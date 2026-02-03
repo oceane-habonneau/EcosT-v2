@@ -10,6 +10,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  base: '/EcosT-v2/',  // Nom de votre repo
   resolve: {
     alias: {
       // Alias @ to the src directory
