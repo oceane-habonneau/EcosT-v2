@@ -32,8 +32,6 @@ import {
   Linkedin,
   TrendingUp
 } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 interface SystemNode {
   id: string;
@@ -246,7 +244,9 @@ const iconMap: Record<string, any> = {
   FileImage,
   FileText,
   Mail,
-  Building2
+  Building2,
+  TrendingUp,
+  Linkedin
 };
 
 export function HotelEcosystem() {
@@ -413,51 +413,56 @@ export function HotelEcosystem() {
   };
 
   const exportToPNG = async () => {
-    if (diagramRef.current) {
-      try {
-        const canvas = await html2canvas(diagramRef.current, {
-          backgroundColor: '#ffffff',
-          scale: 2,
-          logging: false,
-          useCORS: true
-        });
-        
-        const link = document.createElement('a');
-        link.download = `ecosysteme-hotelier-${Date.now()}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        setShowExportModal(false);
-      } catch (error) {
-        console.error('Erreur export PNG:', error);
-        alert('Erreur lors de l\'export PNG. Veuillez réessayer.');
-      }
+    if (!diagramRef.current) return;
+    
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      
+      const canvas = await html2canvas(diagramRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+      
+      const link = document.createElement('a');
+      link.download = `ecosysteme-hotelier-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      setShowExportModal(false);
+    } catch (error) {
+      console.error('Erreur export PNG:', error);
+      alert('Erreur lors de l\'export PNG. Veuillez réessayer.');
     }
   };
 
   const exportToPDF = async () => {
-    if (diagramRef.current) {
-      try {
-        const canvas = await html2canvas(diagramRef.current, {
-          backgroundColor: '#ffffff',
-          scale: 2,
-          logging: false,
-          useCORS: true
-        });
-        
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-          orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
-          unit: 'px',
-          format: [canvas.width, canvas.height]
-        });
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save(`ecosysteme-hotelier-${Date.now()}.pdf`);
-        setShowExportModal(false);
-      } catch (error) {
-        console.error('Erreur export PDF:', error);
-        alert('Erreur lors de l\'export PDF. Veuillez réessayer.');
-      }
+    if (!diagramRef.current) return;
+    
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+      
+      const canvas = await html2canvas(diagramRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`ecosysteme-hotelier-${Date.now()}.pdf`);
+      setShowExportModal(false);
+    } catch (error) {
+      console.error('Erreur export PDF:', error);
+      alert('Erreur lors de l\'export PDF. Veuillez réessayer.');
     }
   };
 
