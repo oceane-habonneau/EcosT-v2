@@ -418,33 +418,70 @@ export function HotelEcosystem() {
     try {
       const html2canvas = (await import('html2canvas')).default;
       
-      const canvas = await html2canvas(diagramRef.current, {
-        backgroundColor: '#ffffff',
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        foreignObjectRendering: false,
-        onclone: (clonedDoc) => {
-          // Convertir les couleurs oklch en couleurs standards
-          const elements = clonedDoc.querySelectorAll('*');
-          elements.forEach((el) => {
-            const styles = window.getComputedStyle(el);
-            if (el instanceof HTMLElement) {
-              // Copier les couleurs calculées
-              if (styles.color) el.style.color = styles.color;
-              if (styles.backgroundColor) el.style.backgroundColor = styles.backgroundColor;
-              if (styles.borderColor) el.style.borderColor = styles.borderColor;
-            }
-          });
-        }
-      });
+      // Créer un clone de l'élément
+      const clone = diagramRef.current.cloneNode(true) as HTMLElement;
       
-      const link = document.createElement('a');
-      link.download = `ecosysteme-hotelier-${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      setShowExportModal(false);
+      // Fonction pour convertir tous les styles en inline
+      const convertStylesToInline = (element: Element, sourceElement: Element) => {
+        if (element instanceof HTMLElement && sourceElement instanceof HTMLElement) {
+          const computedStyle = window.getComputedStyle(sourceElement);
+          
+          // Copier les styles importants en inline
+          element.style.cssText = '';
+          element.style.color = computedStyle.color;
+          element.style.backgroundColor = computedStyle.backgroundColor;
+          element.style.borderColor = computedStyle.borderColor;
+          element.style.borderWidth = computedStyle.borderWidth;
+          element.style.borderStyle = computedStyle.borderStyle;
+          element.style.borderRadius = computedStyle.borderRadius;
+          element.style.padding = computedStyle.padding;
+          element.style.margin = computedStyle.margin;
+          element.style.fontSize = computedStyle.fontSize;
+          element.style.fontWeight = computedStyle.fontWeight;
+          element.style.width = computedStyle.width;
+          element.style.height = computedStyle.height;
+          element.style.display = computedStyle.display;
+          element.style.position = computedStyle.position;
+          element.style.top = computedStyle.top;
+          element.style.left = computedStyle.left;
+          element.style.right = computedStyle.right;
+          element.style.bottom = computedStyle.bottom;
+          element.style.transform = computedStyle.transform;
+          element.style.boxShadow = computedStyle.boxShadow;
+        }
+        
+        // Traiter récursivement tous les enfants
+        for (let i = 0; i < element.children.length; i++) {
+          convertStylesToInline(element.children[i], sourceElement.children[i]);
+        }
+      };
+      
+      convertStylesToInline(clone, diagramRef.current);
+      
+      // Créer un conteneur temporaire hors écran
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.appendChild(clone);
+      document.body.appendChild(tempContainer);
+      
+      try {
+        const canvas = await html2canvas(clone, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          logging: false,
+          useCORS: true,
+          allowTaint: true
+        });
+        
+        const link = document.createElement('a');
+        link.download = `ecosysteme-hotelier-${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        setShowExportModal(false);
+      } finally {
+        document.body.removeChild(tempContainer);
+      }
     } catch (error) {
       console.error('Erreur export PNG:', error);
       alert('Erreur lors de l\'export PNG. Veuillez réessayer.');
@@ -458,38 +495,75 @@ export function HotelEcosystem() {
       const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
       
-      const canvas = await html2canvas(diagramRef.current, {
-        backgroundColor: '#ffffff',
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        foreignObjectRendering: false,
-        onclone: (clonedDoc) => {
-          // Convertir les couleurs oklch en couleurs standards
-          const elements = clonedDoc.querySelectorAll('*');
-          elements.forEach((el) => {
-            const styles = window.getComputedStyle(el);
-            if (el instanceof HTMLElement) {
-              // Copier les couleurs calculées
-              if (styles.color) el.style.color = styles.color;
-              if (styles.backgroundColor) el.style.backgroundColor = styles.backgroundColor;
-              if (styles.borderColor) el.style.borderColor = styles.borderColor;
-            }
-          });
+      // Créer un clone de l'élément
+      const clone = diagramRef.current.cloneNode(true) as HTMLElement;
+      
+      // Fonction pour convertir tous les styles en inline
+      const convertStylesToInline = (element: Element, sourceElement: Element) => {
+        if (element instanceof HTMLElement && sourceElement instanceof HTMLElement) {
+          const computedStyle = window.getComputedStyle(sourceElement);
+          
+          // Copier les styles importants en inline
+          element.style.cssText = '';
+          element.style.color = computedStyle.color;
+          element.style.backgroundColor = computedStyle.backgroundColor;
+          element.style.borderColor = computedStyle.borderColor;
+          element.style.borderWidth = computedStyle.borderWidth;
+          element.style.borderStyle = computedStyle.borderStyle;
+          element.style.borderRadius = computedStyle.borderRadius;
+          element.style.padding = computedStyle.padding;
+          element.style.margin = computedStyle.margin;
+          element.style.fontSize = computedStyle.fontSize;
+          element.style.fontWeight = computedStyle.fontWeight;
+          element.style.width = computedStyle.width;
+          element.style.height = computedStyle.height;
+          element.style.display = computedStyle.display;
+          element.style.position = computedStyle.position;
+          element.style.top = computedStyle.top;
+          element.style.left = computedStyle.left;
+          element.style.right = computedStyle.right;
+          element.style.bottom = computedStyle.bottom;
+          element.style.transform = computedStyle.transform;
+          element.style.boxShadow = computedStyle.boxShadow;
         }
-      });
+        
+        // Traiter récursivement tous les enfants
+        for (let i = 0; i < element.children.length; i++) {
+          convertStylesToInline(element.children[i], sourceElement.children[i]);
+        }
+      };
       
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
-        unit: 'px',
-        format: [canvas.width, canvas.height]
-      });
+      convertStylesToInline(clone, diagramRef.current);
       
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save(`ecosysteme-hotelier-${Date.now()}.pdf`);
-      setShowExportModal(false);
+      // Créer un conteneur temporaire hors écran
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.appendChild(clone);
+      document.body.appendChild(tempContainer);
+      
+      try {
+        const canvas = await html2canvas(clone, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          logging: false,
+          useCORS: true,
+          allowTaint: true
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+          unit: 'px',
+          format: [canvas.width, canvas.height]
+        });
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save(`ecosysteme-hotelier-${Date.now()}.pdf`);
+        setShowExportModal(false);
+      } finally {
+        document.body.removeChild(tempContainer);
+      }
     } catch (error) {
       console.error('Erreur export PDF:', error);
       alert('Erreur lors de l\'export PDF. Veuillez réessayer.');
