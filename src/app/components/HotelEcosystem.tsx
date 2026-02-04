@@ -608,6 +608,7 @@ export function HotelEcosystem() {
               >
                 🔵 Stack Avancé
               </button>
+            </div>
 
             {/* Right controls */}
             <div className="flex gap-2 flex-wrap">
