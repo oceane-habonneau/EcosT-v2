@@ -597,22 +597,17 @@ export function HotelEcosystem() {
                 🟢 Stack Simple
               </button>
               <button
-                onClick={() => loadStack(stack1Simple)}
+                onClick={() => loadStack(stack2Intermediate)}
                 className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-md text-sm font-medium"
               >
                 🟠 Stack Intermédiaire
               </button>
               <button
-                onClick={() => loadStack(stack2Intermediate)}
+                onClick={() => loadStack(stack3Advanced)}
                 className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md text-sm font-medium"
               >
                 🔵 Stack Avancé
               </button>
-              <button
-                onClick={() => loadStack(stack3Advanced)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
-              >
-            </div>
 
             {/* Right controls */}
             <div className="flex gap-2 flex-wrap">
