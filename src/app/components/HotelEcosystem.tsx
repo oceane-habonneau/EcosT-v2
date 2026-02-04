@@ -422,7 +422,22 @@ export function HotelEcosystem() {
         backgroundColor: '#ffffff',
         scale: 2,
         logging: false,
-        useCORS: true
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
+        onclone: (clonedDoc) => {
+          // Convertir les couleurs oklch en couleurs standards
+          const elements = clonedDoc.querySelectorAll('*');
+          elements.forEach((el) => {
+            const styles = window.getComputedStyle(el);
+            if (el instanceof HTMLElement) {
+              // Copier les couleurs calculées
+              if (styles.color) el.style.color = styles.color;
+              if (styles.backgroundColor) el.style.backgroundColor = styles.backgroundColor;
+              if (styles.borderColor) el.style.borderColor = styles.borderColor;
+            }
+          });
+        }
       });
       
       const link = document.createElement('a');
@@ -447,7 +462,22 @@ export function HotelEcosystem() {
         backgroundColor: '#ffffff',
         scale: 2,
         logging: false,
-        useCORS: true
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
+        onclone: (clonedDoc) => {
+          // Convertir les couleurs oklch en couleurs standards
+          const elements = clonedDoc.querySelectorAll('*');
+          elements.forEach((el) => {
+            const styles = window.getComputedStyle(el);
+            if (el instanceof HTMLElement) {
+              // Copier les couleurs calculées
+              if (styles.color) el.style.color = styles.color;
+              if (styles.backgroundColor) el.style.backgroundColor = styles.backgroundColor;
+              if (styles.borderColor) el.style.borderColor = styles.borderColor;
+            }
+          });
+        }
       });
       
       const imgData = canvas.toDataURL('image/png');
