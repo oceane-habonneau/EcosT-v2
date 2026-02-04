@@ -286,6 +286,13 @@ export function HotelEcosystem() {
     }
   };
 
+  const handleTouchStart = (id: string, e: React.TouchEvent) => {
+    if (mode === 'move') {
+      e.preventDefault();
+      setDraggingId(id);
+    }
+  };
+
   const handleCardClick = (id: string, e: React.MouseEvent) => {
     if (mode === 'link') {
       e.stopPropagation();
@@ -333,7 +340,29 @@ export function HotelEcosystem() {
     }));
   }, [draggingId]);
 
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!draggingId || !containerRef.current) return;
+
+    const touch = e.touches[0];
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = ((touch.clientX - rect.left) / rect.width) * 100;
+    const y = ((touch.clientY - rect.top) / rect.height) * 100;
+
+    // Clamp values between 5 and 95 to keep cards inside
+    const clampedX = Math.max(5, Math.min(95, x));
+    const clampedY = Math.max(5, Math.min(95, y));
+
+    setNodePositions(prev => ({
+      ...prev,
+      [draggingId]: { x: clampedX, y: clampedY }
+    }));
+  }, [draggingId]);
+
   const handleMouseUp = useCallback(() => {
+    setDraggingId(null);
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
     setDraggingId(null);
   }, []);
 
@@ -342,12 +371,16 @@ export function HotelEcosystem() {
     if (draggingId) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove);
+      window.addEventListener('touchend', handleTouchEnd);
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('touchmove', handleTouchMove);
+        window.removeEventListener('touchend', handleTouchEnd);
       };
     }
-  }, [draggingId, handleMouseMove, handleMouseUp]);
+  }, [draggingId, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   const resetPositions = () => {
     setNodePositions(
@@ -606,17 +639,17 @@ export function HotelEcosystem() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto p-4 md:p-8">
+    <div className="max-w-[1400px] mx-auto p-2 sm:p-4 md:p-8">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-5xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
+      <div className="text-center mb-4 sm:mb-6 md:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-5xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
           Schéma écosystème hôtelier
         </h1>
-        <p className="text-base md:text-lg text-slate-600">Océane Habonneau</p>
+        <p className="text-sm sm:text-base md:text-lg text-slate-600">Océane Habonneau</p>
         {/* Contact CTA */}
         <a 
           href="mailto:oceane.habonneau@gmail.com?subject=Demande%20de%20contact%20-%20Ecosyst%C3%A8me%20h%C3%B4telier&body=Bonjour%20Océane%2C%0A%0AJe%20souhaiterais%20discuter%20avec%20vous%20concernant%20votre%20schéma%20d'écosystème%20hôtelier.%0A%0A"
-          className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+          className="inline-flex items-center gap-2 mt-3 sm:mt-4 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
         >
           <Mail className="w-5 h-5" />
           Contactez-moi
@@ -624,19 +657,19 @@ export function HotelEcosystem() {
       </div>
 
       {/* View Mode Toggle */}
-      <div className="mb-6 flex justify-center">
-        <div className="inline-flex rounded-xl border-2 border-slate-300 shadow-md bg-white p-1">
+      <div className="mb-4 sm:mb-6 flex justify-center">
+        <div className="inline-flex rounded-xl border-2 border-slate-300 shadow-md bg-white p-1 w-full sm:w-auto">
           <button
             onClick={() => setViewMode('admin')}
-            className={`flex items-center gap-2 px-4 md:px-6 py-2 rounded-lg transition-colors text-sm md:text-base ${
+            className={`flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 md:px-6 py-2 rounded-lg transition-colors text-xs sm:text-sm md:text-base flex-1 sm:flex-initial ${
               viewMode === 'admin' 
                 ? 'bg-slate-700 text-white' 
                 : 'text-slate-700 hover:bg-slate-100'
             }`}
           >
-            <Settings className="w-4 h-4" />
-            <span className="hidden md:inline">Mode Administration</span>
-            <span className="md:hidden">Admin</span>
+            <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Mode Administration</span>
+            <span className="sm:hidden">Admin</span>
           </button>
           <button
             onClick={() => {
@@ -645,15 +678,15 @@ export function HotelEcosystem() {
               setSelectedForLink(null);
               setDraggingId(null);
             }}
-            className={`flex items-center gap-2 px-4 md:px-6 py-2 rounded-lg transition-colors text-sm md:text-base ${
+            className={`flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 md:px-6 py-2 rounded-lg transition-colors text-xs sm:text-sm md:text-base flex-1 sm:flex-initial ${
               viewMode === 'public' 
                 ? 'bg-slate-700 text-white' 
                 : 'text-slate-700 hover:bg-slate-100'
             }`}
           >
-            <Eye className="w-4 h-4" />
-            <span className="hidden md:inline">Vue Publique</span>
-            <span className="md:hidden">Public</span>
+            <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Vue Publique</span>
+            <span className="sm:hidden">Public</span>
           </button>
         </div>
       </div>
@@ -662,113 +695,111 @@ export function HotelEcosystem() {
       {viewMode === 'admin' && (
         <>
           {/* Controls */}
-          <div className="mb-4 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+          <div className="mb-3 sm:mb-4 flex flex-col gap-2 sm:gap-3">
             {/* Mode Toggle */}
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 justify-center sm:justify-start">
               <button
                 onClick={() => {
                   setMode('move');
                   setSelectedForLink(null);
                 }}
-                className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl transition-colors shadow-md text-sm ${
+                className={`flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-2 rounded-xl transition-colors shadow-md text-xs sm:text-sm flex-1 sm:flex-initial ${
                   mode === 'move' 
                     ? 'bg-blue-500 text-white border-2 border-blue-600' 
                     : 'bg-white text-slate-700 border-2 border-slate-300 hover:bg-slate-50'
                 }`}
               >
-                <Move className="w-4 h-4" />
-                <span className="hidden sm:inline">Mode Déplacement</span>
-                <span className="sm:hidden">Déplacer</span>
+                <Move className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span>Déplacer</span>
               </button>
               <button
                 onClick={() => {
                   setMode('link');
                   setDraggingId(null);
                 }}
-                className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl transition-colors shadow-md text-sm ${
+                className={`flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-2 rounded-xl transition-colors shadow-md text-xs sm:text-sm flex-1 sm:flex-initial ${
                   mode === 'link' 
                     ? 'bg-purple-500 text-white border-2 border-purple-600' 
                     : 'bg-white text-slate-700 border-2 border-slate-300 hover:bg-slate-50'
                 }`}
               >
-                <Link2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Mode Liaison</span>
-                <span className="sm:hidden">Lier</span>
+                <Link2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span>Lier</span>
               </button>
             </div>
 
             {/* Stack Buttons */}
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 justify-center sm:justify-start flex-wrap">
               <button
                 onClick={() => loadStack(stack1Simple)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
+                className="flex items-center justify-center gap-1 px-2 sm:px-3 md:px-4 py-2 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors shadow-md text-xs sm:text-sm font-medium"
               >
-                🟢 Stack Simple
+                <span>🟢 Simple</span>
               </button>
               <button
                 onClick={() => loadStack(stack2Intermediate)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-md text-sm font-medium"
+                className="flex items-center justify-center gap-1 px-2 sm:px-3 md:px-4 py-2 rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-md text-xs sm:text-sm font-medium"
               >
-                🟠 Stack Intermédiaire
+                <span>🟠 Intermédiaire</span>
               </button>
               <button
                 onClick={() => loadStack(stack3Advanced)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md text-sm font-medium"
+                className="flex items-center justify-center gap-1 px-2 sm:px-3 md:px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md text-xs sm:text-sm font-medium"
               >
-                🔵 Stack Avancé
+                <span>🔵 Avancé</span>
               </button>
             </div>
 
             {/* Right controls */}
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 justify-center sm:justify-start flex-wrap">
               <button
                 onClick={resetConnections}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
+                className="flex items-center justify-center gap-1 px-2 sm:px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-xs sm:text-sm"
               >
-                <Unlink className="w-4 h-4" />
-                <span className="hidden lg:inline">Réinitialiser liaisons</span>
-                <span className="lg:hidden">Liaisons</span>
+                <Unlink className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline lg:inline">Réinitialiser liaisons</span>
+                <span className="sm:hidden">Liaisons</span>
               </button>
               <button
                 onClick={resetPositions}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
+                className="flex items-center justify-center gap-1 px-2 sm:px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-xs sm:text-sm"
               >
-                <RotateCcw className="w-4 h-4" />
-                <span className="hidden lg:inline">Réinitialiser positions</span>
-                <span className="lg:hidden">Positions</span>
+                <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline lg:inline">Réinitialiser positions</span>
+                <span className="sm:hidden">Positions</span>
               </button>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
+                className="flex items-center justify-center gap-1 px-2 sm:px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-xs sm:text-sm"
               >
-                <Plus className="w-4 h-4" />
-                <span className="hidden md:inline">Ajouter</span>
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span>Ajouter</span>
               </button>
               <button
                 onClick={() => setShowExportModal(true)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
+                className="flex items-center justify-center gap-1 px-2 sm:px-3 md:px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-md text-xs sm:text-sm font-medium"
               >
-                <Download className="w-4 h-4" />
-                <span className="hidden md:inline">Export</span>
+                <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span>Export</span>
               </button>
             </div>
           </div>
 
           {/* Mode instructions */}
-          <div className="mb-4">
+          <div className="mb-3 sm:mb-4">
             {mode === 'move' && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-2 border-blue-200 text-blue-700 rounded-xl shadow-md">
-                <Move className="w-4 h-4" />
-                <span className="text-xs md:text-sm">Cliquez et glissez pour déplacer les cartes</span>
+              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-50 border-2 border-blue-200 text-blue-700 rounded-xl shadow-md">
+                <Move className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="text-xs sm:text-sm">Cliquez et glissez pour déplacer les cartes</span>
               </div>
             )}
             {mode === 'link' && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 border-2 border-purple-200 text-purple-700 rounded-xl shadow-md">
-                <Link2 className="w-4 h-4" />
-                <span className="text-xs md:text-sm">
+              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-purple-50 border-2 border-purple-200 text-purple-700 rounded-xl shadow-md">
+                <Link2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="text-xs sm:text-sm">
                   {selectedForLink 
-                    ? 'Cliquez sur une autre carte pour créer/supprimer une liaison, ou cliquez sur une liaison existante pour la supprimer' 
-                    : 'Cliquez sur une carte pour commencer une liaison, ou cliquez sur une liaison existante pour la supprimer'}
+                    ? 'Cliquez sur une autre carte pour créer/supprimer une liaison' 
+                    : 'Cliquez sur une carte pour commencer une liaison'}
                 </span>
               </div>
             )}
@@ -777,10 +808,10 @@ export function HotelEcosystem() {
       )}
 
       {/* Ecosystem Diagram */}
-      <div ref={diagramRef} className="relative bg-gradient-to-br from-slate-50 to-white rounded-3xl p-8 md:p-16 shadow-2xl border-2 border-slate-200">
+      <div ref={diagramRef} className="relative bg-gradient-to-br from-slate-50 to-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 md:p-16 shadow-2xl border-2 border-slate-200">
         <div 
           ref={containerRef}
-          className="relative w-full select-none" 
+          className="relative w-full select-none touch-none" 
           style={{ paddingBottom: '85%' }}
         >
           
@@ -848,20 +879,21 @@ export function HotelEcosystem() {
                 <div
                   key={system.id}
                   id={`node-${system.id}`}
-                  className={`absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''}`}
+                  className={`absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move touch-none' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''}`}
                   style={{
                     left: `${pos.x}%`,
                     top: `${pos.y}%`,
                     transform: 'translate(-50%, -50%)',
-                    width: isPMS ? '140px' : '110px',
+                    width: isPMS ? 'clamp(100px, 20vw, 140px)' : 'clamp(85px, 18vw, 110px)',
                     zIndex: isDragging || isSelected ? 10 : 2
                   }}
                   onMouseDown={viewMode === 'admin' ? (e) => handleMouseDown(system.id, e) : undefined}
+                  onTouchStart={viewMode === 'admin' && mode === 'move' ? (e) => handleTouchStart(system.id, e) : undefined}
                   onClick={viewMode === 'admin' ? (e) => handleCardClick(system.id, e) : undefined}
                 >
                   {/* Card */}
                   <div
-                    className={`relative bg-white rounded-2xl p-3 shadow-xl border-2 transition-all ${
+                    className={`relative bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-xl border-2 transition-all ${
                       isDragging ? 'scale-110 shadow-2xl' : ''
                     } ${
                       isSelected ? 'ring-4 ring-purple-400 scale-110' : ''
@@ -872,25 +904,25 @@ export function HotelEcosystem() {
                   >
                     {/* Mode indicator - only in admin mode */}
                     {viewMode === 'admin' && (
-                      <div className="absolute top-1 left-1/2 -translate-x-1/2">
+                      <div className="absolute top-0.5 sm:top-1 left-1/2 -translate-x-1/2">
                         {mode === 'move' ? (
-                          <Move className="w-3 h-3 text-slate-400" />
+                          <Move className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" />
                         ) : (
-                          <Link2 className={`w-3 h-3 ${isSelected ? 'text-purple-600' : 'text-slate-400'}`} />
+                          <Link2 className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${isSelected ? 'text-purple-600' : 'text-slate-400'}`} />
                         )}
                       </div>
                     )}
 
                     {/* Icon with colored background */}
                     <div 
-                      className={`${isPMS ? 'w-14 h-14' : 'w-11 h-11'} rounded-xl mb-2 mx-auto flex items-center justify-center shadow-md`}
+                      className={`${isPMS ? 'w-10 h-10 sm:w-14 sm:h-14' : 'w-8 h-8 sm:w-11 sm:h-11'} rounded-lg sm:rounded-xl mb-1.5 sm:mb-2 mx-auto flex items-center justify-center shadow-md`}
                       style={{ backgroundColor: config.color }}
                     >
-                      <Icon className={`${isPMS ? 'w-7 h-7' : 'w-6 h-6'} text-white`} />
+                      <Icon className={`${isPMS ? 'w-5 h-5 sm:w-7 sm:h-7' : 'w-4 h-4 sm:w-6 sm:h-6'} text-white`} />
                     </div>
 
                     {/* Title */}
-                    <h3 className={`${isPMS ? 'text-xs font-semibold' : 'text-xs'} text-center text-slate-800 leading-tight min-h-[24px] flex items-center justify-center px-1`}>
+                    <h3 className={`${isPMS ? 'text-[10px] sm:text-xs font-semibold' : 'text-[9px] sm:text-xs'} text-center text-slate-800 leading-tight min-h-[20px] sm:min-h-[24px] flex items-center justify-center px-0.5 sm:px-1`}>
                       {system.name}
                     </h3>
 
@@ -902,19 +934,19 @@ export function HotelEcosystem() {
 
                     {/* Connection count badge - only in admin mode */}
                     {viewMode === 'admin' && connections[system.id] && connections[system.id].length > 0 && (
-                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full shadow-md">
+                      <div className="absolute -bottom-1 sm:-bottom-2 left-1/2 -translate-x-1/2 bg-purple-500 text-white text-[9px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full shadow-md">
                         {connections[system.id].length}
                       </div>
                     )}
 
                     {/* Delete button - only in admin mode */}
                     {viewMode === 'admin' && (
-                      <div className="absolute bottom-2 right-2">
+                      <div className="absolute bottom-1 sm:bottom-2 right-1 sm:right-2">
                         <button
                           onClick={() => deleteSystem(system.id)}
-                          className="w-4 h-4 text-slate-400 hover:text-red-600 transition-colors"
+                          className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400 hover:text-red-600 transition-colors"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                         </button>
                       </div>
                     )}
