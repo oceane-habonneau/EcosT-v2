@@ -30,7 +30,10 @@ import {
   Mail,
   Building2,
   Linkedin,
-  TrendingUp
+  TrendingUp,
+  Menu,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 interface SystemNode {
@@ -42,7 +45,6 @@ interface SystemNode {
   y: number; // Position Y in percentage
   connections?: string[];
 }
-
 
 // 📋 Liste des suggestions de cartes (triées alphabétiquement)
 const cardSuggestions = [
@@ -108,86 +110,6 @@ const stack3Advanced: SystemNode[] = [
   { id: 'moteur-resto', name: 'Moteur résa resto', category: 'restaurant', icon: 'UtensilsCrossed', x: 80, y: 12, connections: [] }
 ];
 
-// Simplified default ecosystem with only requested cards
-const systems: SystemNode[] = [
-  // Center - PMS
-  { 
-    id: 'pms', 
-    name: 'PMS', 
-    category: 'management', 
-    icon: 'Bed',
-    x: 50,
-    y: 50,
-    connections: ['channel-manager', 'crm', 'booking-engine', 'pos']
-  },
-  
-  // Channel Manager (top left)
-  { 
-    id: 'channel-manager', 
-    name: 'Channel Manager', 
-    category: 'sales', 
-    icon: 'Share2',
-    x: 25,
-    y: 30,
-    connections: ['ota']
-  },
-  
-  // Booking Engine (top center)
-  { 
-    id: 'booking-engine', 
-    name: 'Moteur de réservation', 
-    category: 'booking', 
-    icon: 'Calendar',
-    x: 50,
-    y: 20,
-    connections: []
-  },
-  
-  // OTA (top right)
-  { 
-    id: 'ota', 
-    name: 'OTA', 
-    category: 'sales', 
-    icon: 'Building2',
-    x: 75,
-    y: 30,
-    connections: []
-  },
-  
-  // CRM (right)
-  { 
-    id: 'crm', 
-    name: 'CRM', 
-    category: 'management', 
-    icon: 'Users',
-    x: 75,
-    y: 50,
-    connections: []
-  },
-  
-  // POS Restaurant (bottom left)
-  { 
-    id: 'pos', 
-    name: 'POS Restaurant', 
-    category: 'restaurant', 
-    icon: 'UtensilsCrossed',
-    x: 25,
-    y: 70,
-    connections: ['psp']
-  },
-  
-  // PSP (bottom center)
-  { 
-    id: 'psp', 
-    name: 'PSP', 
-    category: 'management', 
-    icon: 'CreditCard',
-    x: 50,
-    y: 80,
-    connections: []
-  },
-];
-
 const categoryConfig = {
   management: { 
     label: 'Gestion & Opérations', 
@@ -216,48 +138,20 @@ const categoryConfig = {
 };
 
 const iconMap: Record<string, any> = {
-  Users,
-  Star,
-  Home,
-  Calculator,
-  Bed,
-  CreditCard,
-  Globe,
-  ShoppingBag,
-  MessageCircle,
-  UtensilsCrossed,
-  Calendar,
-  Sparkles,
-  Share2,
-  DollarSign,
-  RotateCcw,
-  Move,
-  Link2,
-  Unlink,
-  Eye,
-  Settings,
-  Edit2,
-  Trash2,
-  Plus,
-  X,
-  Download,
-  FileImage,
-  FileText,
-  Mail,
-  Building2,
-  TrendingUp,
-  Linkedin
+  Bed, Users, Star, Home, Calculator, CreditCard, Globe, ShoppingBag,
+  MessageCircle, UtensilsCrossed, Calendar, Sparkles, Share2, DollarSign,
+  Building2, TrendingUp
 };
 
 export function HotelEcosystem() {
   const [allSystems, setAllSystems] = useState<SystemNode[]>(stack1Simple);
-  const [nodePositions, setNodePositions] = useState<Record<string, { x: number; y: number }>>(
+  const [nodePositions, setNodePositions] = useState<Record<string, { x: number; y: number }>>(() =>
     stack1Simple.reduce((acc, system) => {
       acc[system.id] = { x: system.x, y: system.y };
       return acc;
     }, {} as Record<string, { x: number; y: number }>)
   );
-  const [connections, setConnections] = useState<Record<string, string[]>>(
+  const [connections, setConnections] = useState<Record<string, string[]>>(() =>
     stack1Simple.reduce((acc, system) => {
       acc[system.id] = system.connections || [];
       return acc;
@@ -267,45 +161,48 @@ export function HotelEcosystem() {
   const [mode, setMode] = useState<'move' | 'link'>('move');
   const [selectedForLink, setSelectedForLink] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'admin' | 'public'>('admin');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState<string>('');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [hoveredConnection, setHoveredConnection] = useState<string | null>(null);
   const [newCard, setNewCard] = useState({
     name: '',
     category: 'management' as const,
     icon: 'Bed'
   });
-  const [connectionToDelete, setConnectionToDelete] = useState<{from: string, to: string} | null>(null);
-  const [hoveredConnection, setHoveredConnection] = useState<string | null>(null);
-  const [showExportModal, setShowExportModal] = useState(false);
+  
+  // 📱 États pour le mobile
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isStackMenuOpen, setIsStackMenuOpen] = useState(false);
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const diagramRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseDown = (id: string, e: React.MouseEvent) => {
-    if (mode === 'move') {
-      e.preventDefault();
-      setDraggingId(id);
-    }
+  // Gestion du drag tactile ET souris
+  const handleMouseDown = (id: string, e: React.MouseEvent | React.TouchEvent) => {
+    if (mode !== 'move' || viewMode !== 'admin') return;
+    
+    e.preventDefault();
+    setDraggingId(id);
   };
 
   const handleCardClick = (id: string, e: React.MouseEvent) => {
-    if (mode === 'link') {
+    if (mode === 'link' && viewMode === 'admin') {
       e.stopPropagation();
       if (!selectedForLink) {
-        // First click - select source
         setSelectedForLink(id);
       } else if (selectedForLink === id) {
-        // Clicking same card - deselect
         setSelectedForLink(null);
       } else {
-        // Second click - create/remove connection
         const hasConnection = connections[selectedForLink]?.includes(id);
         
         setConnections(prev => {
           const newConnections = { ...prev };
           if (hasConnection) {
-            // Remove connection
             newConnections[selectedForLink] = newConnections[selectedForLink].filter(c => c !== id);
           } else {
-            // Add connection
             newConnections[selectedForLink] = [...(newConnections[selectedForLink] || []), id];
           }
           return newConnections;
@@ -316,14 +213,16 @@ export function HotelEcosystem() {
     }
   };
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent | TouchEvent) => {
     if (!draggingId || !containerRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    const x = ((clientX - rect.left) / rect.width) * 100;
+    const y = ((clientY - rect.top) / rect.height) * 100;
 
-    // Clamp values between 5 and 95 to keep cards inside
     const clampedX = Math.max(5, Math.min(95, x));
     const clampedY = Math.max(5, Math.min(95, y));
 
@@ -337,22 +236,28 @@ export function HotelEcosystem() {
     setDraggingId(null);
   }, []);
 
-  // Add and remove event listeners
   useEffect(() => {
     if (draggingId) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleMouseMove);
+      window.addEventListener('touchend', handleMouseUp);
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('touchmove', handleMouseMove);
+        window.removeEventListener('touchend', handleMouseUp);
       };
     }
   }, [draggingId, handleMouseMove, handleMouseUp]);
 
   const resetPositions = () => {
     setNodePositions(
-      stack1Simple.reduce((acc, system) => {
-        acc[system.id] = { x: system.x, y: system.y };
+      allSystems.reduce((acc, system) => {
+        const original = stack1Simple.find(s => s.id === system.id) || 
+                        stack2Intermediate.find(s => s.id === system.id) ||
+                        stack3Advanced.find(s => s.id === system.id);
+        acc[system.id] = original ? { x: original.x, y: original.y } : { x: 50, y: 50 };
         return acc;
       }, {} as Record<string, { x: number; y: number }>)
     );
@@ -360,12 +265,29 @@ export function HotelEcosystem() {
 
   const resetConnections = () => {
     setConnections(
-      stack1Simple.reduce((acc, system) => {
+      allSystems.reduce((acc, system) => {
         acc[system.id] = system.connections || [];
         return acc;
       }, {} as Record<string, string[]>)
     );
     setSelectedForLink(null);
+  };
+
+  const startEditing = (id: string) => {
+    const system = allSystems.find(s => s.id === id);
+    if (system) {
+      setEditingId(id);
+      setEditingName(system.name);
+    }
+  };
+
+  const saveEdit = () => {
+    if (editingId && editingName) {
+      setAllSystems(prev => prev.map(system => 
+        system.id === editingId ? { ...system, name: editingName } : system
+      ));
+      setEditingId(null);
+    }
   };
 
   const deleteSystem = (id: string) => {
@@ -376,6 +298,9 @@ export function HotelEcosystem() {
     });
     setConnections(prev => {
       const { [id]: _, ...rest } = prev;
+      Object.keys(rest).forEach(key => {
+        rest[key] = rest[key].filter(c => c !== id);
+      });
       return rest;
     });
   };
@@ -413,142 +338,34 @@ export function HotelEcosystem() {
   };
 
   const exportToPNG = async () => {
-    if (!diagramRef.current) return;
-    
-    try {
-      const html2canvas = (await import('html2canvas')).default;
-      
-      // Créer un clone de l'élément
-      const clone = diagramRef.current.cloneNode(true) as HTMLElement;
-      
-      // Fonction pour convertir tous les styles en inline
-      const convertStylesToInline = (element: Element, sourceElement: Element) => {
-        if (element instanceof HTMLElement && sourceElement instanceof HTMLElement) {
-          const computedStyle = window.getComputedStyle(sourceElement);
-          
-          // Copier les styles importants en inline
-          element.style.cssText = '';
-          element.style.color = computedStyle.color;
-          element.style.backgroundColor = computedStyle.backgroundColor;
-          element.style.borderColor = computedStyle.borderColor;
-          element.style.borderWidth = computedStyle.borderWidth;
-          element.style.borderStyle = computedStyle.borderStyle;
-          element.style.borderRadius = computedStyle.borderRadius;
-          element.style.padding = computedStyle.padding;
-          element.style.margin = computedStyle.margin;
-          element.style.fontSize = computedStyle.fontSize;
-          element.style.fontWeight = computedStyle.fontWeight;
-          element.style.width = computedStyle.width;
-          element.style.height = computedStyle.height;
-          element.style.display = computedStyle.display;
-          element.style.position = computedStyle.position;
-          element.style.top = computedStyle.top;
-          element.style.left = computedStyle.left;
-          element.style.right = computedStyle.right;
-          element.style.bottom = computedStyle.bottom;
-          element.style.transform = computedStyle.transform;
-          element.style.boxShadow = computedStyle.boxShadow;
-        }
-        
-        // Traiter récursivement tous les enfants
-        for (let i = 0; i < element.children.length; i++) {
-          convertStylesToInline(element.children[i], sourceElement.children[i]);
-        }
-      };
-      
-      convertStylesToInline(clone, diagramRef.current);
-      
-      // Créer un conteneur temporaire hors écran
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.appendChild(clone);
-      document.body.appendChild(tempContainer);
-      
+    if (diagramRef.current) {
       try {
-        const canvas = await html2canvas(clone, {
+        const html2canvas = (await import('html2canvas')).default;
+        const canvas = await html2canvas(diagramRef.current, {
           backgroundColor: '#ffffff',
           scale: 2,
-          logging: false,
-          useCORS: true,
-          allowTaint: true
         });
         
         const link = document.createElement('a');
         link.download = `ecosysteme-hotelier-${Date.now()}.png`;
-        link.href = canvas.toDataURL('image/png');
+        link.href = canvas.toDataURL();
         link.click();
         setShowExportModal(false);
-      } finally {
-        document.body.removeChild(tempContainer);
+      } catch (error) {
+        console.error('Erreur export PNG:', error);
       }
-    } catch (error) {
-      console.error('Erreur export PNG:', error);
-      alert('Erreur lors de l\'export PNG. Veuillez réessayer.');
     }
   };
 
   const exportToPDF = async () => {
-    if (!diagramRef.current) return;
-    
-    try {
-      const html2canvas = (await import('html2canvas')).default;
-      const { jsPDF } = await import('jspdf');
-      
-      // Créer un clone de l'élément
-      const clone = diagramRef.current.cloneNode(true) as HTMLElement;
-      
-      // Fonction pour convertir tous les styles en inline
-      const convertStylesToInline = (element: Element, sourceElement: Element) => {
-        if (element instanceof HTMLElement && sourceElement instanceof HTMLElement) {
-          const computedStyle = window.getComputedStyle(sourceElement);
-          
-          // Copier les styles importants en inline
-          element.style.cssText = '';
-          element.style.color = computedStyle.color;
-          element.style.backgroundColor = computedStyle.backgroundColor;
-          element.style.borderColor = computedStyle.borderColor;
-          element.style.borderWidth = computedStyle.borderWidth;
-          element.style.borderStyle = computedStyle.borderStyle;
-          element.style.borderRadius = computedStyle.borderRadius;
-          element.style.padding = computedStyle.padding;
-          element.style.margin = computedStyle.margin;
-          element.style.fontSize = computedStyle.fontSize;
-          element.style.fontWeight = computedStyle.fontWeight;
-          element.style.width = computedStyle.width;
-          element.style.height = computedStyle.height;
-          element.style.display = computedStyle.display;
-          element.style.position = computedStyle.position;
-          element.style.top = computedStyle.top;
-          element.style.left = computedStyle.left;
-          element.style.right = computedStyle.right;
-          element.style.bottom = computedStyle.bottom;
-          element.style.transform = computedStyle.transform;
-          element.style.boxShadow = computedStyle.boxShadow;
-        }
-        
-        // Traiter récursivement tous les enfants
-        for (let i = 0; i < element.children.length; i++) {
-          convertStylesToInline(element.children[i], sourceElement.children[i]);
-        }
-      };
-      
-      convertStylesToInline(clone, diagramRef.current);
-      
-      // Créer un conteneur temporaire hors écran
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.appendChild(clone);
-      document.body.appendChild(tempContainer);
-      
+    if (diagramRef.current) {
       try {
-        const canvas = await html2canvas(clone, {
+        const html2canvas = (await import('html2canvas')).default;
+        const jsPDF = (await import('jspdf')).default;
+        
+        const canvas = await html2canvas(diagramRef.current, {
           backgroundColor: '#ffffff',
           scale: 2,
-          logging: false,
-          useCORS: true,
-          allowTaint: true
         });
         
         const imgData = canvas.toDataURL('image/png');
@@ -561,12 +378,9 @@ export function HotelEcosystem() {
         pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
         pdf.save(`ecosysteme-hotelier-${Date.now()}.pdf`);
         setShowExportModal(false);
-      } finally {
-        document.body.removeChild(tempContainer);
+      } catch (error) {
+        console.error('Erreur export PDF:', error);
       }
-    } catch (error) {
-      console.error('Erreur export PDF:', error);
-      alert('Erreur lors de l\'export PDF. Veuillez réessayer.');
     }
   };
 
@@ -586,57 +400,54 @@ export function HotelEcosystem() {
     );
     setSelectedForLink(null);
     setMode('move');
-  };
-
-  const removeConnection = (fromId: string, toId: string) => {
-    setConnections(prev => {
-      const newConnections = { ...prev };
-      if (newConnections[fromId]) {
-        newConnections[fromId] = newConnections[fromId].filter(id => id !== toId);
-      }
-      return newConnections;
-    });
+    setIsStackMenuOpen(false);
   };
 
   const handleConnectionClick = (fromId: string, toId: string) => {
     if (mode === 'link') {
-      // Supprimer la connexion en mode liaison
-      removeConnection(fromId, toId);
+      setConnections(prev => {
+        const newConnections = { ...prev };
+        if (newConnections[fromId]) {
+          newConnections[fromId] = newConnections[fromId].filter(id => id !== toId);
+        }
+        return newConnections;
+      });
     }
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto p-4 md:p-8">
+    <div className="max-w-[1400px] mx-auto p-3 sm:p-4 md:p-8">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-5xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
+      <div className="text-center mb-4 md:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-5xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold">
           Schéma écosystème hôtelier
         </h1>
-        <p className="text-base md:text-lg text-slate-600">Océane Habonneau</p>
+        <p className="text-sm sm:text-base md:text-lg text-slate-600">Océane Habonneau</p>
         {/* Contact CTA */}
         <a 
           href="mailto:oceane.habonneau@gmail.com?subject=Demande%20de%20contact%20-%20Ecosyst%C3%A8me%20h%C3%B4telier&body=Bonjour%20Océane%2C%0A%0AJe%20souhaiterais%20discuter%20avec%20vous%20concernant%20votre%20schéma%20d'écosystème%20hôtelier.%0A%0A"
-          className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+          className="inline-flex items-center gap-2 mt-3 md:mt-4 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm sm:text-base rounded-lg md:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
         >
-          <Mail className="w-5 h-5" />
+          <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
           Contactez-moi
         </a>
       </div>
 
       {/* View Mode Toggle */}
-      <div className="mb-6 flex justify-center">
-        <div className="inline-flex rounded-xl border-2 border-slate-300 shadow-md bg-white p-1">
+      <div className="mb-4 md:mb-6 flex justify-center">
+        <div className="inline-flex rounded-lg md:rounded-xl border-2 border-slate-300 shadow-md bg-white p-0.5 md:p-1 w-full sm:w-auto">
           <button
             onClick={() => setViewMode('admin')}
-            className={`flex items-center gap-2 px-4 md:px-6 py-2 rounded-lg transition-colors text-sm md:text-base ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 sm:px-4 md:px-6 py-2 rounded-md md:rounded-lg transition-colors text-xs sm:text-sm md:text-base ${
               viewMode === 'admin' 
                 ? 'bg-slate-700 text-white' 
                 : 'text-slate-700 hover:bg-slate-100'
             }`}
           >
-            <Settings className="w-4 h-4" />
-            <span className="hidden md:inline">Mode Administration</span>
-            <span className="md:hidden">Admin</span>
+            <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline md:hidden">Admin</span>
+            <span className="sm:hidden md:inline">Admin</span>
+            <span className="hidden md:inline">istration</span>
           </button>
           <button
             onClick={() => {
@@ -644,16 +455,18 @@ export function HotelEcosystem() {
               setMode('move');
               setSelectedForLink(null);
               setDraggingId(null);
+              setIsMobileMenuOpen(false);
             }}
-            className={`flex items-center gap-2 px-4 md:px-6 py-2 rounded-lg transition-colors text-sm md:text-base ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 sm:px-4 md:px-6 py-2 rounded-md md:rounded-lg transition-colors text-xs sm:text-sm md:text-base ${
               viewMode === 'public' 
                 ? 'bg-slate-700 text-white' 
                 : 'text-slate-700 hover:bg-slate-100'
             }`}
           >
-            <Eye className="w-4 h-4" />
-            <span className="hidden md:inline">Vue Publique</span>
-            <span className="md:hidden">Public</span>
+            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline md:hidden">Public</span>
+            <span className="sm:hidden md:inline">Public</span>
+            <span className="hidden md:inline">ue</span>
           </button>
         </div>
       </div>
@@ -661,114 +474,244 @@ export function HotelEcosystem() {
       {/* Admin Controls */}
       {viewMode === 'admin' && (
         <>
-          {/* Controls */}
-          <div className="mb-4 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+          {/* 📱 Mobile: Menu Burger */}
+          <div className="md:hidden mb-4">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-slate-700 text-white rounded-xl shadow-md"
+            >
+              <div className="flex items-center gap-2">
+                <Menu className="w-5 h-5" />
+                <span className="font-medium">Menu</span>
+              </div>
+              {isMobileMenuOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* 📱 Mobile: Menu déroulant */}
+          <div className={`md:hidden mb-4 space-y-3 ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
             {/* Mode Toggle */}
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2">
               <button
                 onClick={() => {
                   setMode('move');
                   setSelectedForLink(null);
                 }}
-                className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl transition-colors shadow-md text-sm ${
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-colors shadow-md text-sm font-medium ${
                   mode === 'move' 
                     ? 'bg-blue-500 text-white border-2 border-blue-600' 
-                    : 'bg-white text-slate-700 border-2 border-slate-300 hover:bg-slate-50'
+                    : 'bg-white text-slate-700 border-2 border-slate-300'
                 }`}
               >
                 <Move className="w-4 h-4" />
-                <span className="hidden sm:inline">Mode Déplacement</span>
-                <span className="sm:hidden">Déplacer</span>
+                Déplacer
               </button>
               <button
                 onClick={() => {
                   setMode('link');
                   setDraggingId(null);
                 }}
-                className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl transition-colors shadow-md text-sm ${
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-colors shadow-md text-sm font-medium ${
                   mode === 'link' 
                     ? 'bg-purple-500 text-white border-2 border-purple-600' 
-                    : 'bg-white text-slate-700 border-2 border-slate-300 hover:bg-slate-50'
+                    : 'bg-white text-slate-700 border-2 border-slate-300'
                 }`}
               >
                 <Link2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Mode Liaison</span>
-                <span className="sm:hidden">Lier</span>
+                Lier
               </button>
             </div>
 
-            {/* Stack Buttons */}
-            <div className="flex gap-2 flex-wrap">
+            {/* Stack Menu */}
+            <div>
               <button
-                onClick={() => loadStack(stack1Simple)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
+                onClick={() => setIsStackMenuOpen(!isStackMenuOpen)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-slate-300 rounded-xl shadow-md text-sm font-medium"
               >
-                🟢 Stack Simple
+                <span>Charger un Stack</span>
+                {isStackMenuOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
-              <button
-                onClick={() => loadStack(stack2Intermediate)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-md text-sm font-medium"
-              >
-                🟠 Stack Intermédiaire
-              </button>
-              <button
-                onClick={() => loadStack(stack3Advanced)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md text-sm font-medium"
-              >
-                🔵 Stack Avancé
-              </button>
+              {isStackMenuOpen && (
+                <div className="mt-2 space-y-2">
+                  <button
+                    onClick={() => loadStack(stack1Simple)}
+                    className="w-full px-4 py-3 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
+                  >
+                    🟢 Stack Simple
+                  </button>
+                  <button
+                    onClick={() => loadStack(stack2Intermediate)}
+                    className="w-full px-4 py-3 rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-md text-sm font-medium"
+                  >
+                    🟠 Stack Intermédiaire
+                  </button>
+                  <button
+                    onClick={() => loadStack(stack3Advanced)}
+                    className="w-full px-4 py-3 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md text-sm font-medium"
+                  >
+                    🔵 Stack Avancé
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Right controls */}
-            <div className="flex gap-2 flex-wrap">
+            {/* Actions Menu */}
+            <div>
               <button
-                onClick={resetConnections}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
+                onClick={() => setIsActionsMenuOpen(!isActionsMenuOpen)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-slate-300 rounded-xl shadow-md text-sm font-medium"
               >
-                <Unlink className="w-4 h-4" />
-                <span className="hidden lg:inline">Réinitialiser liaisons</span>
-                <span className="lg:hidden">Liaisons</span>
+                <span>Actions</span>
+                {isActionsMenuOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
-              <button
-                onClick={resetPositions}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
-              >
-                <RotateCcw className="w-4 h-4" />
-                <span className="hidden lg:inline">Réinitialiser positions</span>
-                <span className="lg:hidden">Positions</span>
-              </button>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
-              >
-                <Plus className="w-4 h-4" />
-                <span className="hidden md:inline">Ajouter</span>
-              </button>
-              <button
-                onClick={() => setShowExportModal(true)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
-              >
-                <Download className="w-4 h-4" />
-                <span className="hidden md:inline">Export</span>
-              </button>
+              {isActionsMenuOpen && (
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <button
+                    onClick={resetConnections}
+                    className="flex flex-col items-center justify-center gap-1 px-3 py-3 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-md"
+                  >
+                    <Unlink className="w-5 h-5" />
+                    <span className="text-xs font-medium">Liaisons</span>
+                  </button>
+                  <button
+                    onClick={resetPositions}
+                    className="flex flex-col items-center justify-center gap-1 px-3 py-3 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-md"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                    <span className="text-xs font-medium">Positions</span>
+                  </button>
+                  <button
+                    onClick={() => setShowAddModal(true)}
+                    className="flex flex-col items-center justify-center gap-1 px-3 py-3 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-md"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span className="text-xs font-medium">Ajouter</span>
+                  </button>
+                  <button
+                    onClick={() => setShowExportModal(true)}
+                    className="flex flex-col items-center justify-center gap-1 px-3 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-md"
+                  >
+                    <Download className="w-5 h-5" />
+                    <span className="text-xs font-medium">Export</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 💻 Desktop: Controls originaux */}
+          <div className="hidden md:block mb-4">
+            <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+              {/* Mode Toggle */}
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => {
+                    setMode('move');
+                    setSelectedForLink(null);
+                  }}
+                  className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl transition-colors shadow-md text-sm ${
+                    mode === 'move' 
+                      ? 'bg-blue-500 text-white border-2 border-blue-600' 
+                      : 'bg-white text-slate-700 border-2 border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <Move className="w-4 h-4" />
+                  <span className="hidden sm:inline">Mode Déplacement</span>
+                  <span className="sm:hidden">Déplacer</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setMode('link');
+                    setDraggingId(null);
+                  }}
+                  className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl transition-colors shadow-md text-sm ${
+                    mode === 'link' 
+                      ? 'bg-purple-500 text-white border-2 border-purple-600' 
+                      : 'bg-white text-slate-700 border-2 border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <Link2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Mode Liaison</span>
+                  <span className="sm:hidden">Lier</span>
+                </button>
+              </div>
+
+              {/* Stack Buttons */}
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => loadStack(stack1Simple)}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
+                >
+                  🟢 <span className="hidden lg:inline">Stack Simple</span><span className="lg:hidden">Simple</span>
+                </button>
+                <button
+                  onClick={() => loadStack(stack2Intermediate)}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-md text-sm font-medium"
+                >
+                  🟠 <span className="hidden lg:inline">Stack Intermédiaire</span><span className="lg:hidden">Inter</span>
+                </button>
+                <button
+                  onClick={() => loadStack(stack3Advanced)}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md text-sm font-medium"
+                >
+                  🔵 <span className="hidden lg:inline">Stack Avancé</span><span className="lg:hidden">Avancé</span>
+                </button>
+              </div>
+
+              {/* Right controls */}
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={resetConnections}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
+                >
+                  <Unlink className="w-4 h-4" />
+                  <span className="hidden lg:inline">Réinitialiser liaisons</span>
+                  <span className="lg:hidden">Liaisons</span>
+                </button>
+                <button
+                  onClick={resetPositions}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span className="hidden lg:inline">Réinitialiser positions</span>
+                  <span className="lg:hidden">Positions</span>
+                </button>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden md:inline">Ajouter</span>
+                </button>
+                <button
+                  onClick={() => setShowExportModal(true)}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="hidden md:inline">Export</span>
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Mode instructions */}
           <div className="mb-4">
             {mode === 'move' && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-2 border-blue-200 text-blue-700 rounded-xl shadow-md">
-                <Move className="w-4 h-4" />
-                <span className="text-xs md:text-sm">Cliquez et glissez pour déplacer les cartes</span>
+              <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-50 border-2 border-blue-200 text-blue-700 rounded-lg md:rounded-xl shadow-md">
+                <Move className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
+                <span className="text-xs md:text-sm">
+                  <span className="hidden sm:inline">Cliquez et glissez pour déplacer les cartes</span>
+                  <span className="sm:hidden">Déplacez les cartes</span>
+                </span>
               </div>
             )}
             {mode === 'link' && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 border-2 border-purple-200 text-purple-700 rounded-xl shadow-md">
-                <Link2 className="w-4 h-4" />
+              <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-purple-50 border-2 border-purple-200 text-purple-700 rounded-lg md:rounded-xl shadow-md">
+                <Link2 className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
                 <span className="text-xs md:text-sm">
                   {selectedForLink 
-                    ? 'Cliquez sur une autre carte pour créer/supprimer une liaison, ou cliquez sur une liaison existante pour la supprimer' 
-                    : 'Cliquez sur une carte pour commencer une liaison, ou cliquez sur une liaison existante pour la supprimer'}
+                    ? <><span className="hidden sm:inline">Cliquez sur une autre carte pour créer/supprimer une liaison, ou cliquez sur une liaison existante pour la supprimer</span><span className="sm:hidden">Cliquez sur une carte ou une liaison</span></> 
+                    : <><span className="hidden sm:inline">Cliquez sur une carte pour commencer une liaison, ou cliquez sur une liaison existante pour la supprimer</span><span className="sm:hidden">Cliquez sur une carte</span></>}
                 </span>
               </div>
             )}
@@ -777,13 +720,12 @@ export function HotelEcosystem() {
       )}
 
       {/* Ecosystem Diagram */}
-      <div ref={diagramRef} className="relative bg-gradient-to-br from-slate-50 to-white rounded-3xl p-8 md:p-16 shadow-2xl border-2 border-slate-200">
+      <div ref={diagramRef} className="relative bg-gradient-to-br from-slate-50 to-white rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-12 lg:p-16 shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none">
         <div 
           ref={containerRef}
-          className="relative w-full select-none" 
-          style={{ paddingBottom: '85%' }}
+          className="relative w-full h-full"
+          style={{ minHeight: '400px', touchAction: 'none' }}
         >
-          
           {/* Connection Lines SVG */}
           <svg 
             className="absolute inset-0 w-full h-full pointer-events-none" 
@@ -848,20 +790,21 @@ export function HotelEcosystem() {
                 <div
                   key={system.id}
                   id={`node-${system.id}`}
-                  className={`absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''}`}
+                  className={`absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''} touch-none select-none`}
                   style={{
                     left: `${pos.x}%`,
                     top: `${pos.y}%`,
                     transform: 'translate(-50%, -50%)',
-                    width: isPMS ? '140px' : '110px',
+                    width: isPMS ? '100px' : '80px',
                     zIndex: isDragging || isSelected ? 10 : 2
                   }}
                   onMouseDown={viewMode === 'admin' ? (e) => handleMouseDown(system.id, e) : undefined}
+                  onTouchStart={viewMode === 'admin' ? (e) => handleMouseDown(system.id, e) : undefined}
                   onClick={viewMode === 'admin' ? (e) => handleCardClick(system.id, e) : undefined}
                 >
                   {/* Card */}
                   <div
-                    className={`relative bg-white rounded-2xl p-3 shadow-xl border-2 transition-all ${
+                    className={`relative bg-white rounded-xl md:rounded-2xl p-2 md:p-3 shadow-xl border-2 transition-all ${
                       isDragging ? 'scale-110 shadow-2xl' : ''
                     } ${
                       isSelected ? 'ring-4 ring-purple-400 scale-110' : ''
@@ -872,49 +815,73 @@ export function HotelEcosystem() {
                   >
                     {/* Mode indicator - only in admin mode */}
                     {viewMode === 'admin' && (
-                      <div className="absolute top-1 left-1/2 -translate-x-1/2">
+                      <div className="absolute top-0.5 md:top-1 left-1/2 -translate-x-1/2">
                         {mode === 'move' ? (
-                          <Move className="w-3 h-3 text-slate-400" />
+                          <Move className="w-2.5 h-2.5 md:w-3 md:h-3 text-slate-400" />
                         ) : (
-                          <Link2 className={`w-3 h-3 ${isSelected ? 'text-purple-600' : 'text-slate-400'}`} />
+                          <Link2 className={`w-2.5 h-2.5 md:w-3 md:h-3 ${isSelected ? 'text-purple-600' : 'text-slate-400'}`} />
                         )}
                       </div>
                     )}
 
                     {/* Icon with colored background */}
                     <div 
-                      className={`${isPMS ? 'w-14 h-14' : 'w-11 h-11'} rounded-xl mb-2 mx-auto flex items-center justify-center shadow-md`}
+                      className={`${isPMS ? 'w-10 h-10 md:w-14 md:h-14' : 'w-8 h-8 md:w-11 md:h-11'} rounded-lg md:rounded-xl mb-1 md:mb-2 mx-auto flex items-center justify-center shadow-md`}
                       style={{ backgroundColor: config.color }}
                     >
-                      <Icon className={`${isPMS ? 'w-7 h-7' : 'w-6 h-6'} text-white`} />
+                      <Icon className={`${isPMS ? 'w-5 h-5 md:w-7 md:h-7' : 'w-4 h-4 md:w-6 md:h-6'} text-white`} />
                     </div>
 
                     {/* Title */}
-                    <h3 className={`${isPMS ? 'text-xs font-semibold' : 'text-xs'} text-center text-slate-800 leading-tight min-h-[24px] flex items-center justify-center px-1`}>
-                      {system.name}
+                    <h3 className={`${isPMS ? 'text-[10px] md:text-xs font-semibold' : 'text-[9px] md:text-xs'} text-center text-slate-800 leading-tight min-h-[20px] md:min-h-[24px] flex items-center justify-center px-0.5 md:px-1`}>
+                      {editingId === system.id ? (
+                        <input
+                          type="text"
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onBlur={saveEdit}
+                          onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
+                          className="w-full text-center text-[9px] md:text-xs font-semibold leading-tight"
+                          autoFocus
+                        />
+                      ) : (
+                        system.name
+                      )}
                     </h3>
 
                     {/* Category indicator dot */}
                     <div 
-                      className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full shadow-sm"
+                      className="absolute top-1 md:top-2 right-1 md:right-2 w-2 h-2 md:w-2.5 md:h-2.5 rounded-full shadow-sm"
                       style={{ backgroundColor: config.color }}
                     />
 
                     {/* Connection count badge - only in admin mode */}
                     {viewMode === 'admin' && connections[system.id] && connections[system.id].length > 0 && (
-                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full shadow-md">
+                      <div className="absolute -bottom-1.5 md:-bottom-2 left-1/2 -translate-x-1/2 bg-purple-500 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full shadow-md">
                         {connections[system.id].length}
                       </div>
                     )}
 
-                    {/* Delete button - only in admin mode */}
+                    {/* Edit/Delete buttons - only in admin mode and on desktop */}
                     {viewMode === 'admin' && (
-                      <div className="absolute bottom-2 right-2">
+                      <div className="absolute bottom-1 md:bottom-2 right-1 md:right-2 flex gap-0.5 md:gap-1">
                         <button
-                          onClick={() => deleteSystem(system.id)}
-                          className="w-4 h-4 text-slate-400 hover:text-red-600 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startEditing(system.id);
+                          }}
+                          className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 hover:text-slate-600 flex items-center justify-center"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Edit2 className="w-3 h-3 md:w-4 md:h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteSystem(system.id);
+                          }}
+                          className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 hover:text-slate-600 flex items-center justify-center"
+                        >
+                          <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
                         </button>
                       </div>
                     )}
@@ -926,12 +893,12 @@ export function HotelEcosystem() {
         </div>
       </div>
 
-      {/* Add Card Modal */}
+      {/* Add Card Modal - Responsive */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white p-4 sm:p-6 rounded-xl md:rounded-2xl shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Ajouter une nouvelle carte</h3>
+              <h3 className="text-lg sm:text-xl font-bold">Ajouter une nouvelle carte</h3>
               <button
                 onClick={() => {
                   setShowAddModal(false);
@@ -964,48 +931,32 @@ export function HotelEcosystem() {
               <label className="block text-sm font-medium text-slate-700 mb-1">Catégorie</label>
               <select
                 value={newCard.category}
-                onChange={(e) => setNewCard(prev => ({ ...prev, category: e.target.value as 'management' | 'booking' | 'sales' | 'customer' | 'restaurant' | 'wellness' }))}
-                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                onChange={(e) => setNewCard(prev => ({ ...prev, category: e.target.value as any }))}
+                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
               >
                 {Object.entries(categoryConfig).map(([key, config]) => (
                   <option key={key} value={key}>{config.label}</option>
                 ))}
               </select>
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-slate-700 mb-2">Icône</label>
-              <div className="grid grid-cols-5 gap-2">
-                {[
-                  { icon: 'Users', label: 'Utilisateurs' },
-                  { icon: 'Bed', label: 'Lit' },
-                  { icon: 'CreditCard', label: 'Carte' },
-                  { icon: 'Globe', label: 'Globe' },
-                  { icon: 'ShoppingBag', label: 'Boutique' },
-                  { icon: 'MessageCircle', label: 'Message' },
-                  { icon: 'UtensilsCrossed', label: 'Restaurant' },
-                  { icon: 'Calendar', label: 'Calendrier' },
-                  { icon: 'Sparkles', label: 'Étoiles' },
-                  { icon: 'Share2', label: 'Partage' },
-                  { icon: 'DollarSign', label: 'Dollar' },
-                  { icon: 'Star', label: 'Étoile' },
-                  { icon: 'Home', label: 'Maison' },
-                  { icon: 'Calculator', label: 'Calculette' },
-                  { icon: 'Building2', label: 'Bâtiment' },
-                ].map(({icon, label}) => {
-                  const IconComponent = iconMap[icon];
+              <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-48 overflow-y-auto p-2 border border-slate-200 rounded-lg">
+                {Object.keys(iconMap).map((iconKey) => {
+                  const IconComponent = iconMap[iconKey];
                   return (
                     <button
-                      key={icon}
-                      onClick={() => setNewCard(prev => ({ ...prev, icon }))}
-                      className={`p-3 rounded-lg border-2 transition-all hover:scale-110 ${
-                        newCard.icon === icon 
-                          ? 'border-indigo-500 bg-indigo-50' 
-                          : 'border-slate-200 hover:border-slate-300'
+                      key={iconKey}
+                      type="button"
+                      onClick={() => setNewCard(prev => ({ ...prev, icon: iconKey }))}
+                      className={`p-2 sm:p-3 rounded-lg transition-all ${
+                        newCard.icon === iconKey
+                          ? 'bg-purple-100 border-2 border-purple-500'
+                          : 'bg-slate-50 border border-slate-200 hover:bg-slate-100'
                       }`}
-                      title={label}
                     >
-                      <IconComponent className="w-5 h-5 mx-auto" />
+                      <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 mx-auto" />
                     </button>
                   );
                 })}
@@ -1018,16 +969,16 @@ export function HotelEcosystem() {
                   setShowAddModal(false);
                   setNewCard({name: '', category: 'management', icon: 'Bed'});
                 }}
-                className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+                className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors text-sm"
               >
                 Annuler
               </button>
               <button
                 onClick={addNewSystem}
                 disabled={!newCard.name.trim()}
-                className={`px-4 py-2 rounded-lg transition-colors ${
+                className={`px-4 py-2 rounded-lg transition-colors text-sm ${
                   newCard.name.trim()
-                    ? 'bg-indigo-500 text-white hover:bg-indigo-600'
+                    ? 'bg-purple-500 text-white hover:bg-purple-600'
                     : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                 }`}
               >
@@ -1038,47 +989,31 @@ export function HotelEcosystem() {
         </div>
       )}
 
-      {/* Legend */}
-      <div className="mt-8 p-6 bg-white rounded-2xl border-2 border-slate-200 shadow-lg">
-        <h3 className="mb-4 text-slate-800 text-center">Légende des catégories</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {Object.entries(categoryConfig).map(([key, config]) => (
-            <div key={key} className="flex items-center gap-2">
-              <div 
-                className="w-5 h-5 rounded-lg shadow-sm" 
-                style={{ backgroundColor: config.color }}
-              />
-              <span className="text-sm text-slate-700">{config.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Export Modal */}
       {showExportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <h2 className="text-2xl font-bold mb-4">Exporter le schéma</h2>
-            <p className="text-slate-600 mb-6">Choisissez le format d'export :</p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">Exporter le schéma</h2>
+            <p className="text-slate-600 mb-6 text-sm sm:text-base">Choisissez le format d'export :</p>
             
             <div className="space-y-3">
               <button
                 onClick={exportToPNG}
-                className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 shadow-md"
+                className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 shadow-md text-sm sm:text-base"
               >
                 <FileImage className="w-5 h-5" />
                 Exporter en PNG
               </button>
               <button
                 onClick={exportToPDF}
-                className="w-full px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2 shadow-md"
+                className="w-full px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2 shadow-md text-sm sm:text-base"
               >
                 <FileText className="w-5 h-5" />
                 Exporter en PDF
               </button>
               <button
                 onClick={() => setShowExportModal(false)}
-                className="w-full px-4 py-3 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                className="w-full px-4 py-3 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm sm:text-base"
               >
                 Annuler
               </button>
@@ -1087,8 +1022,24 @@ export function HotelEcosystem() {
         </div>
       )}
 
-      {/* Footer */}
-      <div className="text-center text-sm text-slate-600 space-y-2 mt-8 pt-6 border-t border-slate-200">
+      {/* Legend - Responsive */}
+      <div className="mt-6 md:mt-8 p-4 sm:p-6 bg-white rounded-xl md:rounded-2xl border-2 border-slate-200 shadow-lg">
+        <h3 className="mb-3 md:mb-4 text-slate-800 text-center text-sm sm:text-base font-semibold">Légende des catégories</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
+          {Object.entries(categoryConfig).map(([key, config]) => (
+            <div key={key} className="flex items-center gap-1.5 sm:gap-2">
+              <div 
+                className="w-4 h-4 sm:w-5 sm:h-5 rounded-lg shadow-sm flex-shrink-0" 
+                style={{ backgroundColor: config.color }}
+              />
+              <span className="text-xs sm:text-sm text-slate-700">{config.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Footer - Responsive */}
+      <div className="text-center text-xs sm:text-sm text-slate-600 space-y-2 mt-6 md:mt-8 pt-4 md:pt-6 border-t border-slate-200">
         <p>
           Vous préférez me contacter via LinkedIn ?{' '}
           <a
@@ -1097,8 +1048,9 @@ export function HotelEcosystem() {
             rel="noopener noreferrer"
             className="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-1"
           >
-            <Linkedin className="w-4 h-4" />
-            Voir mon profil LinkedIn
+            <Linkedin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Voir mon profil LinkedIn</span>
+            <span className="sm:hidden">LinkedIn</span>
           </a>
         </p>
         <p className="text-xs text-slate-500">
