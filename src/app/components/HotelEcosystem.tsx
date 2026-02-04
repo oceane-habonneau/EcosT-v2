@@ -267,8 +267,6 @@ export function HotelEcosystem() {
   const [mode, setMode] = useState<'move' | 'link'>('move');
   const [selectedForLink, setSelectedForLink] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'admin' | 'public'>('admin');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState<string>('');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [newCard, setNewCard] = useState({
     name: '',
@@ -370,27 +368,6 @@ export function HotelEcosystem() {
     setSelectedForLink(null);
   };
 
-  const startEditing = (id: string) => {
-    const system = allSystems.find(s => s.id === id);
-    if (system) {
-      setEditingId(id);
-      setEditingName(system.name);
-    }
-  };
-
-  const saveEdit = () => {
-    if (editingId && editingName) {
-      setAllSystems(prev => prev.map(system => 
-        system.id === editingId ? { ...system, name: editingName } : system
-      ));
-      setEditingId(null);
-    }
-  };
-
-  const cancelEdit = () => {
-    setEditingId(null);
-  };
-
   const deleteSystem = (id: string) => {
     setAllSystems(prev => prev.filter(system => system.id !== id));
     setNodePositions(prev => {
@@ -441,15 +418,18 @@ export function HotelEcosystem() {
         const canvas = await html2canvas(diagramRef.current, {
           backgroundColor: '#ffffff',
           scale: 2,
+          logging: false,
+          useCORS: true
         });
         
         const link = document.createElement('a');
         link.download = `ecosysteme-hotelier-${Date.now()}.png`;
-        link.href = canvas.toDataURL();
+        link.href = canvas.toDataURL('image/png');
         link.click();
         setShowExportModal(false);
       } catch (error) {
         console.error('Erreur export PNG:', error);
+        alert('Erreur lors de l\'export PNG. Veuillez réessayer.');
       }
     }
   };
@@ -460,6 +440,8 @@ export function HotelEcosystem() {
         const canvas = await html2canvas(diagramRef.current, {
           backgroundColor: '#ffffff',
           scale: 2,
+          logging: false,
+          useCORS: true
         });
         
         const imgData = canvas.toDataURL('image/png');
@@ -474,7 +456,43 @@ export function HotelEcosystem() {
         setShowExportModal(false);
       } catch (error) {
         console.error('Erreur export PDF:', error);
+        alert('Erreur lors de l\'export PDF. Veuillez réessayer.');
       }
+    }
+  };
+
+  const loadStack = (stack: SystemNode[]) => {
+    setAllSystems(stack);
+    setNodePositions(
+      stack.reduce((acc, system) => {
+        acc[system.id] = { x: system.x, y: system.y };
+        return acc;
+      }, {} as Record<string, { x: number; y: number }>)
+    );
+    setConnections(
+      stack.reduce((acc, system) => {
+        acc[system.id] = system.connections || [];
+        return acc;
+      }, {} as Record<string, string[]>)
+    );
+    setSelectedForLink(null);
+    setMode('move');
+  };
+
+  const removeConnection = (fromId: string, toId: string) => {
+    setConnections(prev => {
+      const newConnections = { ...prev };
+      if (newConnections[fromId]) {
+        newConnections[fromId] = newConnections[fromId].filter(id => id !== toId);
+      }
+      return newConnections;
+    });
+  };
+
+  const handleConnectionClick = (fromId: string, toId: string) => {
+    if (mode === 'link') {
+      // Supprimer la connexion en mode liaison
+      removeConnection(fromId, toId);
     }
   };
 
@@ -764,18 +782,7 @@ export function HotelEcosystem() {
 
                     {/* Title */}
                     <h3 className={`${isPMS ? 'text-xs font-semibold' : 'text-xs'} text-center text-slate-800 leading-tight min-h-[24px] flex items-center justify-center px-1`}>
-                      {editingId === system.id ? (
-                        <input
-                          type="text"
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          onBlur={saveEdit}
-                          onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                          className="w-full text-center text-xs font-semibold leading-tight min-h-[24px] flex items-center justify-center px-1"
-                        />
-                      ) : (
-                        system.name
-                      )}
+                      {system.name}
                     </h3>
 
                     {/* Category indicator dot */}
@@ -791,18 +798,12 @@ export function HotelEcosystem() {
                       </div>
                     )}
 
-                    {/* Edit/Delete buttons - only in admin mode */}
+                    {/* Delete button - only in admin mode */}
                     {viewMode === 'admin' && (
-                      <div className="absolute bottom-2 right-2 flex gap-1">
-                        <button
-                          onClick={() => startEditing(system.id)}
-                          className="w-4 h-4 text-slate-400 hover:text-slate-600"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
+                      <div className="absolute bottom-2 right-2">
                         <button
                           onClick={() => deleteSystem(system.id)}
-                          className="w-4 h-4 text-slate-400 hover:text-slate-600"
+                          className="w-4 h-4 text-slate-400 hover:text-red-600 transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
