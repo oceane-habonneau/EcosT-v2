@@ -338,49 +338,98 @@ export function HotelEcosystem() {
   };
 
   const exportToPNG = async () => {
-    if (diagramRef.current) {
+    if (!diagramRef.current) return;
+    
+    try {
+      // Vérifier si html2canvas est disponible
+      let html2canvas;
       try {
-        const html2canvas = (await import('html2canvas')).default;
-        const canvas = await html2canvas(diagramRef.current, {
-          backgroundColor: '#ffffff',
-          scale: 2,
+        html2canvas = (await import('html2canvas')).default;
+      } catch {
+        // Fallback : charger depuis CDN
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
         });
-        
-        const link = document.createElement('a');
-        link.download = `ecosysteme-hotelier-${Date.now()}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-        setShowExportModal(false);
-      } catch (error) {
-        console.error('Erreur export PNG:', error);
+        html2canvas = (window as any).html2canvas;
       }
+      
+      const canvas = await html2canvas(diagramRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+      
+      const link = document.createElement('a');
+      link.download = `ecosysteme-hotelier-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      setShowExportModal(false);
+    } catch (error) {
+      console.error('Erreur export PNG:', error);
+      alert('Erreur lors de l\'export PNG. Veuillez réessayer.');
     }
   };
 
   const exportToPDF = async () => {
-    if (diagramRef.current) {
+    if (!diagramRef.current) return;
+    
+    try {
+      // Charger html2canvas
+      let html2canvas;
       try {
-        const html2canvas = (await import('html2canvas')).default;
-        const jsPDF = (await import('jspdf')).default;
-        
-        const canvas = await html2canvas(diagramRef.current, {
-          backgroundColor: '#ffffff',
-          scale: 2,
+        html2canvas = (await import('html2canvas')).default;
+      } catch {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
         });
-        
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-          orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
-          unit: 'px',
-          format: [canvas.width, canvas.height]
-        });
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save(`ecosysteme-hotelier-${Date.now()}.pdf`);
-        setShowExportModal(false);
-      } catch (error) {
-        console.error('Erreur export PDF:', error);
+        html2canvas = (window as any).html2canvas;
       }
+      
+      // Charger jsPDF
+      let jsPDF;
+      try {
+        const jsPDFModule = await import('jspdf');
+        jsPDF = jsPDFModule.default || jsPDFModule.jsPDF;
+      } catch {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+        jsPDF = (window as any).jspdf.jsPDF;
+      }
+      
+      const canvas = await html2canvas(diagramRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`ecosysteme-hotelier-${Date.now()}.pdf`);
+      setShowExportModal(false);
+    } catch (error) {
+      console.error('Erreur export PDF:', error);
+      alert('Erreur lors de l\'export PDF. Veuillez réessayer.');
     }
   };
 
@@ -445,9 +494,8 @@ export function HotelEcosystem() {
             }`}
           >
             <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline md:hidden">Admin</span>
-            <span className="sm:hidden md:inline">Admin</span>
-            <span className="hidden md:inline">istration</span>
+            <span className="sm:hidden">Admin</span>
+            <span className="hidden sm:inline">Mode Administration</span>
           </button>
           <button
             onClick={() => {
@@ -464,9 +512,8 @@ export function HotelEcosystem() {
             }`}
           >
             <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline md:hidden">Public</span>
-            <span className="sm:hidden md:inline">Public</span>
-            <span className="hidden md:inline">ue</span>
+            <span className="sm:hidden">Public</span>
+            <span className="hidden sm:inline">Vue Publique</span>
           </button>
         </div>
       </div>
@@ -804,10 +851,10 @@ export function HotelEcosystem() {
                 >
                   {/* Card */}
                   <div
-                    className={`relative bg-white rounded-xl md:rounded-2xl p-2 md:p-3 shadow-xl border-2 transition-all ${
-                      isDragging ? 'scale-110 shadow-2xl' : ''
+                    className={`relative bg-white bg-opacity-95 backdrop-blur-sm rounded-xl md:rounded-2xl p-2 md:p-3 shadow-xl border-2 transition-all ${
+                      isDragging ? 'scale-110 shadow-2xl bg-opacity-100' : ''
                     } ${
-                      isSelected ? 'ring-4 ring-purple-400 scale-110' : ''
+                      isSelected ? 'ring-4 ring-purple-400 scale-110 bg-opacity-100' : ''
                     } ${
                       hasConnectionToSelected ? 'ring-2 ring-purple-200' : ''
                     }`}
