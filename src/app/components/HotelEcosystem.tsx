@@ -872,7 +872,7 @@ export function HotelEcosystem() {
                     {/* Icon with colored background */}
                     <div 
                       className={`${isPMS ? 'w-10 h-10 md:w-14 md:h-14' : 'w-8 h-8 md:w-11 md:h-11'} rounded-lg md:rounded-xl mb-1 md:mb-2 mx-auto flex items-center justify-center shadow-md`}
-                      style={{ backgroundColor: config.color }}
+                      style={{ backgroundColor: config.color, opacity: 0.92 }}
                     >
                       <Icon className={`${isPMS ? 'w-5 h-5 md:w-7 md:h-7' : 'w-4 h-4 md:w-6 md:h-6'} text-white`} />
                     </div>
