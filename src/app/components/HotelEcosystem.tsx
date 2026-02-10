@@ -366,13 +366,26 @@ export function HotelEcosystem() {
         throw new Error('html2canvas non disponible');
       }
       
+      // Sauvegarder et retirer temporairement les gradients problématiques
+      const body = document.body;
+      const originalBodyClass = body.className;
+      body.className = body.className.replace(/bg-gradient-\S+/g, '');
+      
       const canvas = await html2canvas(diagramRef.current, {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#f8fafc',
         scale: 2,
         logging: false,
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        ignoreElements: (element) => {
+          // Ignorer les éléments avec des gradients oklch
+          const style = window.getComputedStyle(element);
+          return style.backgroundImage.includes('oklch');
+        }
       });
+      
+      // Restaurer la classe originale
+      body.className = originalBodyClass;
       
       const link = document.createElement('a');
       link.download = `ecosysteme-hotelier-${Date.now()}.png`;
@@ -429,13 +442,26 @@ export function HotelEcosystem() {
         throw new Error('Bibliothèques non disponibles');
       }
       
+      // Sauvegarder et retirer temporairement les gradients problématiques
+      const body = document.body;
+      const originalBodyClass = body.className;
+      body.className = body.className.replace(/bg-gradient-\S+/g, '');
+      
       const canvas = await html2canvas(diagramRef.current, {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#f8fafc',
         scale: 2,
         logging: false,
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        ignoreElements: (element) => {
+          // Ignorer les éléments avec des gradients oklch
+          const style = window.getComputedStyle(element);
+          return style.backgroundImage.includes('oklch');
+        }
       });
+      
+      // Restaurer la classe originale
+      body.className = originalBodyClass;
       
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
