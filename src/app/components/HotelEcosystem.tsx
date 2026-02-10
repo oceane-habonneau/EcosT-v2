@@ -346,7 +346,6 @@ export function HotelEcosystem() {
     try {
       // Vérifier si html2canvas est déjà chargé
       if (!(window as any).html2canvas) {
-        // Charger html2canvas depuis CDN
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
         
@@ -356,8 +355,7 @@ export function HotelEcosystem() {
           document.head.appendChild(script);
         });
         
-        // Attendre un peu que la bibliothèque soit disponible
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
       
       const html2canvas = (window as any).html2canvas;
@@ -366,26 +364,17 @@ export function HotelEcosystem() {
         throw new Error('html2canvas non disponible');
       }
       
-      // Sauvegarder et retirer temporairement les gradients problématiques
-      const body = document.body;
-      const originalBodyClass = body.className;
-      body.className = body.className.replace(/bg-gradient-\S+/g, '');
+      const element = diagramRef.current;
       
-      const canvas = await html2canvas(diagramRef.current, {
-        backgroundColor: '#f8fafc',
+      const canvas = await html2canvas(element, {
+        backgroundColor: '#f1f5f9',
         scale: 2,
         logging: false,
         useCORS: true,
         allowTaint: true,
-        ignoreElements: (element) => {
-          // Ignorer les éléments avec des gradients oklch
-          const style = window.getComputedStyle(element);
-          return style.backgroundImage.includes('oklch');
-        }
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight
       });
-      
-      // Restaurer la classe originale
-      body.className = originalBodyClass;
       
       const link = document.createElement('a');
       link.download = `ecosysteme-hotelier-${Date.now()}.png`;
@@ -416,8 +405,7 @@ export function HotelEcosystem() {
           document.head.appendChild(html2canvasScript);
         });
         
-        // Attendre un peu que la bibliothèque soit disponible
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
       
       // Vérifier si jsPDF est déjà chargé
@@ -431,8 +419,7 @@ export function HotelEcosystem() {
           document.head.appendChild(jsPDFScript);
         });
         
-        // Attendre un peu que la bibliothèque soit disponible
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
       
       const html2canvas = (window as any).html2canvas;
@@ -442,26 +429,17 @@ export function HotelEcosystem() {
         throw new Error('Bibliothèques non disponibles');
       }
       
-      // Sauvegarder et retirer temporairement les gradients problématiques
-      const body = document.body;
-      const originalBodyClass = body.className;
-      body.className = body.className.replace(/bg-gradient-\S+/g, '');
+      const element = diagramRef.current;
       
-      const canvas = await html2canvas(diagramRef.current, {
-        backgroundColor: '#f8fafc',
+      const canvas = await html2canvas(element, {
+        backgroundColor: '#f1f5f9',
         scale: 2,
         logging: false,
         useCORS: true,
         allowTaint: true,
-        ignoreElements: (element) => {
-          // Ignorer les éléments avec des gradients oklch
-          const style = window.getComputedStyle(element);
-          return style.backgroundImage.includes('oklch');
-        }
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight
       });
-      
-      // Restaurer la classe originale
-      body.className = originalBodyClass;
       
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
@@ -813,7 +791,7 @@ export function HotelEcosystem() {
       )}
 
       {/* Ecosystem Diagram */}
-      <div ref={diagramRef} className="relative bg-gradient-to-br from-slate-50 to-white rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-12 lg:p-16 shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none">
+      <div ref={diagramRef} className="relative bg-slate-50 rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-12 lg:p-16 shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none">
         <div 
           ref={containerRef}
           className="relative w-full h-full"
