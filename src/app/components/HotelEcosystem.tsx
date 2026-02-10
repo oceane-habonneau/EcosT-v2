@@ -338,18 +338,27 @@ export function HotelEcosystem() {
   };
 
   const exportToPNG = async () => {
-    if (!diagramRef.current) return;
+    if (!diagramRef.current) {
+      alert('Erreur : Zone de diagramme non trouvée');
+      return;
+    }
     
     try {
-      // Charger html2canvas depuis CDN
-      const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-      
-      await new Promise((resolve, reject) => {
-        script.onload = resolve;
-        script.onerror = () => reject(new Error('Impossible de charger html2canvas'));
-        document.head.appendChild(script);
-      });
+      // Vérifier si html2canvas est déjà chargé
+      if (!(window as any).html2canvas) {
+        // Charger html2canvas depuis CDN
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        
+        await new Promise((resolve, reject) => {
+          script.onload = resolve;
+          script.onerror = () => reject(new Error('Impossible de charger html2canvas'));
+          document.head.appendChild(script);
+        });
+        
+        // Attendre un peu que la bibliothèque soit disponible
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
       
       const html2canvas = (window as any).html2canvas;
       
@@ -372,36 +381,49 @@ export function HotelEcosystem() {
       setShowExportModal(false);
     } catch (error) {
       console.error('Erreur export PNG:', error);
-      alert('Erreur lors de l\'export PNG. Veuillez réessayer.');
+      alert(`Erreur lors de l'export PNG : ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
   const exportToPDF = async () => {
-    if (!diagramRef.current) return;
+    if (!diagramRef.current) {
+      alert('Erreur : Zone de diagramme non trouvée');
+      return;
+    }
     
     try {
-      // Charger html2canvas
-      const html2canvasScript = document.createElement('script');
-      html2canvasScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      // Vérifier si html2canvas est déjà chargé
+      if (!(window as any).html2canvas) {
+        const html2canvasScript = document.createElement('script');
+        html2canvasScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        
+        await new Promise((resolve, reject) => {
+          html2canvasScript.onload = resolve;
+          html2canvasScript.onerror = () => reject(new Error('Impossible de charger html2canvas'));
+          document.head.appendChild(html2canvasScript);
+        });
+        
+        // Attendre un peu que la bibliothèque soit disponible
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
       
-      await new Promise((resolve, reject) => {
-        html2canvasScript.onload = resolve;
-        html2canvasScript.onerror = () => reject(new Error('Impossible de charger html2canvas'));
-        document.head.appendChild(html2canvasScript);
-      });
-      
-      // Charger jsPDF
-      const jsPDFScript = document.createElement('script');
-      jsPDFScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-      
-      await new Promise((resolve, reject) => {
-        jsPDFScript.onload = resolve;
-        jsPDFScript.onerror = () => reject(new Error('Impossible de charger jsPDF'));
-        document.head.appendChild(jsPDFScript);
-      });
+      // Vérifier si jsPDF est déjà chargé
+      if (!(window as any).jspdf) {
+        const jsPDFScript = document.createElement('script');
+        jsPDFScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        
+        await new Promise((resolve, reject) => {
+          jsPDFScript.onload = resolve;
+          jsPDFScript.onerror = () => reject(new Error('Impossible de charger jsPDF'));
+          document.head.appendChild(jsPDFScript);
+        });
+        
+        // Attendre un peu que la bibliothèque soit disponible
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
       
       const html2canvas = (window as any).html2canvas;
-      const jsPDF = (window as any).jspdf.jsPDF;
+      const jsPDF = (window as any).jspdf?.jsPDF;
       
       if (!html2canvas || !jsPDF) {
         throw new Error('Bibliothèques non disponibles');
@@ -427,7 +449,7 @@ export function HotelEcosystem() {
       setShowExportModal(false);
     } catch (error) {
       console.error('Erreur export PDF:', error);
-      alert('Erreur lors de l\'export PDF. Veuillez réessayer.');
+      alert(`Erreur lors de l'export PDF : ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
