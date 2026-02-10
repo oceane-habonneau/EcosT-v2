@@ -183,102 +183,137 @@ export function HotelEcosystem() {
   // Gestion du drag tactile ET souris
   const handleMouseDown = (id: string, e: React.MouseEvent | React.TouchEvent) => {
     if (mode !== 'move' || viewMode !== 'admin') return;
+    
     e.preventDefault();
     setDraggingId(id);
-
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-
-    const moveHandler = (moveEvent: MouseEvent | TouchEvent) => {
-      if (!containerRef.current) return;
-
-      const rect = containerRef.current.getBoundingClientRect();
-      const moveClientX = 'touches' in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX;
-      const moveClientY = 'touches' in moveEvent ? moveEvent.touches[0].clientY : moveEvent.clientY;
-
-      const newX = Math.min(95, Math.max(5, ((moveClientX - rect.left) / rect.width) * 100));
-      const newY = Math.min(95, Math.max(5, ((moveClientY - rect.top) / rect.height) * 100));
-
-      setNodePositions((prev) => ({
-        ...prev,
-        [id]: { x: newX, y: newY },
-      }));
-    };
-
-    const upHandler = () => {
-      setDraggingId(null);
-      document.removeEventListener('mousemove', moveHandler as any);
-      document.removeEventListener('mouseup', upHandler);
-      document.removeEventListener('touchmove', moveHandler as any);
-      document.removeEventListener('touchend', upHandler);
-    };
-
-    document.addEventListener('mousemove', moveHandler as any);
-    document.addEventListener('mouseup', upHandler);
-    document.addEventListener('touchmove', moveHandler as any);
-    document.addEventListener('touchend', upHandler);
   };
 
-  const createConnection = (targetId: string) => {
-    if (selectedForLink && selectedForLink !== targetId) {
-      setConnections((prev) => ({
-        ...prev,
-        [selectedForLink]: [...(prev[selectedForLink] || []), targetId],
-      }));
-      setSelectedForLink(null);
+  const handleCardClick = (id: string, e: React.MouseEvent) => {
+    if (mode === 'link' && viewMode === 'admin') {
+      e.stopPropagation();
+      if (!selectedForLink) {
+        setSelectedForLink(id);
+      } else if (selectedForLink === id) {
+        setSelectedForLink(null);
+      } else {
+        const hasConnection = connections[selectedForLink]?.includes(id);
+        
+        setConnections(prev => {
+          const newConnections = { ...prev };
+          if (hasConnection) {
+            newConnections[selectedForLink] = newConnections[selectedForLink].filter(c => c !== id);
+          } else {
+            newConnections[selectedForLink] = [...(newConnections[selectedForLink] || []), id];
+          }
+          return newConnections;
+        });
+        
+        setSelectedForLink(null);
+      }
     }
   };
 
-  const removeConnection = (sourceId: string, targetId: string) => {
-    setConnections((prev) => ({
+  const handleMouseMove = useCallback((e: MouseEvent | TouchEvent) => {
+    if (!draggingId || !containerRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    const x = ((clientX - rect.left) / rect.width) * 100;
+    const y = ((clientY - rect.top) / rect.height) * 100;
+
+    const clampedX = Math.max(5, Math.min(95, x));
+    const clampedY = Math.max(5, Math.min(95, y));
+
+    setNodePositions(prev => ({
       ...prev,
-      [sourceId]: (prev[sourceId] || []).filter((id) => id !== targetId),
+      [draggingId]: { x: clampedX, y: clampedY }
     }));
+  }, [draggingId]);
+
+  const handleMouseUp = useCallback(() => {
+    setDraggingId(null);
+  }, []);
+
+  useEffect(() => {
+    if (draggingId) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleMouseMove);
+      window.addEventListener('touchend', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('touchmove', handleMouseMove);
+        window.removeEventListener('touchend', handleMouseUp);
+      };
+    }
+  }, [draggingId, handleMouseMove, handleMouseUp]);
+
+  const resetPositions = () => {
+    setNodePositions(
+      allSystems.reduce((acc, system) => {
+        const original = stack1Simple.find(s => s.id === system.id) || 
+                        stack2Intermediate.find(s => s.id === system.id) ||
+                        stack3Advanced.find(s => s.id === system.id);
+        acc[system.id] = original ? { x: original.x, y: original.y } : { x: 50, y: 50 };
+        return acc;
+      }, {} as Record<string, { x: number; y: number }>)
+    );
   };
 
-  const resetDiagram = () => {
-    if (window.confirm('Voulez-vous vraiment réinitialiser le schéma ?')) {
-      loadStack(stack1Simple);
+  const resetConnections = () => {
+    setConnections(
+      allSystems.reduce((acc, system) => {
+        acc[system.id] = system.connections || [];
+        return acc;
+      }, {} as Record<string, string[]>)
+    );
+    setSelectedForLink(null);
+  };
+
+  const startEditing = (id: string) => {
+    const system = allSystems.find(s => s.id === id);
+    if (system) {
+      setEditingId(id);
+      setEditingName(system.name);
+    }
+  };
+
+  const saveEdit = () => {
+    if (editingId && editingName) {
+      setAllSystems(prev => prev.map(system => 
+        system.id === editingId ? { ...system, name: editingName } : system
+      ));
+      setEditingId(null);
     }
   };
 
   const deleteSystem = (id: string) => {
-    if (window.confirm('Supprimer cette carte ?')) {
-      setAllSystems(prev => prev.filter(s => s.id !== id));
-      const newConnections = { ...connections };
-      delete newConnections[id];
-      Object.keys(newConnections).forEach(key => {
-        newConnections[key] = newConnections[key].filter(connId => connId !== id);
+    setAllSystems(prev => prev.filter(system => system.id !== id));
+    setNodePositions(prev => {
+      const { [id]: _, ...rest } = prev;
+      return rest;
+    });
+    setConnections(prev => {
+      const { [id]: _, ...rest } = prev;
+      Object.keys(rest).forEach(key => {
+        rest[key] = rest[key].filter(c => c !== id);
       });
-      setConnections(newConnections);
-      const newPositions = { ...nodePositions };
-      delete newPositions[id];
-      setNodePositions(newPositions);
-    }
-  };
-
-  const startEditing = (id: string, name: string) => {
-    setEditingId(id);
-    setEditingName(name);
-  };
-
-  const saveEdit = () => {
-    if (editingId && editingName.trim()) {
-      setAllSystems(prev =>
-        prev.map(s => (s.id === editingId ? { ...s, name: editingName.trim() } : s))
-      );
-    }
-    setEditingId(null);
-    setEditingName('');
+      return rest;
+    });
   };
 
   const addNewSystem = () => {
-    if (!newCard.name.trim()) return;
-    
-    const newId = `system-${Date.now()}`;
+    if (!newCard.name.trim()) {
+      alert('Veuillez entrer un nom pour la carte');
+      return;
+    }
+    const newId = `new-${Date.now()}`;
     const newSystem: SystemNode = {
       id: newId,
-      name: newCard.name.trim(),
+      name: newCard.name,
       category: newCard.category,
       icon: newCard.icon,
       x: 50,
@@ -302,12 +337,8 @@ export function HotelEcosystem() {
     });
   };
 
-  // ✅ CORRECTION : Fonction exportToPNG simplifiée avec gestion d'erreur
   const exportToPNG = async () => {
-    if (!diagramRef.current) {
-      alert('Erreur : Zone de diagramme non trouvée');
-      return;
-    }
+    if (!diagramRef.current) return;
     
     try {
       // Charger html2canvas depuis CDN
@@ -320,7 +351,6 @@ export function HotelEcosystem() {
         document.head.appendChild(script);
       });
       
-      // Attendre que html2canvas soit disponible
       const html2canvas = (window as any).html2canvas;
       
       if (!html2canvas) {
@@ -339,21 +369,15 @@ export function HotelEcosystem() {
       link.download = `ecosysteme-hotelier-${Date.now()}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
-      
       setShowExportModal(false);
-      alert('Export PNG réussi ! 🎉');
     } catch (error) {
       console.error('Erreur export PNG:', error);
-      alert(`Erreur lors de l'export PNG : ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      alert('Erreur lors de l\'export PNG. Veuillez réessayer.');
     }
   };
 
-  // ✅ CORRECTION : Fonction exportToPDF simplifiée avec gestion d'erreur
   const exportToPDF = async () => {
-    if (!diagramRef.current) {
-      alert('Erreur : Zone de diagramme non trouvée');
-      return;
-    }
+    if (!diagramRef.current) return;
     
     try {
       // Charger html2canvas
@@ -400,12 +424,10 @@ export function HotelEcosystem() {
       
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
       pdf.save(`ecosysteme-hotelier-${Date.now()}.pdf`);
-      
       setShowExportModal(false);
-      alert('Export PDF réussi ! 🎉');
     } catch (error) {
       console.error('Erreur export PDF:', error);
-      alert(`Erreur lors de l'export PDF : ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      alert('Erreur lors de l\'export PDF. Veuillez réessayer.');
     }
   };
 
@@ -425,484 +447,477 @@ export function HotelEcosystem() {
     );
     setSelectedForLink(null);
     setMode('move');
+    setIsStackMenuOpen(false);
   };
 
-  const renderLines = () => {
-    return allSystems.flatMap((system) => {
-      const systemConnections = connections[system.id] || [];
-      return systemConnections.map((targetId) => {
-        const target = allSystems.find((s) => s.id === targetId);
-        if (!target) return null;
-
-        const startPos = nodePositions[system.id];
-        const endPos = nodePositions[targetId];
-
-        const connectionKey = `${system.id}-${targetId}`;
-        const isHovered = hoveredConnection === connectionKey;
-
-        return (
-          <g 
-            key={connectionKey}
-            onMouseEnter={() => setHoveredConnection(connectionKey)}
-            onMouseLeave={() => setHoveredConnection(null)}
-            style={{ cursor: viewMode === 'admin' ? 'pointer' : 'default' }}
-          >
-            <line
-              x1={`${startPos.x}%`}
-              y1={`${startPos.y}%`}
-              x2={`${endPos.x}%`}
-              y2={`${endPos.y}%`}
-              stroke={isHovered ? '#6366f1' : '#cbd5e1'}
-              strokeWidth={isHovered ? '3' : '2'}
-              strokeDasharray={isHovered ? '0' : '5,5'}
-              style={{ transition: 'all 0.2s' }}
-            />
-            {viewMode === 'admin' && isHovered && (
-              <g>
-                <circle
-                  cx={`${(startPos.x + endPos.x) / 2}%`}
-                  cy={`${(startPos.y + endPos.y) / 2}%`}
-                  r="12"
-                  fill="white"
-                  stroke="#6366f1"
-                  strokeWidth="2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeConnection(system.id, targetId);
-                    setHoveredConnection(null);
-                  }}
-                  style={{ cursor: 'pointer' }}
-                />
-                <text
-                  x={`${(startPos.x + endPos.x) / 2}%`}
-                  y={`${(startPos.y + endPos.y) / 2}%`}
-                  fill="#6366f1"
-                  fontSize="16"
-                  fontWeight="bold"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeConnection(system.id, targetId);
-                    setHoveredConnection(null);
-                  }}
-                  style={{ cursor: 'pointer', pointerEvents: 'none' }}
-                >
-                  ×
-                </text>
-              </g>
-            )}
-          </g>
-        );
+  const handleConnectionClick = (fromId: string, toId: string) => {
+    if (mode === 'link') {
+      setConnections(prev => {
+        const newConnections = { ...prev };
+        if (newConnections[fromId]) {
+          newConnections[fromId] = newConnections[fromId].filter(id => id !== toId);
+        }
+        return newConnections;
       });
-    });
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-3 sm:p-4 md:p-8">
-      {/* Header - Responsive */}
-      <div className="max-w-7xl mx-auto mb-4 sm:mb-6 md:mb-8">
-        <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 border-2 border-purple-100">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h1 className="text-xl sm:text-2xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Écosystème Hôtelier Interactif
-            </h1>
-            
-            {/* 📱 Bouton menu mobile */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg bg-purple-100 hover:bg-purple-200 transition-colors"
-            >
-              <Menu className="w-5 h-5 text-purple-600" />
-            </button>
-          </div>
+    <div className="max-w-[1400px] mx-auto p-3 sm:p-4 md:p-8">
+      {/* Header */}
+      <div className="text-center mb-4 md:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-5xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold">
+          Schéma écosystème hôtelier
+        </h1>
+        <p className="text-sm sm:text-base md:text-lg text-slate-600">Océane Habonneau</p>
+        {/* Contact CTA */}
+        <a 
+          href="mailto:oceane.habonneau@gmail.com?subject=Demande%20de%20contact%20-%20Ecosyst%C3%A8me%20h%C3%B4telier&body=Bonjour%20Océane%2C%0A%0AJe%20souhaiterais%20discuter%20avec%20vous%20concernant%20votre%20schéma%20d'écosystème%20hôtelier.%0A%0A"
+          className="inline-flex items-center gap-2 mt-3 md:mt-4 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm sm:text-base rounded-lg md:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+        >
+          <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
+          Contactez-moi
+        </a>
+      </div>
 
-          {/* 💻 Menu desktop (caché sur mobile) */}
-          <div className="hidden lg:flex flex-wrap gap-2 mb-4">
-            {/* Modes */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setMode('move')}
-                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-all shadow-md text-xs sm:text-sm ${
-                  mode === 'move'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white text-slate-700 hover:bg-blue-50'
-                }`}
-              >
-                <Move className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Déplacer</span>
-              </button>
-              <button
-                onClick={() => setMode('link')}
-                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-all shadow-md text-xs sm:text-sm ${
-                  mode === 'link'
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-white text-slate-700 hover:bg-purple-50'
-                }`}
-              >
-                <Link2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Relier</span>
-              </button>
-            </div>
-
-            {/* Stacks */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => loadStack(stack1Simple)}
-                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all shadow-md text-xs sm:text-sm"
-              >
-                Stack 🟢 Simple
-              </button>
-              <button
-                onClick={() => loadStack(stack2Intermediate)}
-                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all shadow-md text-xs sm:text-sm"
-              >
-                Stack 🟠 Intermédiaire
-              </button>
-              <button
-                onClick={() => loadStack(stack3Advanced)}
-                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all shadow-md text-xs sm:text-sm"
-              >
-                Stack 🔵 Avancé
-              </button>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-md text-xs sm:text-sm"
-              >
-                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Ajouter</span>
-              </button>
-              <button
-                onClick={resetDiagram}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition-all shadow-md text-xs sm:text-sm"
-              >
-                <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Réinitialiser</span>
-              </button>
-              <button
-                onClick={() => setViewMode(viewMode === 'admin' ? 'public' : 'admin')}
-                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-all shadow-md text-xs sm:text-sm ${
-                  viewMode === 'admin'
-                    ? 'bg-indigo-500 text-white hover:bg-indigo-600'
-                    : 'bg-teal-500 text-white hover:bg-teal-600'
-                }`}
-              >
-                {viewMode === 'admin' ? (
-                  <>
-                    <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">Mode Admin</span>
-                  </>
-                ) : (
-                  <>
-                    <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">Mode Public</span>
-                  </>
-                )}
-              </button>
-              <button
-                onClick={() => setShowExportModal(true)}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all shadow-md text-xs sm:text-sm"
-              >
-                <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Exporter</span>
-              </button>
-            </div>
-          </div>
-
-          {/* 📱 Menu mobile (déplié) */}
-          {isMobileMenuOpen && (
-            <div className="lg:hidden space-y-3 mb-4 pt-4 border-t border-slate-200">
-              {/* Modes */}
-              <div>
-                <p className="text-xs font-semibold text-slate-600 mb-2">Modes</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      setMode('move');
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-all shadow-md text-sm ${
-                      mode === 'move'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-white text-slate-700'
-                    }`}
-                  >
-                    <Move className="w-4 h-4" />
-                    Déplacer
-                  </button>
-                  <button
-                    onClick={() => {
-                      setMode('link');
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-all shadow-md text-sm ${
-                      mode === 'link'
-                        ? 'bg-purple-500 text-white'
-                        : 'bg-white text-slate-700'
-                    }`}
-                  >
-                    <Link2 className="w-4 h-4" />
-                    Relier
-                  </button>
-                </div>
-              </div>
-
-              {/* Stacks */}
-              <div>
-                <button
-                  onClick={() => setIsStackMenuOpen(!isStackMenuOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-100 rounded-lg text-sm font-semibold text-slate-700"
-                >
-                  <span>Charger un stack</span>
-                  {isStackMenuOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </button>
-                {isStackMenuOpen && (
-                  <div className="mt-2 space-y-2">
-                    <button
-                      onClick={() => {
-                        loadStack(stack1Simple);
-                        setIsStackMenuOpen(false);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full px-3 py-2 bg-green-500 text-white rounded-lg text-sm"
-                    >
-                      Stack 🟢 Simple
-                    </button>
-                    <button
-                      onClick={() => {
-                        loadStack(stack2Intermediate);
-                        setIsStackMenuOpen(false);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full px-3 py-2 bg-orange-500 text-white rounded-lg text-sm"
-                    >
-                      Stack 🟠 Intermédiaire
-                    </button>
-                    <button
-                      onClick={() => {
-                        loadStack(stack3Advanced);
-                        setIsStackMenuOpen(false);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full px-3 py-2 bg-blue-500 text-white rounded-lg text-sm"
-                    >
-                      Stack 🔵 Avancé
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div>
-                <button
-                  onClick={() => setIsActionsMenuOpen(!isActionsMenuOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-100 rounded-lg text-sm font-semibold text-slate-700"
-                >
-                  <span>Actions</span>
-                  {isActionsMenuOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </button>
-                {isActionsMenuOpen && (
-                  <div className="mt-2 space-y-2">
-                    <button
-                      onClick={() => {
-                        setShowAddModal(true);
-                        setIsActionsMenuOpen(false);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Ajouter une carte
-                    </button>
-                    <button
-                      onClick={() => {
-                        resetDiagram();
-                        setIsActionsMenuOpen(false);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-500 text-white rounded-lg text-sm"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      Réinitialiser
-                    </button>
-                    <button
-                      onClick={() => {
-                        setViewMode(viewMode === 'admin' ? 'public' : 'admin');
-                        setIsActionsMenuOpen(false);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm ${
-                        viewMode === 'admin'
-                          ? 'bg-indigo-500 text-white'
-                          : 'bg-teal-500 text-white'
-                      }`}
-                    >
-                      {viewMode === 'admin' ? (
-                        <>
-                          <Settings className="w-4 h-4" />
-                          Mode Admin
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="w-4 h-4" />
-                          Mode Public
-                        </>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowExportModal(true);
-                        setIsActionsMenuOpen(false);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg text-sm"
-                    >
-                      <Download className="w-4 h-4" />
-                      Exporter
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Instructions */}
-          {mode === 'link' && viewMode === 'admin' && (
-            <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-purple-50 border border-purple-200 rounded-lg">
-              <p className="text-xs sm:text-sm text-purple-800">
-                <strong>Mode Liaison :</strong> Cliquez sur une carte source, puis sur une carte cible pour créer un lien. 
-                {selectedForLink && <span className="ml-1 font-semibold">✓ Carte source sélectionnée</span>}
-              </p>
-            </div>
-          )}
+      {/* View Mode Toggle */}
+      <div className="mb-4 md:mb-6 flex justify-center">
+        <div className="inline-flex rounded-lg md:rounded-xl border-2 border-slate-300 shadow-md bg-white p-0.5 md:p-1 w-full sm:w-auto">
+          <button
+            onClick={() => setViewMode('admin')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 sm:px-4 md:px-6 py-2 rounded-md md:rounded-lg transition-colors text-xs sm:text-sm md:text-base ${
+              viewMode === 'admin' 
+                ? 'bg-slate-700 text-white' 
+                : 'text-slate-700 hover:bg-slate-100'
+            }`}
+          >
+            <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="sm:hidden">Admin</span>
+            <span className="hidden sm:inline">Mode Administration</span>
+          </button>
+          <button
+            onClick={() => {
+              setViewMode('public');
+              setMode('move');
+              setSelectedForLink(null);
+              setDraggingId(null);
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 sm:px-4 md:px-6 py-2 rounded-md md:rounded-lg transition-colors text-xs sm:text-sm md:text-base ${
+              viewMode === 'public' 
+                ? 'bg-slate-700 text-white' 
+                : 'text-slate-700 hover:bg-slate-100'
+            }`}
+          >
+            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="sm:hidden">Public</span>
+            <span className="hidden sm:inline">Vue Publique</span>
+          </button>
         </div>
       </div>
 
-      {/* Diagram - Responsive */}
-      <div className="max-w-7xl mx-auto">
-        <div 
-          ref={diagramRef}
-          className="bg-white rounded-xl md:rounded-2xl shadow-2xl border-2 border-slate-200 overflow-hidden"
-        >
-          <div
-            ref={containerRef}
-            className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100"
-            style={{ height: 'min(80vh, 800px)' }}
-          >
-            {/* SVG pour les lignes */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
-              <defs>
-                <marker
-                  id="arrowhead"
-                  markerWidth="10"
-                  markerHeight="10"
-                  refX="9"
-                  refY="3"
-                  orient="auto"
-                >
-                  <polygon points="0 0, 10 3, 0 6" fill="#cbd5e1" />
-                </marker>
-              </defs>
-              {renderLines()}
-            </svg>
+      {/* Admin Controls */}
+      {viewMode === 'admin' && (
+        <>
+          {/* 📱 Mobile: Menu Burger */}
+          <div className="md:hidden mb-4">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-slate-700 text-white rounded-xl shadow-md"
+            >
+              <div className="flex items-center gap-2">
+                <Menu className="w-5 h-5" />
+                <span className="font-medium">Menu</span>
+              </div>
+              {isMobileMenuOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </button>
+          </div>
 
-            {/* Cartes système avec OPACITÉ */}
-            {allSystems.map((system) => {
-              const IconComponent = iconMap[system.icon] || Bed;
+          {/* 📱 Mobile: Menu déroulant */}
+          <div className={`md:hidden mb-4 space-y-3 ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
+            {/* Mode Toggle */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setMode('move');
+                  setSelectedForLink(null);
+                }}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-colors shadow-md text-sm font-medium ${
+                  mode === 'move' 
+                    ? 'bg-blue-500 text-white border-2 border-blue-600' 
+                    : 'bg-white text-slate-700 border-2 border-slate-300'
+                }`}
+              >
+                <Move className="w-4 h-4" />
+                Déplacer
+              </button>
+              <button
+                onClick={() => {
+                  setMode('link');
+                  setDraggingId(null);
+                }}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-colors shadow-md text-sm font-medium ${
+                  mode === 'link' 
+                    ? 'bg-purple-500 text-white border-2 border-purple-600' 
+                    : 'bg-white text-slate-700 border-2 border-slate-300'
+                }`}
+              >
+                <Link2 className="w-4 h-4" />
+                Lier
+              </button>
+            </div>
+
+            {/* Stack Menu */}
+            <div>
+              <button
+                onClick={() => setIsStackMenuOpen(!isStackMenuOpen)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-slate-300 rounded-xl shadow-md text-sm font-medium"
+              >
+                <span>Charger un Stack</span>
+                {isStackMenuOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+              {isStackMenuOpen && (
+                <div className="mt-2 space-y-2">
+                  <button
+                    onClick={() => loadStack(stack1Simple)}
+                    className="w-full px-4 py-3 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
+                  >
+                    🟢 Stack Simple
+                  </button>
+                  <button
+                    onClick={() => loadStack(stack2Intermediate)}
+                    className="w-full px-4 py-3 rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-md text-sm font-medium"
+                  >
+                    🟠 Stack Intermédiaire
+                  </button>
+                  <button
+                    onClick={() => loadStack(stack3Advanced)}
+                    className="w-full px-4 py-3 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md text-sm font-medium"
+                  >
+                    🔵 Stack Avancé
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Actions Menu */}
+            <div>
+              <button
+                onClick={() => setIsActionsMenuOpen(!isActionsMenuOpen)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-slate-300 rounded-xl shadow-md text-sm font-medium"
+              >
+                <span>Actions</span>
+                {isActionsMenuOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+              {isActionsMenuOpen && (
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <button
+                    onClick={resetConnections}
+                    className="flex flex-col items-center justify-center gap-1 px-3 py-3 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-md"
+                  >
+                    <Unlink className="w-5 h-5" />
+                    <span className="text-xs font-medium">Liaisons</span>
+                  </button>
+                  <button
+                    onClick={resetPositions}
+                    className="flex flex-col items-center justify-center gap-1 px-3 py-3 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-md"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                    <span className="text-xs font-medium">Positions</span>
+                  </button>
+                  <button
+                    onClick={() => setShowAddModal(true)}
+                    className="flex flex-col items-center justify-center gap-1 px-3 py-3 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-md"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span className="text-xs font-medium">Ajouter</span>
+                  </button>
+                  <button
+                    onClick={() => setShowExportModal(true)}
+                    className="flex flex-col items-center justify-center gap-1 px-3 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-md"
+                  >
+                    <Download className="w-5 h-5" />
+                    <span className="text-xs font-medium">Export</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 💻 Desktop: Controls originaux */}
+          <div className="hidden md:block mb-4">
+            <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+              {/* Mode Toggle */}
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => {
+                    setMode('move');
+                    setSelectedForLink(null);
+                  }}
+                  className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl transition-colors shadow-md text-sm ${
+                    mode === 'move' 
+                      ? 'bg-blue-500 text-white border-2 border-blue-600' 
+                      : 'bg-white text-slate-700 border-2 border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <Move className="w-4 h-4" />
+                  <span className="hidden sm:inline">Mode Déplacement</span>
+                  <span className="sm:hidden">Déplacer</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setMode('link');
+                    setDraggingId(null);
+                  }}
+                  className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl transition-colors shadow-md text-sm ${
+                    mode === 'link' 
+                      ? 'bg-purple-500 text-white border-2 border-purple-600' 
+                      : 'bg-white text-slate-700 border-2 border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <Link2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Mode Liaison</span>
+                  <span className="sm:hidden">Lier</span>
+                </button>
+              </div>
+
+              {/* Stack Buttons */}
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => loadStack(stack1Simple)}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
+                >
+                  🟢 <span className="hidden lg:inline">Stack Simple</span><span className="lg:hidden">Simple</span>
+                </button>
+                <button
+                  onClick={() => loadStack(stack2Intermediate)}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-md text-sm font-medium"
+                >
+                  🟠 <span className="hidden lg:inline">Stack Intermédiaire</span><span className="lg:hidden">Inter</span>
+                </button>
+                <button
+                  onClick={() => loadStack(stack3Advanced)}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md text-sm font-medium"
+                >
+                  🔵 <span className="hidden lg:inline">Stack Avancé</span><span className="lg:hidden">Avancé</span>
+                </button>
+              </div>
+
+              {/* Right controls */}
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={resetConnections}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
+                >
+                  <Unlink className="w-4 h-4" />
+                  <span className="hidden lg:inline">Réinitialiser liaisons</span>
+                  <span className="lg:hidden">Liaisons</span>
+                </button>
+                <button
+                  onClick={resetPositions}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span className="hidden lg:inline">Réinitialiser positions</span>
+                  <span className="lg:hidden">Positions</span>
+                </button>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden md:inline">Ajouter</span>
+                </button>
+                <button
+                  onClick={() => setShowExportModal(true)}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="hidden md:inline">Export</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Mode instructions */}
+          <div className="mb-4">
+            {mode === 'move' && (
+              <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-50 border-2 border-blue-200 text-blue-700 rounded-lg md:rounded-xl shadow-md">
+                <Move className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
+                <span className="text-xs md:text-sm">
+                  <span className="hidden sm:inline">Cliquez et glissez pour déplacer les cartes</span>
+                  <span className="sm:hidden">Déplacez les cartes</span>
+                </span>
+              </div>
+            )}
+            {mode === 'link' && (
+              <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-purple-50 border-2 border-purple-200 text-purple-700 rounded-lg md:rounded-xl shadow-md">
+                <Link2 className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
+                <span className="text-xs md:text-sm">
+                  {selectedForLink 
+                    ? <><span className="hidden sm:inline">Cliquez sur une autre carte pour créer/supprimer une liaison, ou cliquez sur une liaison existante pour la supprimer</span><span className="sm:hidden">Cliquez sur une carte ou une liaison</span></> 
+                    : <><span className="hidden sm:inline">Cliquez sur une carte pour commencer une liaison, ou cliquez sur une liaison existante pour la supprimer</span><span className="sm:hidden">Cliquez sur une carte</span></>}
+                </span>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Ecosystem Diagram */}
+      <div ref={diagramRef} className="relative bg-gradient-to-br from-slate-50 to-white rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-12 lg:p-16 shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none">
+        <div 
+          ref={containerRef}
+          className="relative w-full h-full"
+          style={{ minHeight: '400px', touchAction: 'none' }}
+        >
+          {/* Connection Lines SVG */}
+          <svg 
+            className="absolute inset-0 w-full h-full pointer-events-none" 
+            style={{ zIndex: 1 }}
+          >
+            <defs>
+              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#94a3b8" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#64748b" stopOpacity="0.7" />
+              </linearGradient>
+            </defs>
+            
+            {/* Draw all connections */}
+            {Object.entries(connections).map(([fromId, targets]) => {
+              if (!targets || targets.length === 0) return null;
+              
+              return targets.map((targetId, index) => {
+                const fromPos = nodePositions[fromId];
+                const toPos = nodePositions[targetId];
+                
+                if (!fromPos || !toPos) return null;
+                
+                const connectionKey = `${fromId}-${targetId}`;
+                const isHovered = hoveredConnection === connectionKey;
+                
+                return (
+                  <line
+                    key={`${fromId}-${targetId}-${index}`}
+                    x1={`${fromPos.x}%`}
+                    y1={`${fromPos.y}%`}
+                    x2={`${toPos.x}%`}
+                    y2={`${toPos.y}%`}
+                    stroke={isHovered ? '#f59e0b' : 'url(#lineGradient)'}
+                    strokeWidth={isHovered ? 4 : 3}
+                    style={{ 
+                      pointerEvents: mode === 'link' ? 'stroke' : 'none',
+                      cursor: mode === 'link' ? 'pointer' : 'default',
+                      strokeLinecap: 'round',
+                      transition: 'all 0.2s'
+                    }}
+                    onClick={() => mode === 'link' && handleConnectionClick(fromId, targetId)}
+                    onMouseEnter={() => mode === 'link' && setHoveredConnection(connectionKey)}
+                    onMouseLeave={() => mode === 'link' && setHoveredConnection(null)}
+                  />
+                );
+              });
+            })}
+          </svg>
+
+          {/* Nodes */}
+          <div className="absolute inset-0" style={{ zIndex: 2 }}>
+            {allSystems.map(system => {
+              const config = categoryConfig[system.category];
+              const Icon = iconMap[system.icon];
+              const isPMS = system.id === 'pms';
               const pos = nodePositions[system.id];
-              const categoryColor = categoryConfig[system.category].color;
+              const isDragging = draggingId === system.id;
               const isSelected = selectedForLink === system.id;
-              const isEditing = editingId === system.id;
+              const hasConnectionToSelected = selectedForLink && connections[selectedForLink]?.includes(system.id);
 
               return (
                 <div
                   key={system.id}
-                  onMouseDown={(e) => {
-                    if (mode === 'link' && viewMode === 'admin') {
-                      if (!selectedForLink) {
-                        setSelectedForLink(system.id);
-                      } else {
-                        createConnection(system.id);
-                      }
-                    } else {
-                      handleMouseDown(system.id, e);
-                    }
-                  }}
-                  onTouchStart={(e) => {
-                    if (mode === 'link' && viewMode === 'admin') {
-                      if (!selectedForLink) {
-                        setSelectedForLink(system.id);
-                      } else {
-                        createConnection(system.id);
-                      }
-                    } else {
-                      handleMouseDown(system.id, e);
-                    }
-                  }}
-                  className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ${
-                    draggingId === system.id ? 'scale-110 z-50' : 'z-10'
-                  } ${
-                    mode === 'move' && viewMode === 'admin' ? 'cursor-move' : mode === 'link' && viewMode === 'admin' ? 'cursor-pointer' : 'cursor-default'
-                  }`}
+                  id={`node-${system.id}`}
+                  className={`absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''} touch-none select-none`}
                   style={{
                     left: `${pos.x}%`,
                     top: `${pos.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                    width: isPMS ? '100px' : '80px',
+                    zIndex: isDragging || isSelected ? 10 : 2
                   }}
+                  onMouseDown={viewMode === 'admin' ? (e) => handleMouseDown(system.id, e) : undefined}
+                  onTouchStart={viewMode === 'admin' ? (e) => handleMouseDown(system.id, e) : undefined}
+                  onClick={viewMode === 'admin' ? (e) => handleCardClick(system.id, e) : undefined}
                 >
+                  {/* Card */}
                   <div
-                    className={`relative p-3 sm:p-4 rounded-xl md:rounded-2xl shadow-lg transition-all ${
-                      isSelected
-                        ? 'ring-4 ring-purple-400 scale-105'
-                        : 'hover:shadow-xl hover:scale-105'
+                    className={`relative bg-white bg-opacity-90 backdrop-blur-sm rounded-xl md:rounded-2xl p-2 md:p-3 shadow-xl border-2 transition-all ${
+                      isDragging ? 'scale-110 shadow-2xl bg-opacity-100' : ''
+                    } ${
+                      isSelected ? 'ring-4 ring-purple-400 scale-110 bg-opacity-100' : ''
+                    } ${
+                      hasConnectionToSelected ? 'ring-2 ring-purple-200' : ''
                     }`}
-                    style={{
-                      backgroundColor: categoryColor,
-                      opacity: 0.92, // ✅ OPACITÉ AJOUTÉE
-                      minWidth: '120px',
-                      maxWidth: '200px',
-                    }}
+                    style={{ borderColor: config.color }}
                   >
-                    <div className="flex flex-col items-center gap-1.5 sm:gap-2">
-                      <IconComponent className="w-6 h-6 sm:w-8 sm:h-8 text-white" strokeWidth={2.5} />
-                      {isEditing ? (
+                    {/* Mode indicator - only in admin mode */}
+                    {viewMode === 'admin' && (
+                      <div className="absolute top-0.5 md:top-1 left-1/2 -translate-x-1/2">
+                        {mode === 'move' ? (
+                          <Move className="w-2.5 h-2.5 md:w-3 md:h-3 text-slate-400" />
+                        ) : (
+                          <Link2 className={`w-2.5 h-2.5 md:w-3 md:h-3 ${isSelected ? 'text-purple-600' : 'text-slate-400'}`} />
+                        )}
+                      </div>
+                    )}
+
+                    {/* Icon with colored background */}
+                    <div 
+                      className={`${isPMS ? 'w-10 h-10 md:w-14 md:h-14' : 'w-8 h-8 md:w-11 md:h-11'} rounded-lg md:rounded-xl mb-1 md:mb-2 mx-auto flex items-center justify-center shadow-md`}
+                      style={{ backgroundColor: config.color }}
+                    >
+                      <Icon className={`${isPMS ? 'w-5 h-5 md:w-7 md:h-7' : 'w-4 h-4 md:w-6 md:h-6'} text-white`} />
+                    </div>
+
+                    {/* Title */}
+                    <h3 className={`${isPMS ? 'text-[10px] md:text-xs font-semibold' : 'text-[9px] md:text-xs'} text-center text-slate-800 leading-tight min-h-[20px] md:min-h-[24px] flex items-center justify-center px-0.5 md:px-1`}>
+                      {editingId === system.id ? (
                         <input
                           type="text"
                           value={editingName}
                           onChange={(e) => setEditingName(e.target.value)}
                           onBlur={saveEdit}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') saveEdit();
-                            if (e.key === 'Escape') {
-                              setEditingId(null);
-                              setEditingName('');
-                            }
-                          }}
+                          onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
+                          className="w-full text-center text-[9px] md:text-xs font-semibold leading-tight"
                           autoFocus
-                          className="w-full px-2 py-1 text-xs sm:text-sm text-center bg-white rounded border border-slate-300"
-                          onClick={(e) => e.stopPropagation()}
                         />
                       ) : (
-                        <span className="text-white text-xs sm:text-sm font-semibold text-center leading-tight px-1">
-                          {system.name}
-                        </span>
+                        system.name
                       )}
-                    </div>
-                    
-                    {/* Boutons d'édition et suppression */}
-                    {viewMode === 'admin' && !isEditing && (
-                      <div className="absolute -top-2 -right-2 flex gap-1">
+                    </h3>
+
+                    {/* Category indicator dot */}
+                    <div 
+                      className="absolute top-1 md:top-2 right-1 md:right-2 w-2 h-2 md:w-2.5 md:h-2.5 rounded-full shadow-sm"
+                      style={{ backgroundColor: config.color }}
+                    />
+
+                    {/* Connection count badge - only in admin mode */}
+                    {viewMode === 'admin' && connections[system.id] && connections[system.id].length > 0 && (
+                      <div className="absolute -bottom-1.5 md:-bottom-2 left-1/2 -translate-x-1/2 bg-purple-500 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full shadow-md">
+                        {connections[system.id].length}
+                      </div>
+                    )}
+
+                    {/* Edit/Delete buttons - only in admin mode and on desktop */}
+                    {viewMode === 'admin' && (
+                      <div className="absolute bottom-1 md:bottom-2 right-1 md:right-2 flex gap-0.5 md:gap-1">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            startEditing(system.id, system.name);
+                            startEditing(system.id);
                           }}
-                          className="w-3.5 h-3.5 md:w-4 md:h-4 bg-white rounded-full shadow-md flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors"
+                          className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 hover:text-slate-600 flex items-center justify-center"
                         >
-                          <Edit2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                          <Edit2 className="w-3 h-3 md:w-4 md:h-4" />
                         </button>
                         <button
                           onClick={(e) => {
