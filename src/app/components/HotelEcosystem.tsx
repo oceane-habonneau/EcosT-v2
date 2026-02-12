@@ -451,7 +451,7 @@ export function HotelEcosystem() {
               Océane Habonneau
             </span>
             <span className="text-xs sm:text-sm text-slate-500 font-medium tracking-wide">
-              Expertise &amp; Flux Hôteliers
+              Expertise &amp; Automatisations
             </span>
           </div>
           {/* Nav links - desktop */}
