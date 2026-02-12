@@ -995,24 +995,21 @@ export function HotelEcosystem() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             {
-              n: '01',
-              icon: <Search className="w-5 h-5" />,
+              icon: <Search className="w-7 h-7" />,
               name: 'Audit & Stratégie IT',
               desc: 'Analyse complète de votre stack technologique. Je cartographie vos flux et identifie les blocages.',
               tags: ['Audit flash', 'Schéma de flux', 'Identification des blocages'],
               color: '#3b82f6'
             },
             {
-              n: '02',
-              icon: <Wrench className="w-5 h-5" />,
+              icon: <Wrench className="w-7 h-7" />,
               name: 'Installation outils métier & Conseil',
               desc: 'Sélection, déploiement et paramétrage de vos outils métier. Accompagnement des équipes jusqu\'à l\'autonomie complète.',
               tags: ['Sélection outils', 'Déploiement', 'Formation équipe'],
               color: '#10b981'
             },
             {
-              n: '03',
-              icon: <Radio className="w-5 h-5" />,
+              icon: <Radio className="w-7 h-7" />,
               name: 'Externalisation de votre pilotage IT',
               desc: 'Je pilote votre écosystème informatique à temps partagé : prestataires, contrats, veille technologique et support quotidien. La sérénité d\'une DSI sans le coût d\'un poste fixe.',
               tags: ['Temps partagé', 'Pilotage fournisseurs', 'Support quotidien'],
@@ -1020,25 +1017,22 @@ export function HotelEcosystem() {
             },
           ].map(service => (
             <div
-              key={service.n}
-              className="group relative bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-4 sm:p-5 hover:bg-opacity-10 hover:border-opacity-20 transition-all hover:-translate-y-1 flex flex-col"
+              key={service.name}
+              className="group relative bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-5 sm:p-6 hover:bg-opacity-10 hover:border-opacity-20 transition-all hover:-translate-y-1 flex flex-col items-center text-center"
             >
               {/* Top accent line */}
               <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: service.color }} />
-              
-              {/* Icon + label */}
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: service.color + '25', color: service.color }}>
-                  {service.icon}
-                </div>
-                <p className="text-xs font-bold" style={{ color: service.color }}>PILIER {service.n}</p>
+
+              {/* Big centered icon */}
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 flex-shrink-0" style={{ backgroundColor: service.color + '22', color: service.color }}>
+                {service.icon}
               </div>
 
-              <h3 className="text-sm sm:text-base font-bold text-white mb-2 leading-tight flex-shrink-0">{service.name}</h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4 flex-grow">{service.desc}</p>
-              <div className="flex flex-wrap gap-1.5 mt-auto">
+              <h3 className="text-base sm:text-lg font-bold text-white mb-3 leading-tight">{service.name}</h3>
+              <p className="text-sm text-slate-300 leading-relaxed mb-5 flex-grow">{service.desc}</p>
+              <div className="flex flex-wrap justify-center gap-1.5 mt-auto">
                 {service.tags.map(tag => (
-                  <span key={tag} className="text-xs px-2 py-0.5 rounded-full border font-medium" style={{ color: service.color, borderColor: service.color + '44', backgroundColor: service.color + '18' }}>
+                  <span key={tag} className="text-xs px-2.5 py-1 rounded-full border font-medium" style={{ color: service.color, borderColor: service.color + '55', backgroundColor: service.color + '18' }}>
                     {tag}
                   </span>
                 ))}
