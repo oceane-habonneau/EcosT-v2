@@ -989,7 +989,7 @@ export function HotelEcosystem() {
         <div className="text-center mb-6 md:mb-8">
           <p className="text-xs uppercase tracking-widest text-amber-400 font-semibold mb-1">Ce que je fais pour vous</p>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">Mes Services</h2>
-          <p className="text-sm text-slate-400 mt-2 max-w-lg mx-auto">Des missions clés en main, pensées pour les hôteliers qui veulent de la clarté — pas du jargon.</p>
+          <p className="text-sm text-slate-400 mt-2 max-w-lg mx-auto">Des missions clés en main, pensées pour les hôteliers qui veulent de la clarté, pas du jargon.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -1028,8 +1028,8 @@ export function HotelEcosystem() {
                 {service.icon}
               </div>
 
-              <h3 className="text-base sm:text-lg font-bold text-white mb-3 leading-tight">{service.name}</h3>
-              <p className="text-sm text-slate-300 leading-relaxed mb-5 flex-grow">{service.desc}</p>
+              <h3 className="text-base sm:text-lg font-bold text-black mb-3 leading-tight">{service.name}</h3>
+              <p className="text-sm text-black leading-relaxed mb-5 flex-grow">{service.desc}</p>
               <div className="flex flex-wrap justify-center gap-1.5 mt-auto">
                 {service.tags.map(tag => (
                   <span key={tag} className="text-xs px-2.5 py-1 rounded-full border font-medium" style={{ color: service.color, borderColor: service.color + '55', backgroundColor: service.color + '18' }}>
