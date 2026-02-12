@@ -46,6 +46,70 @@ interface SystemNode {
   connections?: string[];
 }
 
+// 💡 Infobulles bénéfices par système
+const nodeBenefits: Record<string, { title: string; benefit: string }> = {
+  'pms': {
+    title: 'PMS — Property Management System',
+    benefit: 'Le <strong>cœur de votre hôtel</strong>. Centralise les réservations, les profils clients et la facturation pour supprimer les erreurs et les oublis.'
+  },
+  'channel-manager': {
+    title: 'Channel Manager',
+    benefit: 'Mise à jour automatique de vos stocks sur Booking, Expedia, etc. <strong>Fini le surbooking</strong> et les saisies manuelles fastidieuses.'
+  },
+  'pos': {
+    title: 'POS — Point of Sale Restaurant',
+    benefit: 'Envoi direct des notes en chambre et synchronisation des stocks. <strong>Une fluidité totale</strong> entre la salle et la réception.'
+  },
+  'psp': {
+    title: 'PSP — Payment Service Provider',
+    benefit: 'Sécurisation des transactions et prélèvements automatiques. <strong>30 min gagnées par jour</strong> à la clôture et moins de litiges bancaires.'
+  },
+  'crm': {
+    title: 'Expérience Client / CRM',
+    benefit: 'Automatise l\'envoi des emails pré-séjour/post-séjour. <strong>Fidélise vos clients</strong> sans que vous n\'ayez à y penser.'
+  },
+  'exp-client': {
+    title: 'Expérience Client In-House',
+    benefit: 'Personnalisez chaque séjour grâce aux données centralisées. <strong>Augmentez vos avis positifs</strong> et le retour de vos clients fidèles.'
+  },
+  'compta': {
+    title: 'Flux Comptable',
+    benefit: 'Export automatique de vos chiffres vers votre comptabilité. <strong>Zéro papier, zéro erreur, zéro retard.</strong>'
+  },
+  'booking-engine': {
+    title: 'Moteur de Réservation',
+    benefit: 'Captez les réservations directes sans commission OTA. <strong>Augmentez votre RevPAR</strong> en maîtrisant votre distribution.'
+  },
+  'ota': {
+    title: 'OTA — Online Travel Agency',
+    benefit: 'Visibilité maximale sur Booking.com, Expedia & co. <strong>Gérés automatiquement</strong> depuis votre channel manager pour zéro surcharge.'
+  },
+  'site-internet': {
+    title: 'Site Internet',
+    benefit: 'Votre vitrine digitale disponible 24h/24. <strong>Réduit votre dépendance aux OTA</strong> et renforce votre image de marque.'
+  },
+  'spa': {
+    title: 'SPA & Wellness',
+    benefit: 'Gestion des soins et réservations intégrée au PMS. <strong>Upsell automatique</strong> pour augmenter le panier moyen de vos séjours.'
+  },
+  'rms': {
+    title: 'RMS — Revenue Management System',
+    benefit: 'Optimise vos tarifs en temps réel selon la demande. <strong>+10% à +25% de RevPAR</strong> constaté selon les établissements.'
+  },
+  'gds': {
+    title: 'GDS — Global Distribution System',
+    benefit: 'Accès aux agences de voyages et clientèle corporate mondiale. <strong>Canal stratégique</strong> pour les hôtels business et MICE.'
+  },
+  'moteur-resto': {
+    title: 'Moteur Réservation Restaurant',
+    benefit: 'Gestion des couverts en ligne avec synchronisation cuisine. <strong>Réduisez les no-shows</strong> et optimisez votre taux de remplissage.'
+  },
+  'site-booking': {
+    title: 'Site Web / Boutique',
+    benefit: 'Vendez cartes cadeaux et expériences directement en ligne. <strong>Nouvelle source de revenus</strong> sans intermédiaire.'
+  }
+};
+
 // 📋 Liste des suggestions de cartes (triées alphabétiquement)
 const cardSuggestions = [
   'Boutique en ligne / Carte cadeaux',
@@ -172,6 +236,11 @@ export function HotelEcosystem() {
     icon: 'Bed'
   });
   
+  // 💡 État tooltip
+  const [tooltip, setTooltip] = useState<{ visible: boolean; x: number; y: number; title: string; benefit: string }>({
+    visible: false, x: 0, y: 0, title: '', benefit: ''
+  });
+
   // 📱 États pour le mobile
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isStackMenuOpen, setIsStackMenuOpen] = useState(false);
@@ -490,20 +559,45 @@ export function HotelEcosystem() {
 
   return (
     <div className="max-w-[1400px] mx-auto p-3 sm:p-4 md:p-8">
-      {/* Header */}
-      <div className="text-center mb-4 md:mb-8">
-        <h1 className="text-2xl sm:text-3xl md:text-5xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold">
-          Schéma écosystème hôtelier
-        </h1>
-        <p className="text-sm sm:text-base md:text-lg text-slate-600">Océane Habonneau</p>
-        {/* Contact CTA */}
-        <a 
-          href="mailto:oceane.habonneau@gmail.com?subject=Demande%20de%20contact%20-%20Ecosyst%C3%A8me%20h%C3%B4telier&body=Bonjour%20Océane%2C%0A%0AJe%20souhaiterais%20discuter%20avec%20vous%20concernant%20votre%20schéma%20d'écosystème%20hôtelier.%0A%0A"
-          className="inline-flex items-center gap-2 mt-3 md:mt-4 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm sm:text-base rounded-lg md:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
-        >
-          <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
-          Contactez-moi
-        </a>
+
+      {/* ══════════ HEADER COMMERCIAL ══════════ */}
+      <div className="mb-6 md:mb-10">
+        {/* Nav Bar */}
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-6 px-4 sm:px-6 py-3 sm:py-4 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
+          {/* Brand */}
+          <div className="flex flex-col leading-tight">
+            <span className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
+              Océane Habonneau
+            </span>
+            <span className="text-xs sm:text-sm text-slate-500 font-medium tracking-wide">
+              Expertise &amp; Flux Hôteliers
+            </span>
+          </div>
+          {/* Nav links - desktop */}
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+            <a href="#ecosystem" className="hover:text-slate-900 transition-colors">L'Écosystème</a>
+            <a href="#legende" className="hover:text-slate-900 transition-colors">Légende &amp; Valeur</a>
+            <a href="#services" className="hover:text-slate-900 transition-colors">Services</a>
+          </nav>
+          {/* CTA Button */}
+          <a
+            href="mailto:oceane.habonneau@gmail.com?subject=Demande%20d'audit%20gratuit%20-%20Écosystème%20hôtelier&body=Bonjour%20Océane%2C%0A%0AJe%20souhaiterais%20bénéficier%20de%20votre%20audit%20gratuit.%0A%0A"
+            className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-sm sm:text-base font-bold rounded-xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+          >
+            <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">Prendre RDV /</span> Audit Gratuit
+          </a>
+        </div>
+
+        {/* Hero tagline */}
+        <div className="text-center">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold">
+            Schéma écosystème hôtelier
+          </h1>
+          <p className="text-sm sm:text-base md:text-lg text-slate-600">
+            Survolez chaque carte pour découvrir son <strong>bénéfice concret</strong> pour votre exploitation.
+          </p>
+        </div>
       </div>
 
       {/* View Mode Toggle */}
@@ -790,6 +884,22 @@ export function HotelEcosystem() {
         </>
       )}
 
+      {/* ══════════ ECOSYSTEM DIAGRAM ══════════ */}
+      <div id="ecosystem">
+      {/* Tooltip overlay */}
+      {tooltip.visible && (
+        <div
+          className="fixed z-[9999] pointer-events-none"
+          style={{ left: tooltip.x + 16, top: tooltip.y - 10, maxWidth: 260 }}
+        >
+          <div className="bg-slate-900 text-white rounded-xl shadow-2xl p-3 sm:p-4 border-l-4 border-amber-400">
+            <p className="text-[10px] uppercase tracking-widest text-amber-400 mb-1 font-semibold">Bénéfice pour vous</p>
+            <p className="text-xs sm:text-sm font-bold text-white mb-1.5 leading-tight">{tooltip.title}</p>
+            <p className="text-xs text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: tooltip.benefit }} />
+          </div>
+        </div>
+      )}
+
       {/* Ecosystem Diagram */}
       <div ref={diagramRef} className="relative bg-slate-50 rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-12 lg:p-16 shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none">
         <div 
@@ -872,6 +982,18 @@ export function HotelEcosystem() {
                   onMouseDown={viewMode === 'admin' ? (e) => handleMouseDown(system.id, e) : undefined}
                   onTouchStart={viewMode === 'admin' ? (e) => handleMouseDown(system.id, e) : undefined}
                   onClick={viewMode === 'admin' ? (e) => handleCardClick(system.id, e) : undefined}
+                  onMouseEnter={(e) => {
+                    const info = nodeBenefits[system.id];
+                    if (info) {
+                      setTooltip({ visible: true, x: e.clientX, y: e.clientY, title: info.title, benefit: info.benefit });
+                    }
+                  }}
+                  onMouseMove={(e) => {
+                    if (tooltip.visible) {
+                      setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
+                    }
+                  }}
+                  onMouseLeave={() => setTooltip(prev => ({ ...prev, visible: false }))}
                 >
                   {/* Card */}
                   <div
@@ -1093,10 +1215,15 @@ export function HotelEcosystem() {
         </div>
       )}
 
-      {/* Legend - Responsive */}
-      <div className="mt-6 md:mt-8 p-4 sm:p-6 bg-white rounded-xl md:rounded-2xl border-2 border-slate-200 shadow-lg">
-        <h3 className="mb-3 md:mb-4 text-slate-800 text-center text-sm sm:text-base font-semibold">Légende des catégories</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
+      </div>{/* /ecosystem section */}
+
+      {/* ══════════ LÉGENDE & VALEUR ══════════ */}
+      <div id="legende" className="mt-6 md:mt-8 p-4 sm:p-6 bg-white rounded-xl md:rounded-2xl border-2 border-slate-200 shadow-lg">
+        <h3 className="mb-1 text-slate-800 text-center text-base sm:text-lg font-bold">Légende &amp; Valeur</h3>
+        <p className="text-center text-xs sm:text-sm text-slate-500 mb-4">Comment lire ce schéma ?</p>
+
+        {/* Color legend */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 mb-5">
           {Object.entries(categoryConfig).map(([key, config]) => (
             <div key={key} className="flex items-center gap-1.5 sm:gap-2">
               <div 
@@ -1107,25 +1234,134 @@ export function HotelEcosystem() {
             </div>
           ))}
         </div>
+
+        {/* How to read */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-slate-100">
+          {[
+            { n: '1', title: 'Chaque carte = un système', desc: 'Un logiciel ou une technologie installée dans votre hôtel, reliée aux autres par des flux de données.' },
+            { n: '2', title: 'Les lignes = des flux', desc: 'Chaque connexion représente un échange automatique de données — sans action manuelle de votre équipe.' },
+            { n: '3', title: 'Le PMS au centre', desc: 'Il orchestre tout et garantit la cohérence de vos données en temps réel entre tous les systèmes.' },
+            { n: '4', title: 'Survol = bénéfice concret', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
+          ].map(step => (
+            <div key={step.n} className="flex items-start gap-3">
+              <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold text-sm flex items-center justify-center flex-shrink-0 shadow-md">
+                {step.n}
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-semibold text-slate-800 mb-0.5">{step.title}</p>
+                <p className="text-xs text-slate-500 leading-relaxed">{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Footer - Responsive */}
-      <div className="text-center text-xs sm:text-sm text-slate-600 space-y-2 mt-6 md:mt-8 pt-4 md:pt-6 border-t border-slate-200">
-        <p>
-          Vous préférez me contacter via LinkedIn ?{' '}
+      {/* ══════════ MES SERVICES ══════════ */}
+      <div id="services" className="mt-8 md:mt-12 p-4 sm:p-6 md:p-8 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl md:rounded-2xl shadow-2xl">
+        <div className="text-center mb-6 md:mb-8">
+          <p className="text-xs uppercase tracking-widest text-amber-400 font-semibold mb-1">Ce que je fais pour vous</p>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">Mes Services</h2>
+          <p className="text-sm text-slate-400 mt-2 max-w-lg mx-auto">Des missions clés en main, pensées pour les hôteliers qui veulent de la clarté — pas du jargon.</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            {
+              n: '01',
+              name: 'Audit & Stratégie IT',
+              desc: 'Analyse complète de votre stack technologique. Je cartographie vos flux, identifie les blocages et rédige une feuille de route priorisée avec ROI estimé.',
+              tags: ['Audit flash', 'Schéma des flux', 'ROI estimé'],
+              color: '#3b82f6'
+            },
+            {
+              n: '02',
+              name: 'Installation ERP & Conseil',
+              desc: 'Sélection, déploiement et paramétrage de votre PMS, POS, CRM et Channel Manager. Accompagnement des équipes jusqu\'à l\'autonomie complète.',
+              tags: ['Sélection éditeur', 'Déploiement', 'Formation équipe'],
+              color: '#10b981'
+            },
+            {
+              n: '03',
+              name: 'DSI Externalisée',
+              desc: 'Je pilote votre SI à temps partagé : prestataires, contrats, veille technologique et conformité RGPD. La sérénité d\'une DSI sans le coût d\'un poste fixe.',
+              tags: ['Temps partagé', 'Pilotage fournisseurs', 'RGPD'],
+              color: '#f59e0b'
+            },
+            {
+              n: '04',
+              name: 'Déploiement pour Éditeurs',
+              desc: 'Je représente votre solution sur le terrain : déploiement clé en main, formation clients, support au démarrage et remontées produit structurées.',
+              tags: ['Go-live', 'Accompagnement client', 'Feedback produit'],
+              color: '#a855f7'
+            },
+          ].map(service => (
+            <div
+              key={service.n}
+              className="group relative bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-4 sm:p-5 hover:bg-opacity-10 hover:border-opacity-20 transition-all hover:-translate-y-1"
+            >
+              {/* Top accent line */}
+              <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: service.color }} />
+              
+              <p className="text-xs font-bold mb-2" style={{ color: service.color }}>PILIER {service.n}</p>
+              <h3 className="text-base sm:text-lg font-bold text-white mb-2 leading-tight">{service.name}</h3>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">{service.desc}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {service.tags.map(tag => (
+                  <span key={tag} className="text-xs px-2 py-0.5 rounded-full border font-medium" style={{ color: service.color, borderColor: service.color + '44', backgroundColor: service.color + '18' }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* CTA card */}
+          <div className="sm:col-span-2 lg:col-span-1 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl p-4 sm:p-5 flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-bold text-amber-900 uppercase tracking-widest mb-2">Envie de commencer ?</p>
+              <h3 className="text-base sm:text-xl font-bold text-slate-900 mb-2 leading-tight">Un audit gratuit de 45 min pour identifier vos 3 priorités.</h3>
+              <p className="text-xs sm:text-sm text-amber-900 mb-4">Sans jargon. Sans engagement. Avec un plan d'action concret en sortie.</p>
+            </div>
+            <a
+              href="mailto:oceane.habonneau@gmail.com?subject=Demande%20d'audit%20gratuit&body=Bonjour%20Océane%2C%0A%0AJe%20souhaiterais%20bénéficier%20de%20votre%20audit%20gratuit.%0A%0A"
+              className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-slate-900 text-amber-400 font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg text-sm"
+            >
+              <Mail className="w-4 h-4" />
+              Demander mon audit gratuit
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════ FOOTER ══════════ */}
+      <div className="text-center text-xs sm:text-sm text-slate-600 space-y-3 mt-8 md:mt-10 pt-5 md:pt-6 border-t border-slate-200">
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
           <a
             href="https://www.linkedin.com/in/oc%C3%A9ane-habonneau-5a908212a/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-1"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors shadow-md font-semibold text-xs sm:text-sm"
           >
             <Linkedin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Voir mon profil LinkedIn</span>
-            <span className="sm:hidden">LinkedIn</span>
+            LinkedIn
           </a>
-        </p>
+          <a
+            href="mailto:oceane.habonneau@gmail.com?subject=Demande%20de%20contact%20-%20Écosystème%20hôtelier&body=Bonjour%20Océane%2C%0A%0AJe%20souhaiterais%20discuter%20avec%20vous.%0A%0A"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md font-semibold text-xs sm:text-sm"
+          >
+            <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            Me contacter
+          </a>
+          <a
+            href="mailto:oceane.habonneau@gmail.com?subject=Demande%20d'audit%20gratuit&body=Bonjour%20Océane%2C%0A%0AJe%20souhaiterais%20bénéficier%20de%20votre%20audit%20gratuit.%0A%0A"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-400 text-slate-900 rounded-xl hover:bg-amber-500 transition-colors shadow-md font-bold text-xs sm:text-sm"
+          >
+            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            Prendre RDV
+          </a>
+        </div>
         <p className="text-xs text-slate-500">
-          © 2026 Océane Habonneau – Tous droits réservés
+          © 2026 Océane Habonneau – Consultante en Digitalisation Hôtelière – Tous droits réservés
         </p>
       </div>
     </div>
