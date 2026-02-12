@@ -478,7 +478,7 @@ export function HotelEcosystem() {
             Écosystème Hôtelier
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-slate-600">
-            Survolez chaque carte pour découvrir son <strong>bénéfice concret</strong> pour votre exploitation.
+            <strong>Évaluez votre infrastructure</strong> : si votre écosystème n'atteint pas le <strong>Stack Simple</strong>, votre rentabilité est en péril. Entre les niveaux <strong>Intermédiaire et Avancé</strong>, identifiez dès maintenant les flux de données manquants pour débugger vos opérations et <strong>libérer vos équipes</strong> avant la saison."
           </p>
         </div>
       </div>
