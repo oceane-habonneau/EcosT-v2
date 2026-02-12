@@ -24,16 +24,17 @@ import {
   Trash2,
   Plus,
   X,
-  Download,
-  FileImage,
-  FileText,
   Mail,
   Building2,
   Linkedin,
   TrendingUp,
   Menu,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Search,
+  Wrench,
+  Radio,
+  Layers
 } from 'lucide-react';
 
 interface SystemNode {
@@ -228,7 +229,6 @@ export function HotelEcosystem() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState<string>('');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
-  const [showExportModal, setShowExportModal] = useState(false);
   const [hoveredConnection, setHoveredConnection] = useState<string | null>(null);
   const [newCard, setNewCard] = useState({
     name: '',
@@ -406,125 +406,6 @@ export function HotelEcosystem() {
     });
   };
 
-  const exportToPNG = async () => {
-    if (!diagramRef.current) {
-      alert('Erreur : Zone de diagramme non trouvée');
-      return;
-    }
-    
-    try {
-      // Vérifier si html2canvas est déjà chargé
-      if (!(window as any).html2canvas) {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-        
-        await new Promise((resolve, reject) => {
-          script.onload = resolve;
-          script.onerror = () => reject(new Error('Impossible de charger html2canvas'));
-          document.head.appendChild(script);
-        });
-        
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
-      
-      const html2canvas = (window as any).html2canvas;
-      
-      if (!html2canvas) {
-        throw new Error('html2canvas non disponible');
-      }
-      
-      const element = diagramRef.current;
-      
-      const canvas = await html2canvas(element, {
-        backgroundColor: '#f1f5f9',
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight
-      });
-      
-      const link = document.createElement('a');
-      link.download = `ecosysteme-hotelier-${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      setShowExportModal(false);
-    } catch (error) {
-      console.error('Erreur export PNG:', error);
-      alert(`Erreur lors de l'export PNG : ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
-    }
-  };
-
-  const exportToPDF = async () => {
-    if (!diagramRef.current) {
-      alert('Erreur : Zone de diagramme non trouvée');
-      return;
-    }
-    
-    try {
-      // Vérifier si html2canvas est déjà chargé
-      if (!(window as any).html2canvas) {
-        const html2canvasScript = document.createElement('script');
-        html2canvasScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-        
-        await new Promise((resolve, reject) => {
-          html2canvasScript.onload = resolve;
-          html2canvasScript.onerror = () => reject(new Error('Impossible de charger html2canvas'));
-          document.head.appendChild(html2canvasScript);
-        });
-        
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
-      
-      // Vérifier si jsPDF est déjà chargé
-      if (!(window as any).jspdf) {
-        const jsPDFScript = document.createElement('script');
-        jsPDFScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-        
-        await new Promise((resolve, reject) => {
-          jsPDFScript.onload = resolve;
-          jsPDFScript.onerror = () => reject(new Error('Impossible de charger jsPDF'));
-          document.head.appendChild(jsPDFScript);
-        });
-        
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
-      
-      const html2canvas = (window as any).html2canvas;
-      const jsPDF = (window as any).jspdf?.jsPDF;
-      
-      if (!html2canvas || !jsPDF) {
-        throw new Error('Bibliothèques non disponibles');
-      }
-      
-      const element = diagramRef.current;
-      
-      const canvas = await html2canvas(element, {
-        backgroundColor: '#f1f5f9',
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
-        unit: 'px',
-        format: [canvas.width, canvas.height]
-      });
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save(`ecosysteme-hotelier-${Date.now()}.pdf`);
-      setShowExportModal(false);
-    } catch (error) {
-      console.error('Erreur export PDF:', error);
-      alert(`Erreur lors de l'export PDF : ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
-    }
-  };
 
   const loadStack = (stack: SystemNode[]) => {
     setAllSystems(stack);
@@ -581,7 +462,9 @@ export function HotelEcosystem() {
           </nav>
           {/* CTA Button */}
           <a
-            href="mailto:oceane.habonneau@gmail.com?subject=Demande%20d'audit%20gratuit%20-%20Écosystème%20hôtelier&body=Bonjour%20Océane%2C%0A%0AJe%20souhaiterais%20bénéficier%20de%20votre%20audit%20gratuit.%0A%0A"
+            href="https://calendar.app.google/cKNAVTh1TFacNkXs6"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-sm sm:text-base font-bold rounded-xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
           >
             <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -592,7 +475,7 @@ export function HotelEcosystem() {
         {/* Hero tagline */}
         <div className="text-center">
           <h1 className="text-2xl sm:text-3xl md:text-5xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold">
-            Schéma écosystème hôtelier
+            Écosystème Hôtelier
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-slate-600">
             Survolez chaque carte pour découvrir son <strong>bénéfice concret</strong> pour votre exploitation.
@@ -639,223 +522,100 @@ export function HotelEcosystem() {
       {/* Admin Controls */}
       {viewMode === 'admin' && (
         <>
-          {/* 📱 Mobile: Menu Burger */}
-          <div className="md:hidden mb-4">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-slate-700 text-white rounded-xl shadow-md"
-            >
-              <div className="flex items-center gap-2">
-                <Menu className="w-5 h-5" />
-                <span className="font-medium">Menu</span>
-              </div>
-              {isMobileMenuOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-            </button>
-          </div>
+          {/* ═══ TOOLBAR — pill radio buttons ═══ */}
+          <div className="mb-4 p-3 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
+            <div className="flex flex-wrap gap-3 items-center justify-between">
 
-          {/* 📱 Mobile: Menu déroulant */}
-          <div className={`md:hidden mb-4 space-y-3 ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
-            {/* Mode Toggle */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  setMode('move');
-                  setSelectedForLink(null);
-                }}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-colors shadow-md text-sm font-medium ${
-                  mode === 'move' 
-                    ? 'bg-blue-500 text-white border-2 border-blue-600' 
-                    : 'bg-white text-slate-700 border-2 border-slate-300'
-                }`}
-              >
-                <Move className="w-4 h-4" />
-                Déplacer
-              </button>
-              <button
-                onClick={() => {
-                  setMode('link');
-                  setDraggingId(null);
-                }}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-colors shadow-md text-sm font-medium ${
-                  mode === 'link' 
-                    ? 'bg-purple-500 text-white border-2 border-purple-600' 
-                    : 'bg-white text-slate-700 border-2 border-slate-300'
-                }`}
-              >
-                <Link2 className="w-4 h-4" />
-                Lier
-              </button>
-            </div>
-
-            {/* Stack Menu */}
-            <div>
-              <button
-                onClick={() => setIsStackMenuOpen(!isStackMenuOpen)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-slate-300 rounded-xl shadow-md text-sm font-medium"
-              >
-                <span>Charger un Stack</span>
-                {isStackMenuOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-              {isStackMenuOpen && (
-                <div className="mt-2 space-y-2">
+              {/* ── Groupe Mode ── */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">Mode</span>
+                <div className="flex rounded-full overflow-hidden shadow-md border-2" style={{ borderColor: '#3B82F6' }}>
                   <button
-                    onClick={() => loadStack(stack1Simple)}
-                    className="w-full px-4 py-3 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
+                    onClick={() => { setMode('move'); setSelectedForLink(null); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-all duration-200"
+                    style={mode === 'move'
+                      ? { background: '#3B82F6', color: '#fff', boxShadow: 'inset 0 0 10px rgba(59,130,246,0.5)' }
+                      : { background: '#fff', color: '#3B82F6' }}
                   >
-                    🟢 Stack Simple
+                    <Move className="w-3.5 h-3.5" />
+                    Déplacement
                   </button>
                   <button
-                    onClick={() => loadStack(stack2Intermediate)}
-                    className="w-full px-4 py-3 rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-md text-sm font-medium"
+                    onClick={() => { setMode('link'); setDraggingId(null); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-all duration-200"
+                    style={mode === 'link'
+                      ? { background: '#3B82F6', color: '#fff', boxShadow: 'inset 0 0 10px rgba(59,130,246,0.5)' }
+                      : { background: '#fff', color: '#3B82F6' }}
                   >
-                    🟠 Stack Intermédiaire
-                  </button>
-                  <button
-                    onClick={() => loadStack(stack3Advanced)}
-                    className="w-full px-4 py-3 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md text-sm font-medium"
-                  >
-                    🔵 Stack Avancé
+                    <Link2 className="w-3.5 h-3.5" />
+                    Liaison
                   </button>
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Actions Menu */}
-            <div>
-              <button
-                onClick={() => setIsActionsMenuOpen(!isActionsMenuOpen)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-slate-300 rounded-xl shadow-md text-sm font-medium"
-              >
-                <span>Actions</span>
-                {isActionsMenuOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-              {isActionsMenuOpen && (
-                <div className="mt-2 grid grid-cols-2 gap-2">
+              {/* ── Groupe Stack ── */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">Stack</span>
+                <div className="flex rounded-full overflow-hidden shadow-md border-2" style={{ borderColor: '#119843' }}>
+                  {[
+                    { label: 'Simple', stack: stack1Simple, id: 'simple' },
+                    { label: 'Intermédiaire', stack: stack2Intermediate, id: 'intermediate' },
+                    { label: 'Avancé', stack: stack3Advanced, id: 'advanced' },
+                  ].map(({ label, stack, id }) => {
+                    const isActive = JSON.stringify(allSystems.map(s => s.id).sort()) === JSON.stringify(stack.map(s => s.id).sort());
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => loadStack(stack)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-all duration-200"
+                        style={isActive
+                          ? { background: '#119843', color: '#fff', boxShadow: 'inset 0 0 10px rgba(17,152,67,0.5)' }
+                          : { background: '#fff', color: '#119843' }}
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ── Bouton Ajouter ── */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">Outil</span>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold text-white shadow-md transition-all duration-200 hover:brightness-110 active:scale-95"
+                  style={{ background: '#fe9a00', border: '2px solid #fe9a00' }}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Ajouter un outil
+                </button>
+              </div>
+
+              {/* ── Groupe Réinitialiser ── */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">Réinitialiser</span>
+                <div className="flex rounded-full overflow-hidden shadow-md border-2" style={{ borderColor: '#aeaeae' }}>
                   <button
                     onClick={resetConnections}
-                    className="flex flex-col items-center justify-center gap-1 px-3 py-3 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-md"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:brightness-90"
+                    style={{ background: '#f5f5f5', color: '#555' }}
                   >
-                    <Unlink className="w-5 h-5" />
-                    <span className="text-xs font-medium">Liaisons</span>
+                    <Unlink className="w-3.5 h-3.5" />
+                    Liaisons
                   </button>
                   <button
                     onClick={resetPositions}
-                    className="flex flex-col items-center justify-center gap-1 px-3 py-3 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-md"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:brightness-90"
+                    style={{ background: '#f5f5f5', color: '#555', borderLeft: '1px solid #aeaeae' }}
                   >
-                    <RotateCcw className="w-5 h-5" />
-                    <span className="text-xs font-medium">Positions</span>
-                  </button>
-                  <button
-                    onClick={() => setShowAddModal(true)}
-                    className="flex flex-col items-center justify-center gap-1 px-3 py-3 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-md"
-                  >
-                    <Plus className="w-5 h-5" />
-                    <span className="text-xs font-medium">Ajouter</span>
-                  </button>
-                  <button
-                    onClick={() => setShowExportModal(true)}
-                    className="flex flex-col items-center justify-center gap-1 px-3 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-md"
-                  >
-                    <Download className="w-5 h-5" />
-                    <span className="text-xs font-medium">Export</span>
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    Positions
                   </button>
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* 💻 Desktop: Controls originaux */}
-          <div className="hidden md:block mb-4">
-            <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
-              {/* Mode Toggle */}
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={() => {
-                    setMode('move');
-                    setSelectedForLink(null);
-                  }}
-                  className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl transition-colors shadow-md text-sm ${
-                    mode === 'move' 
-                      ? 'bg-blue-500 text-white border-2 border-blue-600' 
-                      : 'bg-white text-slate-700 border-2 border-slate-300 hover:bg-slate-50'
-                  }`}
-                >
-                  <Move className="w-4 h-4" />
-                  <span className="hidden sm:inline">Mode Déplacement</span>
-                  <span className="sm:hidden">Déplacer</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setMode('link');
-                    setDraggingId(null);
-                  }}
-                  className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl transition-colors shadow-md text-sm ${
-                    mode === 'link' 
-                      ? 'bg-purple-500 text-white border-2 border-purple-600' 
-                      : 'bg-white text-slate-700 border-2 border-slate-300 hover:bg-slate-50'
-                  }`}
-                >
-                  <Link2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Mode Liaison</span>
-                  <span className="sm:hidden">Lier</span>
-                </button>
               </div>
 
-              {/* Stack Buttons */}
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={() => loadStack(stack1Simple)}
-                  className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
-                >
-                  🟢 <span className="hidden lg:inline">Stack Simple</span><span className="lg:hidden">Simple</span>
-                </button>
-                <button
-                  onClick={() => loadStack(stack2Intermediate)}
-                  className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-md text-sm font-medium"
-                >
-                  🟠 <span className="hidden lg:inline">Stack Intermédiaire</span><span className="lg:hidden">Inter</span>
-                </button>
-                <button
-                  onClick={() => loadStack(stack3Advanced)}
-                  className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md text-sm font-medium"
-                >
-                  🔵 <span className="hidden lg:inline">Stack Avancé</span><span className="lg:hidden">Avancé</span>
-                </button>
-              </div>
-
-              {/* Right controls */}
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={resetConnections}
-                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
-                >
-                  <Unlink className="w-4 h-4" />
-                  <span className="hidden lg:inline">Réinitialiser liaisons</span>
-                  <span className="lg:hidden">Liaisons</span>
-                </button>
-                <button
-                  onClick={resetPositions}
-                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span className="hidden lg:inline">Réinitialiser positions</span>
-                  <span className="lg:hidden">Positions</span>
-                </button>
-                <button
-                  onClick={() => setShowAddModal(true)}
-                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-md text-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span className="hidden md:inline">Ajouter</span>
-                </button>
-                <button
-                  onClick={() => setShowExportModal(true)}
-                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-md text-sm font-medium"
-                >
-                  <Download className="w-4 h-4" />
-                  <span className="hidden md:inline">Export</span>
-                </button>
-              </div>
             </div>
           </div>
 
@@ -871,7 +631,7 @@ export function HotelEcosystem() {
               </div>
             )}
             {mode === 'link' && (
-              <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-purple-50 border-2 border-purple-200 text-purple-700 rounded-lg md:rounded-xl shadow-md">
+              <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-50 border-2 border-blue-200 text-blue-700 rounded-lg md:rounded-xl shadow-md">
                 <Link2 className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
                 <span className="text-xs md:text-sm">
                   {selectedForLink 
@@ -1182,38 +942,6 @@ export function HotelEcosystem() {
         </div>
       )}
 
-      {/* Export Modal */}
-      {showExportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
-          <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4">Exporter le schéma</h2>
-            <p className="text-slate-600 mb-6 text-sm sm:text-base">Choisissez le format d'export :</p>
-            
-            <div className="space-y-3">
-              <button
-                onClick={exportToPNG}
-                className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 shadow-md text-sm sm:text-base"
-              >
-                <FileImage className="w-5 h-5" />
-                Exporter en PNG
-              </button>
-              <button
-                onClick={exportToPDF}
-                className="w-full px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2 shadow-md text-sm sm:text-base"
-              >
-                <FileText className="w-5 h-5" />
-                Exporter en PDF
-              </button>
-              <button
-                onClick={() => setShowExportModal(false)}
-                className="w-full px-4 py-3 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm sm:text-base"
-              >
-                Annuler
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       </div>{/* /ecosystem section */}
 
@@ -1264,48 +992,51 @@ export function HotelEcosystem() {
           <p className="text-sm text-slate-400 mt-2 max-w-lg mx-auto">Des missions clés en main, pensées pour les hôteliers qui veulent de la clarté — pas du jargon.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             {
               n: '01',
+              icon: <Search className="w-5 h-5" />,
               name: 'Audit & Stratégie IT',
-              desc: 'Analyse complète de votre stack technologique. Je cartographie vos flux, identifie les blocages et rédige une feuille de route priorisée avec ROI estimé.',
-              tags: ['Audit flash', 'Schéma des flux', 'ROI estimé'],
+              desc: 'Analyse complète de votre stack technologique. Je cartographie vos flux et identifie les blocages.',
+              tags: ['Audit flash', 'Schéma de flux', 'Identification des blocages'],
               color: '#3b82f6'
             },
             {
               n: '02',
-              name: 'Installation ERP & Conseil',
-              desc: 'Sélection, déploiement et paramétrage de votre PMS, POS, CRM et Channel Manager. Accompagnement des équipes jusqu\'à l\'autonomie complète.',
-              tags: ['Sélection éditeur', 'Déploiement', 'Formation équipe'],
+              icon: <Wrench className="w-5 h-5" />,
+              name: 'Installation outils métier & Conseil',
+              desc: 'Sélection, déploiement et paramétrage de vos outils métier. Accompagnement des équipes jusqu\'à l\'autonomie complète.',
+              tags: ['Sélection outils', 'Déploiement', 'Formation équipe'],
               color: '#10b981'
             },
             {
               n: '03',
-              name: 'DSI Externalisée',
-              desc: 'Je pilote votre SI à temps partagé : prestataires, contrats, veille technologique et conformité RGPD. La sérénité d\'une DSI sans le coût d\'un poste fixe.',
-              tags: ['Temps partagé', 'Pilotage fournisseurs', 'RGPD'],
+              icon: <Radio className="w-5 h-5" />,
+              name: 'Externalisation de votre pilotage IT',
+              desc: 'Je pilote votre écosystème informatique à temps partagé : prestataires, contrats, veille technologique et support quotidien. La sérénité d\'une DSI sans le coût d\'un poste fixe.',
+              tags: ['Temps partagé', 'Pilotage fournisseurs', 'Support quotidien'],
               color: '#f59e0b'
-            },
-            {
-              n: '04',
-              name: 'Déploiement pour Éditeurs',
-              desc: 'Je représente votre solution sur le terrain : déploiement clé en main, formation clients, support au démarrage et remontées produit structurées.',
-              tags: ['Go-live', 'Accompagnement client', 'Feedback produit'],
-              color: '#a855f7'
             },
           ].map(service => (
             <div
               key={service.n}
-              className="group relative bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-4 sm:p-5 hover:bg-opacity-10 hover:border-opacity-20 transition-all hover:-translate-y-1"
+              className="group relative bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-4 sm:p-5 hover:bg-opacity-10 hover:border-opacity-20 transition-all hover:-translate-y-1 flex flex-col"
             >
               {/* Top accent line */}
               <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: service.color }} />
               
-              <p className="text-xs font-bold mb-2" style={{ color: service.color }}>PILIER {service.n}</p>
-              <h3 className="text-base sm:text-lg font-bold text-white mb-2 leading-tight">{service.name}</h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">{service.desc}</p>
-              <div className="flex flex-wrap gap-1.5">
+              {/* Icon + label */}
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: service.color + '25', color: service.color }}>
+                  {service.icon}
+                </div>
+                <p className="text-xs font-bold" style={{ color: service.color }}>PILIER {service.n}</p>
+              </div>
+
+              <h3 className="text-sm sm:text-base font-bold text-white mb-2 leading-tight flex-shrink-0">{service.name}</h3>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4 flex-grow">{service.desc}</p>
+              <div className="flex flex-wrap gap-1.5 mt-auto">
                 {service.tags.map(tag => (
                   <span key={tag} className="text-xs px-2 py-0.5 rounded-full border font-medium" style={{ color: service.color, borderColor: service.color + '44', backgroundColor: service.color + '18' }}>
                     {tag}
@@ -1314,22 +1045,26 @@ export function HotelEcosystem() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
 
-          {/* CTA card */}
-          <div className="sm:col-span-2 lg:col-span-1 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl p-4 sm:p-5 flex flex-col justify-between">
-            <div>
-              <p className="text-xs font-bold text-amber-900 uppercase tracking-widest mb-2">Envie de commencer ?</p>
-              <h3 className="text-base sm:text-xl font-bold text-slate-900 mb-2 leading-tight">Un audit gratuit de 45 min pour identifier vos 3 priorités.</h3>
-              <p className="text-xs sm:text-sm text-amber-900 mb-4">Sans jargon. Sans engagement. Avec un plan d'action concret en sortie.</p>
-            </div>
-            <a
-              href="mailto:oceane.habonneau@gmail.com?subject=Demande%20d'audit%20gratuit&body=Bonjour%20Océane%2C%0A%0AJe%20souhaiterais%20bénéficier%20de%20votre%20audit%20gratuit.%0A%0A"
-              className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-slate-900 text-amber-400 font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg text-sm"
-            >
-              <Mail className="w-4 h-4" />
-              Demander mon audit gratuit
-            </a>
+      {/* ══════════ CTA AUDIT GRATUIT ══════════ */}
+      <div className="mt-4 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl md:rounded-2xl p-5 sm:p-6 md:p-8 shadow-2xl">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold text-amber-900 uppercase tracking-widest mb-1">Envie de commencer ?</p>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 leading-tight">Un audit gratuit de 30 min pour identifier vos priorités.</h3>
+            <p className="text-xs sm:text-sm text-amber-900 mt-1">Sans jargon. Sans engagement. Avec un plan d'action concret en sortie.</p>
           </div>
+          <a
+            href="https://calendar.app.google/cKNAVTh1TFacNkXs6"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 flex-shrink-0 px-6 py-3 bg-slate-900 text-amber-400 font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg text-sm whitespace-nowrap"
+          >
+            <Calendar className="w-4 h-4" />
+            Réserver mon audit gratuit
+          </a>
         </div>
       </div>
 
@@ -1353,7 +1088,9 @@ export function HotelEcosystem() {
             Me contacter
           </a>
           <a
-            href="mailto:oceane.habonneau@gmail.com?subject=Demande%20d'audit%20gratuit&body=Bonjour%20Océane%2C%0A%0AJe%20souhaiterais%20bénéficier%20de%20votre%20audit%20gratuit.%0A%0A"
+            href="https://calendar.app.google/cKNAVTh1TFacNkXs6"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-400 text-slate-900 rounded-xl hover:bg-amber-500 transition-colors shadow-md font-bold text-xs sm:text-sm"
           >
             <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
