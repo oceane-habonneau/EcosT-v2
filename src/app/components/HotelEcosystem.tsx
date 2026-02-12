@@ -483,48 +483,49 @@ export function HotelEcosystem() {
         </div>
       </div>
 
-      {/* View Mode Toggle */}
-      <div className="mb-4 md:mb-6 flex justify-center">
-        <div className="inline-flex rounded-lg md:rounded-xl border-2 border-slate-300 shadow-md bg-white p-0.5 md:p-1 w-full sm:w-auto">
-          <button
-            onClick={() => setViewMode('admin')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 sm:px-4 md:px-6 py-2 rounded-md md:rounded-lg transition-colors text-xs sm:text-sm md:text-base ${
-              viewMode === 'admin' 
-                ? 'bg-slate-700 text-white' 
-                : 'text-slate-700 hover:bg-slate-100'
-            }`}
-          >
-            <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="sm:hidden">Admin</span>
-            <span className="hidden sm:inline">Mode Administration</span>
-          </button>
-          <button
-            onClick={() => {
-              setViewMode('public');
-              setMode('move');
-              setSelectedForLink(null);
-              setDraggingId(null);
-              setIsMobileMenuOpen(false);
-            }}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 sm:px-4 md:px-6 py-2 rounded-md md:rounded-lg transition-colors text-xs sm:text-sm md:text-base ${
-              viewMode === 'public' 
-                ? 'bg-slate-700 text-white' 
-                : 'text-slate-700 hover:bg-slate-100'
-            }`}
-          >
-            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="sm:hidden">Public</span>
-            <span className="hidden sm:inline">Vue Publique</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Admin Controls */}
-      {viewMode === 'admin' && (
+      {/* Admin Controls + Toolbar (always visible) */}
+      {(true) && (
         <>
           {/* ═══ TOOLBAR — pill radio buttons ═══ */}
           <div className="mb-4 p-3 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
             <div className="flex flex-wrap gap-3 items-center justify-between">
+
+              {/* ── Groupe Vue ── */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">Vue</span>
+                <div className="flex rounded-full overflow-hidden shadow-md border-2" style={{ borderColor: '#475569' }}>
+                  <button
+                    onClick={() => setViewMode('admin')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-all duration-200"
+                    style={viewMode === 'admin'
+                      ? { background: '#475569', color: '#fff', boxShadow: 'inset 0 0 10px rgba(71,85,105,0.5)' }
+                      : { background: '#fff', color: '#475569' }}
+                  >
+                    <Settings className="w-3.5 h-3.5" />
+                    Admin
+                  </button>
+                  <button
+                    onClick={() => {
+                      setViewMode('public');
+                      setMode('move');
+                      setSelectedForLink(null);
+                      setDraggingId(null);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-all duration-200"
+                    style={viewMode === 'public'
+                      ? { background: '#475569', color: '#fff', boxShadow: 'inset 0 0 10px rgba(71,85,105,0.5)' }
+                      : { background: '#fff', color: '#475569' }}
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    Publique
+                  </button>
+                </div>
+              </div>
+
+              {/* ── Les autres groupes uniquement en mode Admin ── */}
+              {viewMode === 'admin' && (
+                <>
 
               {/* ── Groupe Mode ── */}
               <div className="flex flex-col gap-1">
@@ -616,10 +617,14 @@ export function HotelEcosystem() {
                 </div>
               </div>
 
+              </>
+              )}{/* /admin-only groups */}
+
             </div>
           </div>
 
-          {/* Mode instructions */}
+          {/* Mode instructions — only in admin */}
+          {viewMode === 'admin' && (
           <div className="mb-4">
             {mode === 'move' && (
               <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-50 border-2 border-blue-200 text-blue-700 rounded-lg md:rounded-xl shadow-md">
@@ -641,8 +646,9 @@ export function HotelEcosystem() {
               </div>
             )}
           </div>
+          )}{/* /mode instructions */}
         </>
-      )}
+      )}{/* /toolbar wrapper */}
 
       {/* ══════════ ECOSYSTEM DIAGRAM ══════════ */}
       <div id="ecosystem">
