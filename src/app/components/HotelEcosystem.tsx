@@ -855,6 +855,29 @@ export function HotelEcosystem() {
         </>
       )}{/* /toolbar wrapper */}
 
+      {/* ══════════ COMMENT LIRE CE SCHÉMA ══════════ */}
+      <div className="mb-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
+        <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Comment lire ce schéma ?</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            { n: '1', title: 'Chaque carte = un système', desc: 'Un logiciel ou une technologie installée dans votre hôtel, reliée aux autres par des flux de données.' },
+            { n: '2', title: 'Les lignes = des flux', desc: 'Chaque connexion représente un échange automatique de données — sans action manuelle de votre équipe.' },
+            { n: '3', title: 'Le PMS au centre', desc: 'Il orchestre tout et garantit la cohérence de vos données en temps réel entre tous les systèmes.' },
+            { n: '4', title: 'Survol = bénéfice concret', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
+          ].map(step => (
+            <div key={step.n} className="flex items-start gap-2.5">
+              <div className="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-md">
+                {step.n}
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-800 mb-0.5 leading-tight">{step.title}</p>
+                <p className="text-[11px] text-slate-500 leading-relaxed">{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ══════════ ECOSYSTEM DIAGRAM ══════════ */}
       <div id="ecosystem">
       {/* Tooltip overlay */}
@@ -1171,10 +1194,10 @@ export function HotelEcosystem() {
       {/* ══════════ LÉGENDE & VALEUR ══════════ */}
       <div id="legende" className="mt-6 md:mt-8 p-4 sm:p-6 bg-white rounded-xl md:rounded-2xl border-2 border-slate-200 shadow-lg">
         <h3 className="mb-1 text-slate-800 text-center text-base sm:text-lg font-bold">Légende &amp; Valeur</h3>
-        <p className="text-center text-xs sm:text-sm text-slate-500 mb-4">Comment lire ce schéma ?</p>
+        <p className="text-center text-xs sm:text-sm text-slate-500 mb-4">Code couleur des catégories</p>
 
         {/* Color legend */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 mb-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
           {Object.entries(categoryConfig).map(([key, config]) => (
             <div key={key} className="flex items-center gap-1.5 sm:gap-2">
               <div 
@@ -1182,26 +1205,6 @@ export function HotelEcosystem() {
                 style={{ backgroundColor: config.color }}
               />
               <span className="text-xs sm:text-sm text-slate-700">{config.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* How to read */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-slate-100">
-          {[
-            { n: '1', title: 'Chaque carte = un système', desc: 'Un logiciel ou une technologie installée dans votre hôtel, reliée aux autres par des flux de données.' },
-            { n: '2', title: 'Les lignes = des flux', desc: 'Chaque connexion représente un échange automatique de données — sans action manuelle de votre équipe.' },
-            { n: '3', title: 'Le PMS au centre', desc: 'Il orchestre tout et garantit la cohérence de vos données en temps réel entre tous les systèmes.' },
-            { n: '4', title: 'Survol = bénéfice concret', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
-          ].map(step => (
-            <div key={step.n} className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold text-sm flex items-center justify-center flex-shrink-0 shadow-md">
-                {step.n}
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm font-semibold text-slate-800 mb-0.5">{step.title}</p>
-                <p className="text-xs text-slate-500 leading-relaxed">{step.desc}</p>
-              </div>
             </div>
           ))}
         </div>
