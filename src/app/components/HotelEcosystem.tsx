@@ -210,14 +210,50 @@ const iconMap: Record<string, any> = {
   Building2, TrendingUp
 };
 
-// ══════════ SCORING MATRIX ══════════
+// ══════════ SCORING MATRIX V3 — Intelligence Métier ══════════
 type ScoreLink = { a: string; b: string; points: number };
+type AlternativePath = { paths: Array<{ a: string; b: string }>; points: number; label: string };
 
+// Malus d'absence pour outils vitaux
+const ABSENCE_PENALTIES: Record<string, number> = {
+  'booking-engine': -30,
+  'channel-manager': -20,
+  'pms': -30,
+  'site-internet': -20,
+  'ota': -10,
+};
+
+// Flux vitaux avec chemins alternatifs (logique OR)
+const VITAL_PATHS: AlternativePath[] = [
+  {
+    label: 'Flux Résa Directe',
+    points: 20,
+    paths: [
+      { a: 'pms', b: 'booking-engine' },
+      { a: 'channel-manager', b: 'booking-engine' },
+    ],
+  },
+  {
+    label: 'Flux Paiement',
+    points: 20,
+    paths: [
+      { a: 'booking-engine', b: 'psp' },
+      { a: 'pms', b: 'psp' },
+    ],
+  },
+  {
+    label: 'Flux Visibilité',
+    points: 20,
+    paths: [
+      { a: 'site-internet', b: 'booking-engine' },
+      { a: 'site-internet', b: 'pms' },
+    ],
+  },
+];
+
+// Liens vitaux simples (pas de chemins alternatifs)
 const VITAL_LINKS: ScoreLink[] = [
   { a: 'pms',             b: 'channel-manager',  points: 20 },
-  { a: 'channel-manager', b: 'booking-engine',   points: 20 },
-  { a: 'booking-engine',  b: 'psp',              points: 20 },
-  { a: 'booking-engine',  b: 'site-internet',    points: 20 },
   { a: 'channel-manager', b: 'ota',              points: 20 },
   { a: 'channel-manager', b: 'gds',              points: 20 },
 ];
@@ -227,7 +263,6 @@ const OPERATIONAL_LINKS: ScoreLink[] = [
   { a: 'pms',            b: 'compta',           points: 10 },
   { a: 'pms',            b: 'serrure',          points: 10 },
   { a: 'pms',            b: 'spa',              points: 10 },
-  { a: 'booking-engine', b: 'site-internet',    points: 10 }, // already in vital but for moteur-resto/spa variant
   { a: 'moteur-resto',   b: 'site-internet',    points: 10 },
   { a: 'site-booking',   b: 'site-internet',    points: 10 },
 ];
@@ -238,8 +273,6 @@ const STRATEGIC_LINKS: ScoreLink[] = [
   { a: 'pms', b: 'exp-client', points: 5 },
   { a: 'pms', b: 'tv',         points: 5 },
 ];
-
-const ALL_LINKS: ScoreLink[] = [...VITAL_LINKS, ...OPERATIONAL_LINKS, ...STRATEGIC_LINKS];
 
 // Vérifie si un lien est actif (bidirectionnel)
 function isLinkActive(
@@ -254,19 +287,70 @@ function isLinkRelevant(a: string, b: string, presentIds: Set<string>): boolean 
   return presentIds.has(a) && presentIds.has(b);
 }
 
+// Vérifie si AU MOINS UN chemin d'une alternative est tracé
+function isAlternativePathActive(
+  altPath: AlternativePath,
+  connections: Record<string, string[]>,
+  presentIds: Set<string>
+): boolean {
+  return altPath.paths.some(({ a, b }) =>
+    isLinkRelevant(a, b, presentIds) && isLinkActive(a, b, connections)
+  );
+}
+
+// Vérifie si AU MOINS UN chemin d'une alternative est PERTINENT (cartes présentes)
+function isAlternativePathRelevant(
+  altPath: AlternativePath,
+  presentIds: Set<string>
+): boolean {
+  return altPath.paths.some(({ a, b }) => isLinkRelevant(a, b, presentIds));
+}
+
 function computeScore(
   connections: Record<string, string[]>,
   allSystems: { id: string }[]
-): { score: number; maxScore: number; pct: number; alertPairs: { a: string; b: string }[] } {
+): {
+  score: number;
+  maxScore: number;
+  pct: number;
+  alertPairs: { a: string; b: string }[];
+  missingVitalTools: string[];
+  penalty: number;
+} {
   const presentIds = new Set(allSystems.map(s => s.id));
   let score = 0;
   let maxScore = 0;
+  let penalty = 0;
   const alertPairs: { a: string; b: string }[] = [];
+  const missingVitalTools: string[] = [];
 
-  // Dédupliquer les liens (booking-engine <-> site-internet apparaît en vital + opérationnel)
+  // 1️⃣ Calculer les malus d'absence
+  for (const [toolId, malusPoints] of Object.entries(ABSENCE_PENALTIES)) {
+    if (!presentIds.has(toolId)) {
+      penalty += malusPoints;
+      missingVitalTools.push(toolId);
+    }
+  }
+
+  // 2️⃣ Flux vitaux avec chemins alternatifs
+  for (const altPath of VITAL_PATHS) {
+    if (!isAlternativePathRelevant(altPath, presentIds)) continue;
+    maxScore += altPath.points;
+    if (isAlternativePathActive(altPath, connections, presentIds)) {
+      score += altPath.points;
+    } else {
+      // Badge d'alerte : au moins un chemin est pertinent mais aucun n'est tracé
+      for (const { a, b } of altPath.paths) {
+        if (isLinkRelevant(a, b, presentIds)) {
+          alertPairs.push({ a, b });
+        }
+      }
+    }
+  }
+
+  // 3️⃣ Liens vitaux simples
   const seen = new Set<string>();
-
-  for (const link of ALL_LINKS) {
+  for (const link of VITAL_LINKS) {
     const key = [link.a, link.b].sort().join('|');
     if (seen.has(key)) continue;
     if (!isLinkRelevant(link.a, link.b, presentIds)) continue;
@@ -275,18 +359,53 @@ function computeScore(
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
     } else {
-      // Badge d'alerte uniquement pour les liens vitaux non connectés
-      if (VITAL_LINKS.some(vl => [vl.a, vl.b].sort().join('|') === key)) {
-        alertPairs.push({ a: link.a, b: link.b });
-      }
+      alertPairs.push({ a: link.a, b: link.b });
     }
   }
 
-  const pct = maxScore === 0 ? 0 : Math.round((score / maxScore) * 100);
-  return { score, maxScore, pct, alertPairs };
+  // 4️⃣ Liens opérationnels
+  for (const link of OPERATIONAL_LINKS) {
+    const key = [link.a, link.b].sort().join('|');
+    if (seen.has(key)) continue;
+    if (!isLinkRelevant(link.a, link.b, presentIds)) continue;
+    seen.add(key);
+    maxScore += link.points;
+    if (isLinkActive(link.a, link.b, connections)) {
+      score += link.points;
+    }
+  }
+
+  // 5️⃣ Liens stratégiques
+  for (const link of STRATEGIC_LINKS) {
+    const key = [link.a, link.b].sort().join('|');
+    if (seen.has(key)) continue;
+    if (!isLinkRelevant(link.a, link.b, presentIds)) continue;
+    seen.add(key);
+    maxScore += link.points;
+    if (isLinkActive(link.a, link.b, connections)) {
+      score += link.points;
+    }
+  }
+
+  // 6️⃣ Score final avec malus (ne peut pas descendre sous 0)
+  const finalScore = Math.max(0, score + penalty);
+  const pct = maxScore === 0 ? 0 : Math.round((finalScore / maxScore) * 100);
+
+  return { score: finalScore, maxScore, pct, alertPairs, missingVitalTools, penalty };
 }
 
-function getDiagnostic(pct: number): { label: string; desc: string; color: string; barColor: string } {
+function getDiagnostic(pct: number, hasMissingVitalTools: boolean): {
+  label: string;
+  desc: string;
+  color: string;
+  barColor: string;
+} {
+  if (hasMissingVitalTools) return {
+    label: '⚠️ Outil vital manquant',
+    desc: 'Votre distribution repose sur des outils absents. Impossible d\'évaluer correctement votre écosystème.',
+    color: 'text-red-700',
+    barColor: '#dc2626',
+  };
   if (pct <= 35) return {
     label: '⚠️ Écosystème en péril',
     desc: 'Votre gestion repose sur des processus manuels. Risque de surréservation et perte de CA direct.',
@@ -351,8 +470,8 @@ export function HotelEcosystem() {
   const [isStackMenuOpen, setIsStackMenuOpen] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   
-  // 📊 Widget scoring — collapsed sur mobile par défaut
-  const [scoreWidgetOpen, setScoreWidgetOpen] = useState(false);
+  // 📊 Widget scoring — sidebar panel dépliant (ouvert uniquement sur Stack Simple par défaut)
+  const [scorePanelOpen, setScorePanelOpen] = useState(true);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const diagramRef = useRef<HTMLDivElement>(null);
@@ -532,6 +651,10 @@ export function HotelEcosystem() {
     setSelectedForLink(null);
     setMode('move');
     setIsStackMenuOpen(false);
+    
+    // Fermer le panneau sur Intermédiaire/Avancé, ouvrir sur Simple
+    const isSimple = stack.length === stack1Simple.length && stack.every(s => stack1Simple.find(st => st.id === s.id));
+    setScorePanelOpen(isSimple);
   };
 
   const handleConnectionClick = (fromId: string, toId: string) => {
@@ -547,104 +670,13 @@ export function HotelEcosystem() {
   };
 
   // ── Score calculé en temps réel ──
-  const { pct, maxScore, alertPairs } = computeScore(connections, allSystems);
-  const diagnostic = getDiagnostic(pct);
+  const { pct, maxScore, alertPairs, missingVitalTools, penalty } = computeScore(connections, allSystems);
+  const diagnostic = getDiagnostic(pct, missingVitalTools.length > 0);
   // Set rapide pour lookup O(1)
   const alertNodeIds = new Set(alertPairs.flatMap(p => [p.a, p.b]));
 
   return (
     <div className="max-w-[1400px] mx-auto p-3 sm:p-4 md:p-8">
-
-      {/* ══════════ WIDGET SCORE FIXE ══════════ */}
-      <div className="fixed top-4 right-4 z-[9998] flex flex-col items-end gap-0">
-
-        {/* ── Version mobile : pastille cliquable ── */}
-        <button
-          onClick={() => setScoreWidgetOpen(o => !o)}
-          className="sm:hidden flex items-center gap-2 px-3 py-2 rounded-full shadow-xl text-white text-xs font-bold border-2 border-white transition-all duration-300"
-          style={{ backgroundColor: diagnostic.barColor }}
-        >
-          <span>{pct}%</span>
-          <ChevronUpIcon className={`w-3.5 h-3.5 transition-transform duration-300 ${scoreWidgetOpen ? 'rotate-180' : ''}`} />
-        </button>
-
-        {/* ── Panneau complet (desktop toujours visible, mobile conditionnel) ── */}
-        <div className={`
-          mt-2 w-72 bg-white rounded-2xl shadow-2xl border-2 border-slate-200 overflow-hidden
-          transition-all duration-500 ease-in-out
-          ${scoreWidgetOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 sm:max-h-96 sm:opacity-100'}
-        `}>
-          {/* Header coloré */}
-          <div
-            className="px-4 py-3 flex items-center justify-between transition-colors duration-700"
-            style={{ backgroundColor: diagnostic.barColor }}
-          >
-            <span className="text-white text-xs font-bold tracking-wide uppercase">Score de connectivité</span>
-            <span className="text-white text-lg font-black">{pct}%</span>
-          </div>
-
-          {/* Barre de progression */}
-          <div className="px-4 pt-3 pb-1">
-            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-              <div
-                className="h-full rounded-full transition-all duration-700 ease-out"
-                style={{ width: `${pct}%`, backgroundColor: diagnostic.barColor }}
-              />
-            </div>
-            <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-              <span>0%</span>
-              <span className="text-slate-500 font-medium">{maxScore > 0 ? `${Math.round(pct * maxScore / 100)} / ${maxScore} pts` : '—'}</span>
-              <span>100%</span>
-            </div>
-          </div>
-
-          {/* Seuils visuels */}
-          <div className="px-4 pb-2 flex gap-1">
-            {[
-              { label: 'Péril', max: 35, color: '#ef4444' },
-              { label: 'Tension', max: 70, color: '#f97316' },
-              { label: 'Performance', max: 95, color: '#10b981' },
-              { label: 'Couture', max: 100, color: '#059669' },
-            ].map(s => (
-              <div key={s.label} className="flex-1 text-center">
-                <div
-                  className="h-1 rounded-full mb-0.5"
-                  style={{ backgroundColor: pct <= s.max && (s.label === 'Péril' || pct > (s.label === 'Tension' ? 35 : s.label === 'Performance' ? 70 : 95)) ? s.color : '#e2e8f0' }}
-                />
-                <span className="text-[9px] text-slate-400">{s.label}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Diagnostic */}
-          <div className="px-4 pb-3 border-t border-slate-100 pt-2">
-            <p className={`text-xs font-bold mb-1 ${diagnostic.color}`}>{diagnostic.label}</p>
-            <p className="text-[11px] text-slate-500 leading-relaxed">{diagnostic.desc}</p>
-          </div>
-
-          {/* Liens vitaux manquants */}
-          {alertPairs.length > 0 && (
-            <div className="mx-4 mb-3 p-2 bg-red-50 border border-red-200 rounded-xl">
-              <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-1.5">
-                Connexions vitales manquantes
-              </p>
-              {alertPairs.slice(0, 3).map(({ a, b }) => (
-                <div key={`${a}-${b}`} className="flex items-center gap-1.5 mb-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse flex-shrink-0" />
-                  <span className="text-[10px] text-red-700 font-medium">
-                    {allSystems.find(s => s.id === a)?.name || a}
-                    {' → '}
-                    {allSystems.find(s => s.id === b)?.name || b}
-                  </span>
-                </div>
-              ))}
-              {alertPairs.length > 3 && (
-                <p className="text-[10px] text-red-500 mt-1">+{alertPairs.length - 3} autre(s)</p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* ══════════ HEADER COMMERCIAL ══════════ */}
       <div className="mb-6 md:mb-10">
@@ -896,6 +928,144 @@ export function HotelEcosystem() {
 
       {/* Ecosystem Diagram */}
       <div ref={diagramRef} className="relative bg-slate-50 rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-12 lg:p-16 shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none">
+
+        {/* ══════════ PANNEAU SCORE LATÉRAL DÉPLIANT ══════════ */}
+        <div
+          className={`
+            absolute top-4 right-4 z-[100] 
+            transition-all duration-500 ease-in-out
+            ${scorePanelOpen ? 'w-72 opacity-100' : 'w-12 opacity-90'}
+          `}
+        >
+          {/* Toggle button — toujours visible */}
+          <button
+            onClick={() => setScorePanelOpen(o => !o)}
+            className="absolute -left-3 top-2 z-10 w-6 h-6 bg-white rounded-full shadow-lg border-2 flex items-center justify-center hover:scale-110 transition-transform"
+            style={{ borderColor: diagnostic.barColor }}
+          >
+            <ChevronUpIcon
+              className="w-3.5 h-3.5 transition-transform duration-300"
+              style={{ color: diagnostic.barColor, transform: scorePanelOpen ? 'rotate(-90deg)' : 'rotate(90deg)' }}
+            />
+          </button>
+
+          {/* Pastille % — visible quand fermé (mobile surtout) */}
+          {!scorePanelOpen && (
+            <div
+              className="w-12 h-12 rounded-xl shadow-xl flex items-center justify-center text-white font-black text-sm transition-colors duration-700"
+              style={{ backgroundColor: diagnostic.barColor }}
+            >
+              {pct}%
+            </div>
+          )}
+
+          {/* Panneau complet — visible quand ouvert */}
+          {scorePanelOpen && (
+            <div className="bg-white rounded-2xl shadow-2xl border-2 border-slate-200 overflow-hidden">
+              {/* Header coloré */}
+              <div
+                className="px-3 py-2.5 flex items-center justify-between transition-colors duration-700"
+                style={{ backgroundColor: diagnostic.barColor }}
+              >
+                <span className="text-white text-[10px] font-bold tracking-wide uppercase">Score</span>
+                <span className="text-white text-base font-black">{pct}%</span>
+              </div>
+
+              {/* Barre de progression */}
+              <div className="px-3 pt-2 pb-1">
+                <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                  <div
+                    className="h-full rounded-full transition-all duration-700 ease-out"
+                    style={{ width: `${pct}%`, backgroundColor: diagnostic.barColor }}
+                  />
+                </div>
+                <div className="flex justify-between text-[9px] text-slate-400 mt-0.5">
+                  <span>0%</span>
+                  <span className="text-slate-500 font-medium">
+                    {maxScore > 0 ? `${Math.round((pct * maxScore) / 100)} / ${maxScore} pts` : '—'}
+                    {penalty < 0 && <span className="text-red-600"> ({penalty})</span>}
+                  </span>
+                  <span>100%</span>
+                </div>
+              </div>
+
+              {/* Seuils visuels */}
+              <div className="px-3 pb-1.5 flex gap-0.5">
+                {[
+                  { label: 'Péril', max: 35, color: '#ef4444' },
+                  { label: 'Tension', max: 70, color: '#f97316' },
+                  { label: 'Perf', max: 95, color: '#10b981' },
+                  { label: 'Couture', max: 100, color: '#059669' },
+                ].map(s => (
+                  <div key={s.label} className="flex-1 text-center">
+                    <div
+                      className="h-0.5 rounded-full mb-0.5"
+                      style={{
+                        backgroundColor:
+                          pct <= s.max &&
+                          (s.label === 'Péril' ||
+                            pct > (s.label === 'Tension' ? 35 : s.label === 'Perf' ? 70 : 95))
+                            ? s.color
+                            : '#e2e8f0',
+                      }}
+                    />
+                    <span className="text-[8px] text-slate-400">{s.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Diagnostic */}
+              <div className="px-3 pb-2 border-t border-slate-100 pt-1.5">
+                <p className={`text-[11px] font-bold mb-0.5 leading-tight ${diagnostic.color}`}>
+                  {diagnostic.label}
+                </p>
+                <p className="text-[10px] text-slate-500 leading-relaxed">{diagnostic.desc}</p>
+              </div>
+
+              {/* Outils vitaux manquants */}
+              {missingVitalTools.length > 0 && (
+                <div className="mx-3 mb-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-[9px] font-bold text-red-600 uppercase tracking-wide mb-1">
+                    Outils absents
+                  </p>
+                  {missingVitalTools.map(toolId => (
+                    <div key={toolId} className="flex items-center gap-1 mb-0.5">
+                      <span className="w-1 h-1 rounded-full bg-red-500 flex-shrink-0" />
+                      <span className="text-[9px] text-red-700 font-medium">
+                        {toolId === 'booking-engine' && 'Moteur de Réservation'}
+                        {toolId === 'channel-manager' && 'Channel Manager'}
+                        {toolId === 'pms' && 'PMS'}
+                        {toolId === 'site-internet' && 'Site Internet'}
+                        {toolId === 'ota' && 'OTA'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Connexions vitales manquantes */}
+              {alertPairs.length > 0 && (
+                <div className="mx-3 mb-2 p-2 bg-orange-50 border border-orange-200 rounded-lg">
+                  <p className="text-[9px] font-bold text-orange-600 uppercase tracking-wide mb-1">
+                    Flux manquants
+                  </p>
+                  {alertPairs.slice(0, 2).map(({ a, b }) => (
+                    <div key={`${a}-${b}`} className="flex items-center gap-1 mb-0.5">
+                      <span className="w-1 h-1 rounded-full bg-orange-500 animate-pulse flex-shrink-0" />
+                      <span className="text-[9px] text-orange-700 font-medium leading-tight">
+                        {allSystems.find(s => s.id === a)?.name || a} → {allSystems.find(s => s.id === b)?.name || b}
+                      </span>
+                    </div>
+                  ))}
+                  {alertPairs.length > 2 && (
+                    <p className="text-[9px] text-orange-500 mt-0.5">+{alertPairs.length - 2} autre(s)</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         <div 
           ref={containerRef}
           className="relative w-full h-full"
