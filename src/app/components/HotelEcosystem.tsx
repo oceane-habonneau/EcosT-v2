@@ -34,7 +34,9 @@ import {
   Search,
   Wrench,
   Radio,
-  Layers
+  Layers,
+  AlertCircle,
+  ChevronUp as ChevronUpIcon
 } from 'lucide-react';
 
 interface SystemNode {
@@ -208,6 +210,109 @@ const iconMap: Record<string, any> = {
   Building2, TrendingUp
 };
 
+// ══════════ SCORING MATRIX ══════════
+type ScoreLink = { a: string; b: string; points: number };
+
+const VITAL_LINKS: ScoreLink[] = [
+  { a: 'pms',             b: 'channel-manager',  points: 20 },
+  { a: 'channel-manager', b: 'booking-engine',   points: 20 },
+  { a: 'booking-engine',  b: 'psp',              points: 20 },
+  { a: 'booking-engine',  b: 'site-internet',    points: 20 },
+  { a: 'channel-manager', b: 'ota',              points: 20 },
+  { a: 'channel-manager', b: 'gds',              points: 20 },
+];
+
+const OPERATIONAL_LINKS: ScoreLink[] = [
+  { a: 'pms',            b: 'pos',              points: 10 },
+  { a: 'pms',            b: 'compta',           points: 10 },
+  { a: 'pms',            b: 'serrure',          points: 10 },
+  { a: 'pms',            b: 'spa',              points: 10 },
+  { a: 'booking-engine', b: 'site-internet',    points: 10 }, // already in vital but for moteur-resto/spa variant
+  { a: 'moteur-resto',   b: 'site-internet',    points: 10 },
+  { a: 'site-booking',   b: 'site-internet',    points: 10 },
+];
+
+const STRATEGIC_LINKS: ScoreLink[] = [
+  { a: 'pms', b: 'crm',        points: 5 },
+  { a: 'pms', b: 'rms',        points: 5 },
+  { a: 'pms', b: 'exp-client', points: 5 },
+  { a: 'pms', b: 'tv',         points: 5 },
+];
+
+const ALL_LINKS: ScoreLink[] = [...VITAL_LINKS, ...OPERATIONAL_LINKS, ...STRATEGIC_LINKS];
+
+// Vérifie si un lien est actif (bidirectionnel)
+function isLinkActive(
+  a: string, b: string,
+  connections: Record<string, string[]>
+): boolean {
+  return (connections[a]?.includes(b)) || (connections[b]?.includes(a));
+}
+
+// Vérifie si un lien est "pertinent" = les deux cartes sont sur le canvas
+function isLinkRelevant(a: string, b: string, presentIds: Set<string>): boolean {
+  return presentIds.has(a) && presentIds.has(b);
+}
+
+function computeScore(
+  connections: Record<string, string[]>,
+  allSystems: { id: string }[]
+): { score: number; maxScore: number; pct: number; alertPairs: { a: string; b: string }[] } {
+  const presentIds = new Set(allSystems.map(s => s.id));
+  let score = 0;
+  let maxScore = 0;
+  const alertPairs: { a: string; b: string }[] = [];
+
+  // Dédupliquer les liens (booking-engine <-> site-internet apparaît en vital + opérationnel)
+  const seen = new Set<string>();
+
+  for (const link of ALL_LINKS) {
+    const key = [link.a, link.b].sort().join('|');
+    if (seen.has(key)) continue;
+    if (!isLinkRelevant(link.a, link.b, presentIds)) continue;
+    seen.add(key);
+    maxScore += link.points;
+    if (isLinkActive(link.a, link.b, connections)) {
+      score += link.points;
+    } else {
+      // Badge d'alerte uniquement pour les liens vitaux non connectés
+      if (VITAL_LINKS.some(vl => [vl.a, vl.b].sort().join('|') === key)) {
+        alertPairs.push({ a: link.a, b: link.b });
+      }
+    }
+  }
+
+  const pct = maxScore === 0 ? 0 : Math.round((score / maxScore) * 100);
+  return { score, maxScore, pct, alertPairs };
+}
+
+function getDiagnostic(pct: number): { label: string; desc: string; color: string; barColor: string } {
+  if (pct <= 35) return {
+    label: '⚠️ Écosystème en péril',
+    desc: 'Votre gestion repose sur des processus manuels. Risque de surréservation et perte de CA direct.',
+    color: 'text-red-600',
+    barColor: '#ef4444',
+  };
+  if (pct <= 70) return {
+    label: '⚙️ Gestion sous tension',
+    desc: 'Le socle est là, mais vos outils travaillent en silos. La double saisie fragilise vos opérations.',
+    color: 'text-orange-500',
+    barColor: '#f97316',
+  };
+  if (pct <= 95) return {
+    label: '✅ Performance activée',
+    desc: 'Écosystème sain. Vous avez une base solide pour automatiser votre stratégie.',
+    color: 'text-emerald-600',
+    barColor: '#10b981',
+  };
+  return {
+    label: '🚀 Écosystème Haute-Couture',
+    desc: 'Intégration totale. Vos données travaillent pour vous.',
+    color: 'text-emerald-700',
+    barColor: '#059669',
+  };
+}
+
 export function HotelEcosystem() {
   const [allSystems, setAllSystems] = useState<SystemNode[]>(stack1Simple);
   const [nodePositions, setNodePositions] = useState<Record<string, { x: number; y: number }>>(() =>
@@ -245,6 +350,9 @@ export function HotelEcosystem() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isStackMenuOpen, setIsStackMenuOpen] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
+  
+  // 📊 Widget scoring — collapsed sur mobile par défaut
+  const [scoreWidgetOpen, setScoreWidgetOpen] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const diagramRef = useRef<HTMLDivElement>(null);
@@ -438,8 +546,105 @@ export function HotelEcosystem() {
     }
   };
 
+  // ── Score calculé en temps réel ──
+  const { pct, maxScore, alertPairs } = computeScore(connections, allSystems);
+  const diagnostic = getDiagnostic(pct);
+  // Set rapide pour lookup O(1)
+  const alertNodeIds = new Set(alertPairs.flatMap(p => [p.a, p.b]));
+
   return (
     <div className="max-w-[1400px] mx-auto p-3 sm:p-4 md:p-8">
+
+      {/* ══════════ WIDGET SCORE FIXE ══════════ */}
+      <div className="fixed top-4 right-4 z-[9998] flex flex-col items-end gap-0">
+
+        {/* ── Version mobile : pastille cliquable ── */}
+        <button
+          onClick={() => setScoreWidgetOpen(o => !o)}
+          className="sm:hidden flex items-center gap-2 px-3 py-2 rounded-full shadow-xl text-white text-xs font-bold border-2 border-white transition-all duration-300"
+          style={{ backgroundColor: diagnostic.barColor }}
+        >
+          <span>{pct}%</span>
+          <ChevronUpIcon className={`w-3.5 h-3.5 transition-transform duration-300 ${scoreWidgetOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {/* ── Panneau complet (desktop toujours visible, mobile conditionnel) ── */}
+        <div className={`
+          mt-2 w-72 bg-white rounded-2xl shadow-2xl border-2 border-slate-200 overflow-hidden
+          transition-all duration-500 ease-in-out
+          ${scoreWidgetOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 sm:max-h-96 sm:opacity-100'}
+        `}>
+          {/* Header coloré */}
+          <div
+            className="px-4 py-3 flex items-center justify-between transition-colors duration-700"
+            style={{ backgroundColor: diagnostic.barColor }}
+          >
+            <span className="text-white text-xs font-bold tracking-wide uppercase">Score de connectivité</span>
+            <span className="text-white text-lg font-black">{pct}%</span>
+          </div>
+
+          {/* Barre de progression */}
+          <div className="px-4 pt-3 pb-1">
+            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+              <div
+                className="h-full rounded-full transition-all duration-700 ease-out"
+                style={{ width: `${pct}%`, backgroundColor: diagnostic.barColor }}
+              />
+            </div>
+            <div className="flex justify-between text-[10px] text-slate-400 mt-1">
+              <span>0%</span>
+              <span className="text-slate-500 font-medium">{maxScore > 0 ? `${Math.round(pct * maxScore / 100)} / ${maxScore} pts` : '—'}</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          {/* Seuils visuels */}
+          <div className="px-4 pb-2 flex gap-1">
+            {[
+              { label: 'Péril', max: 35, color: '#ef4444' },
+              { label: 'Tension', max: 70, color: '#f97316' },
+              { label: 'Performance', max: 95, color: '#10b981' },
+              { label: 'Couture', max: 100, color: '#059669' },
+            ].map(s => (
+              <div key={s.label} className="flex-1 text-center">
+                <div
+                  className="h-1 rounded-full mb-0.5"
+                  style={{ backgroundColor: pct <= s.max && (s.label === 'Péril' || pct > (s.label === 'Tension' ? 35 : s.label === 'Performance' ? 70 : 95)) ? s.color : '#e2e8f0' }}
+                />
+                <span className="text-[9px] text-slate-400">{s.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Diagnostic */}
+          <div className="px-4 pb-3 border-t border-slate-100 pt-2">
+            <p className={`text-xs font-bold mb-1 ${diagnostic.color}`}>{diagnostic.label}</p>
+            <p className="text-[11px] text-slate-500 leading-relaxed">{diagnostic.desc}</p>
+          </div>
+
+          {/* Liens vitaux manquants */}
+          {alertPairs.length > 0 && (
+            <div className="mx-4 mb-3 p-2 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-1.5">
+                Connexions vitales manquantes
+              </p>
+              {alertPairs.slice(0, 3).map(({ a, b }) => (
+                <div key={`${a}-${b}`} className="flex items-center gap-1.5 mb-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse flex-shrink-0" />
+                  <span className="text-[10px] text-red-700 font-medium">
+                    {allSystems.find(s => s.id === a)?.name || a}
+                    {' → '}
+                    {allSystems.find(s => s.id === b)?.name || b}
+                  </span>
+                </div>
+              ))}
+              {alertPairs.length > 3 && (
+                <p className="text-[10px] text-red-500 mt-1">+{alertPairs.length - 3} autre(s)</p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* ══════════ HEADER COMMERCIAL ══════════ */}
       <div className="mb-6 md:mb-10">
@@ -650,29 +855,6 @@ export function HotelEcosystem() {
         </>
       )}{/* /toolbar wrapper */}
 
-      {/* ══════════ COMMENT LIRE CE SCHÉMA ══════════ */}
-      <div className="mb-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
-        <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Comment lire ce schéma ?</p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { n: '1', title: 'Chaque carte = un système', desc: 'Un logiciel ou une technologie installée dans votre hôtel, reliée aux autres par des flux de données.' },
-            { n: '2', title: 'Les lignes = des flux', desc: 'Chaque connexion représente un échange automatique de données — sans action manuelle de votre équipe.' },
-            { n: '3', title: 'Le PMS au centre', desc: 'Il orchestre tout et garantit la cohérence de vos données en temps réel entre tous les systèmes.' },
-            { n: '4', title: 'Survol = bénéfice concret', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
-          ].map(step => (
-            <div key={step.n} className="flex items-start gap-2.5">
-              <div className="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-md">
-                {step.n}
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-800 mb-0.5 leading-tight">{step.title}</p>
-                <p className="text-[11px] text-slate-500 leading-relaxed">{step.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* ══════════ ECOSYSTEM DIAGRAM ══════════ */}
       <div id="ecosystem">
       {/* Tooltip overlay */}
@@ -837,6 +1019,18 @@ export function HotelEcosystem() {
                       style={{ backgroundColor: config.color }}
                     />
 
+                    {/* 🚨 Badge alerte lien vital manquant */}
+                    {alertNodeIds.has(system.id) && (
+                      <div className="absolute -top-2 -left-2 z-20">
+                        <span className="flex h-4 w-4 items-center justify-center">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 items-center justify-center">
+                            <AlertCircle className="w-2 h-2 text-white" />
+                          </span>
+                        </span>
+                      </div>
+                    )}
+
                     {/* Connection count badge - only in admin mode */}
                     {viewMode === 'admin' && connections[system.id] && connections[system.id].length > 0 && (
                       <div className="absolute -bottom-1.5 md:-bottom-2 left-1/2 -translate-x-1/2 bg-purple-500 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full shadow-md">
@@ -977,10 +1171,10 @@ export function HotelEcosystem() {
       {/* ══════════ LÉGENDE & VALEUR ══════════ */}
       <div id="legende" className="mt-6 md:mt-8 p-4 sm:p-6 bg-white rounded-xl md:rounded-2xl border-2 border-slate-200 shadow-lg">
         <h3 className="mb-1 text-slate-800 text-center text-base sm:text-lg font-bold">Légende &amp; Valeur</h3>
-        <p className="text-center text-xs sm:text-sm text-slate-500 mb-4">Code couleur des catégories</p>
+        <p className="text-center text-xs sm:text-sm text-slate-500 mb-4">Comment lire ce schéma ?</p>
 
         {/* Color legend */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 mb-5">
           {Object.entries(categoryConfig).map(([key, config]) => (
             <div key={key} className="flex items-center gap-1.5 sm:gap-2">
               <div 
@@ -988,6 +1182,26 @@ export function HotelEcosystem() {
                 style={{ backgroundColor: config.color }}
               />
               <span className="text-xs sm:text-sm text-slate-700">{config.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* How to read */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-slate-100">
+          {[
+            { n: '1', title: 'Chaque carte = un système', desc: 'Un logiciel ou une technologie installée dans votre hôtel, reliée aux autres par des flux de données.' },
+            { n: '2', title: 'Les lignes = des flux', desc: 'Chaque connexion représente un échange automatique de données — sans action manuelle de votre équipe.' },
+            { n: '3', title: 'Le PMS au centre', desc: 'Il orchestre tout et garantit la cohérence de vos données en temps réel entre tous les systèmes.' },
+            { n: '4', title: 'Survol = bénéfice concret', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
+          ].map(step => (
+            <div key={step.n} className="flex items-start gap-3">
+              <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold text-sm flex items-center justify-center flex-shrink-0 shadow-md">
+                {step.n}
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-semibold text-slate-800 mb-0.5">{step.title}</p>
+                <p className="text-xs text-slate-500 leading-relaxed">{step.desc}</p>
+              </div>
             </div>
           ))}
         </div>
