@@ -1,5 +1,6 @@
 **🏨 Diagnostic Écosystème IT Hôtelier**
 Visualisez, Auditez et Optimisez la performance digitale de votre hôtel.
+
 **⚠️ NOTE SUR LA PROPRIÉTÉ INTELLECTUELLE**
 Cet outil est un moteur de diagnostic métier propriétaire développé par Océane Habonneau. Le code est partagé ici à des fins de transparence technologique et de portfolio. Toute exploitation commerciale, modification ou redistribution par un tiers est strictement interdite sans accord écrit préalable. Pour toute demande de licence ou de partenariat, merci de me contacter via oceane.habonneau@gmail.com.
 
