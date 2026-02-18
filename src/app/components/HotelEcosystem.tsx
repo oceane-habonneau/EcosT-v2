@@ -210,6 +210,58 @@ const iconMap: Record<string, any> = {
   Building2, TrendingUp
 };
 
+// ══════════ WIZARD TOOLS CATALOG ══════════
+const WIZARD_TOOLS = [
+  { id: 'pms', name: 'PMS', icon: 'Bed', category: 'management' as const },
+  { id: 'channel-manager', name: 'Channel Manager', icon: 'Share2', category: 'sales' as const },
+  { id: 'booking-engine', name: 'Moteur de Réservation', icon: 'Calendar', category: 'booking' as const },
+  { id: 'site-internet', name: 'Site Internet', icon: 'Globe', category: 'sales' as const },
+  { id: 'ota', name: 'OTA', icon: 'Building2', category: 'sales' as const },
+  { id: 'psp', name: 'PSP (Paiement)', icon: 'CreditCard', category: 'customer' as const },
+  { id: 'pos', name: 'POS Restaurant', icon: 'UtensilsCrossed', category: 'restaurant' as const },
+  { id: 'compta', name: 'Comptabilité', icon: 'Calculator', category: 'management' as const },
+  { id: 'crm', name: 'CRM', icon: 'Users', category: 'management' as const },
+  { id: 'spa', name: 'SPA', icon: 'Sparkles', category: 'wellness' as const },
+  { id: 'gds', name: 'GDS', icon: 'Globe', category: 'sales' as const },
+  { id: 'rms', name: 'RMS', icon: 'TrendingUp', category: 'management' as const },
+  { id: 'serrure', name: 'Serrure Connectée', icon: 'Home', category: 'customer' as const },
+];
+
+// Paires de connexions logiques possibles selon les outils sélectionnés
+function getLogicalPairs(tools: Set<string>): Array<{ a: string; b: string; question: string }> {
+  const pairs: Array<{ a: string; b: string; question: string }> = [];
+  const has = (id: string) => tools.has(id);
+
+  if (has('pms') && has('channel-manager'))
+    pairs.push({ a: 'pms', b: 'channel-manager', question: 'Votre PMS est-il connecté au Channel Manager ?' });
+  if (has('channel-manager') && has('booking-engine'))
+    pairs.push({ a: 'channel-manager', b: 'booking-engine', question: 'Votre Channel Manager envoie-t-il les réservations au Moteur ?' });
+  if (has('channel-manager') && has('ota'))
+    pairs.push({ a: 'channel-manager', b: 'ota', question: 'Les OTA sont-elles connectées via le Channel Manager ?' });
+  if (has('booking-engine') && has('psp'))
+    pairs.push({ a: 'booking-engine', b: 'psp', question: 'Les paiements en ligne passent-ils par le Moteur vers le PSP ?' });
+  if (has('booking-engine') && has('site-internet'))
+    pairs.push({ a: 'booking-engine', b: 'site-internet', question: 'Le Moteur de Résa est-il intégré au Site Internet ?' });
+  if (has('pms') && has('pos'))
+    pairs.push({ a: 'pms', b: 'pos', question: 'Le POS envoie-t-il automatiquement les notes en chambre au PMS ?' });
+  if (has('pms') && has('compta'))
+    pairs.push({ a: 'pms', b: 'compta', question: 'Les écritures comptables sont-elles exportées automatiquement du PMS ?' });
+  if (has('pms') && has('crm'))
+    pairs.push({ a: 'pms', b: 'crm', question: 'Le CRM est-il alimenté automatiquement par le PMS ?' });
+  if (has('pms') && has('spa'))
+    pairs.push({ a: 'pms', b: 'spa', question: 'Les réservations SPA sont-elles synchronisées avec le PMS ?' });
+  if (has('pms') && has('serrure'))
+    pairs.push({ a: 'pms', b: 'serrure', question: 'Les serrures sont-elles pilotées par le PMS ?' });
+  if (has('pms') && has('rms'))
+    pairs.push({ a: 'pms', b: 'rms', question: 'Le RMS ajuste-t-il les tarifs automatiquement dans le PMS ?' });
+  if (has('site-internet') && has('pms'))
+    pairs.push({ a: 'site-internet', b: 'pms', question: 'Le Site Internet affiche-t-il les disponibilités du PMS en temps réel ?' });
+  if (has('channel-manager') && has('gds'))
+    pairs.push({ a: 'channel-manager', b: 'gds', question: 'Les GDS sont-ils reliés au Channel Manager ?' });
+
+  return pairs;
+}
+
 // ══════════ SCORING MATRIX V3 — Intelligence Métier ══════════
 type ScoreLink = { a: string; b: string; points: number };
 type AlternativePath = { paths: Array<{ a: string; b: string }>; points: number; label: string };
@@ -472,6 +524,13 @@ export function HotelEcosystem() {
   
   // 📊 Widget scoring — sidebar panel dépliant (ouvert uniquement sur Stack Simple par défaut)
   const [scorePanelOpen, setScorePanelOpen] = useState(true);
+
+  // 🧙‍♂️ Wizard de diagnostic
+  const [showWizardOverlay, setShowWizardOverlay] = useState(true);
+  const [showWizardModal, setShowWizardModal] = useState(false);
+  const [wizardStep, setWizardStep] = useState<1 | 2>(1);
+  const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
+  const [selectedConnections, setSelectedConnections] = useState<Set<string>>(new Set());
   
   const containerRef = useRef<HTMLDivElement>(null);
   const diagramRef = useRef<HTMLDivElement>(null);
@@ -669,6 +728,92 @@ export function HotelEcosystem() {
     }
   };
 
+  // ── Wizard handlers ──
+  const startWizard = () => {
+    setShowWizardOverlay(false);
+    setShowWizardModal(true);
+    setWizardStep(1);
+    setSelectedTools(new Set());
+    setSelectedConnections(new Set());
+  };
+
+  const skipWizard = () => {
+    setShowWizardOverlay(false);
+    // Stack Simple déjà chargé par défaut
+  };
+
+  const toggleTool = (toolId: string) => {
+    setSelectedTools(prev => {
+      const next = new Set(prev);
+      if (next.has(toolId)) {
+        next.delete(toolId);
+      } else {
+        next.add(toolId);
+      }
+      return next;
+    });
+  };
+
+  const toggleConnection = (pairKey: string) => {
+    setSelectedConnections(prev => {
+      const next = new Set(prev);
+      if (next.has(pairKey)) {
+        next.delete(pairKey);
+      } else {
+        next.add(pairKey);
+      }
+      return next;
+    });
+  };
+
+  const finishWizard = () => {
+    // 1. Nettoyer le canvas
+    const newSystems: SystemNode[] = [];
+    const newPositions: Record<string, { x: number; y: number }> = {};
+    const newConnections: Record<string, string[]> = {};
+
+    // 2. Ajouter les cartes sélectionnées
+    const toolsList = Array.from(selectedTools);
+    toolsList.forEach((toolId, index) => {
+      const tool = WIZARD_TOOLS.find(t => t.id === toolId);
+      if (!tool) return;
+      
+      // Positionner en grille 3 colonnes
+      const col = index % 3;
+      const row = Math.floor(index / 3);
+      const x = 25 + col * 25;
+      const y = 25 + row * 20;
+
+      newSystems.push({
+        id: toolId,
+        name: tool.name,
+        category: tool.category,
+        icon: tool.icon,
+        x,
+        y,
+        connections: [],
+      });
+
+      newPositions[toolId] = { x, y };
+      newConnections[toolId] = [];
+    });
+
+    // 3. Tracer les connexions
+    selectedConnections.forEach(pairKey => {
+      const [a, b] = pairKey.split('|');
+      if (newConnections[a] && !newConnections[a].includes(b)) {
+        newConnections[a].push(b);
+      }
+    });
+
+    // 4. Appliquer au state
+    setAllSystems(newSystems);
+    setNodePositions(newPositions);
+    setConnections(newConnections);
+    setShowWizardModal(false);
+    setScorePanelOpen(true); // Ouvrir le panneau pour voir le score
+  };
+
   // ── Score calculé en temps réel ──
   const { pct, maxScore, alertPairs, missingVitalTools, penalty } = computeScore(connections, allSystems);
   const diagnostic = getDiagnostic(pct, missingVitalTools.length > 0);
@@ -677,6 +822,187 @@ export function HotelEcosystem() {
 
   return (
     <div className="max-w-[1400px] mx-auto p-3 sm:p-4 md:p-8">
+
+      {/* ══════════ WIZARD OVERLAY D'ACCUEIL ══════════ */}
+      {showWizardOverlay && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
+          <div className="text-center px-6 py-8 max-w-md">
+            <div className="mb-8">
+              <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 leading-tight">
+                Évaluez votre<br />Écosystème IT
+              </h2>
+              <p className="text-base text-slate-200 leading-relaxed">
+                Répondez à quelques questions pour obtenir un diagnostic personnalisé de votre infrastructure hôtelière.
+              </p>
+            </div>
+            <button
+              onClick={startWizard}
+              className="w-full px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-lg font-black rounded-2xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-2xl hover:shadow-amber-500/50 hover:scale-105 active:scale-100 mb-4"
+            >
+              🚀 LANCER MON DIAGNOSTIC
+            </button>
+            <button
+              onClick={skipWizard}
+              className="text-sm text-slate-300 hover:text-white underline underline-offset-4 transition-colors"
+            >
+              Passer et explorer l'outil manuellement
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════ WIZARD MODAL (2 STEPS) ══════════ */}
+      {showWizardModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+            
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">
+                  {wizardStep === 1 ? 'Étape 1 : Inventaire' : 'Étape 2 : Connectivité'}
+                </h3>
+                <p className="text-sm text-slate-500">
+                  {wizardStep === 1 ? 'Sélectionnez les outils présents dans votre hôtel' : 'Indiquez les connexions actives'}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowWizardModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+
+            {/* Body scrollable */}
+            <div className="flex-1 overflow-y-auto p-6">
+              
+              {/* STEP 1 — Inventaire */}
+              {wizardStep === 1 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {WIZARD_TOOLS.map(tool => {
+                    const Icon = iconMap[tool.icon];
+                    const isSelected = selectedTools.has(tool.id);
+                    const config = categoryConfig[tool.category];
+                    return (
+                      <button
+                        key={tool.id}
+                        onClick={() => toggleTool(tool.id)}
+                        className={`
+                          relative p-4 rounded-xl border-2 transition-all hover:scale-105 active:scale-100
+                          ${isSelected 
+                            ? 'border-amber-400 bg-amber-50 shadow-lg shadow-amber-200' 
+                            : 'border-slate-200 bg-white hover:border-slate-300'}
+                        `}
+                      >
+                        {/* Checkbox */}
+                        <div className={`
+                          absolute top-2 right-2 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors
+                          ${isSelected ? 'bg-amber-400 border-amber-500' : 'bg-white border-slate-300'}
+                        `}>
+                          {isSelected && (
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                        
+                        {/* Icon */}
+                        <div 
+                          className="w-12 h-12 rounded-lg mx-auto mb-2 flex items-center justify-center"
+                          style={{ backgroundColor: config.color + '22' }}
+                        >
+                          <Icon className="w-6 h-6" style={{ color: config.color }} />
+                        </div>
+                        
+                        {/* Name */}
+                        <p className="text-xs font-semibold text-slate-700 text-center leading-tight">
+                          {tool.name}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* STEP 2 — Connectivité */}
+              {wizardStep === 2 && (
+                <div className="space-y-4">
+                  {getLogicalPairs(selectedTools).map(({ a, b, question }) => {
+                    const pairKey = `${a}|${b}`;
+                    const isConnected = selectedConnections.has(pairKey);
+                    return (
+                      <div
+                        key={pairKey}
+                        className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-4"
+                      >
+                        <p className="text-sm font-medium text-slate-700 flex-1">{question}</p>
+                        <button
+                          onClick={() => toggleConnection(pairKey)}
+                          className={`
+                            relative w-14 h-8 rounded-full transition-colors duration-300 flex-shrink-0
+                            ${isConnected ? 'bg-emerald-500' : 'bg-slate-300'}
+                          `}
+                        >
+                          <span
+                            className={`
+                              absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300
+                              ${isConnected ? 'translate-x-7' : 'translate-x-1'}
+                            `}
+                          />
+                        </button>
+                      </div>
+                    );
+                  })}
+                  {getLogicalPairs(selectedTools).length === 0 && (
+                    <div className="text-center py-8 text-slate-400">
+                      <p className="text-sm">Aucune connexion possible avec votre sélection.</p>
+                      <p className="text-xs mt-1">Retournez à l'étape 1 pour ajouter des outils.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between gap-3 flex-shrink-0">
+              {wizardStep === 1 && (
+                <>
+                  <button
+                    onClick={() => setShowWizardModal(false)}
+                    className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={() => setWizardStep(2)}
+                    disabled={selectedTools.size === 0}
+                    className="px-6 py-2 bg-slate-800 text-white text-sm font-bold rounded-xl hover:bg-slate-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Suivant →
+                  </button>
+                </>
+              )}
+              {wizardStep === 2 && (
+                <>
+                  <button
+                    onClick={() => setWizardStep(1)}
+                    className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
+                  >
+                    ← Retour
+                  </button>
+                  <button
+                    onClick={finishWizard}
+                    className="px-6 py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-sm font-black rounded-xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-lg"
+                  >
+                    Générer mon diagnostic
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ══════════ HEADER COMMERCIAL ══════════ */}
       <div className="mb-6 md:mb-10">
