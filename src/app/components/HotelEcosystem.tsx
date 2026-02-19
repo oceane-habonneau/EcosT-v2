@@ -136,44 +136,44 @@ const cardSuggestions = [
 
 // 🟢 Socle 1 - Essentiel (par défaut)
 const socle1Essentiel: SystemNode[] = [
-  { id: 'pms',            name: 'PMS',                  category: 'management', icon: 'Bed',           x: 50, y: 50, connections: ['channel-manager', 'pos'] },
-  { id: 'channel-manager',name: 'Channel Manager',       category: 'sales',      icon: 'Share2',        x: 18, y: 28, connections: ['ota', 'booking-engine'] },
-  { id: 'ota',            name: 'OTA',                   category: 'sales',      icon: 'Building2',     x: 18, y: 10, connections: [] },
-  { id: 'booking-engine', name: 'Moteur de réservation', category: 'booking',    icon: 'Calendar',      x: 50, y: 12, connections: ['site-internet', 'psp'] },
-  { id: 'site-internet',  name: 'Site internet',         category: 'sales',      icon: 'Globe',         x: 78, y: 10, connections: [] },
-  { id: 'psp',            name: 'PSP',                   category: 'customer',   icon: 'CreditCard',    x: 80, y: 30, connections: [] },
-  { id: 'pos',            name: 'POS restaurant',        category: 'restaurant', icon: 'UtensilsCrossed', x: 22, y: 72, connections: [] }
+  { id: 'pms',            name: 'PMS',                  category: 'management', icon: 'Bed',             x: 51, y: 59, connections: ['channel-manager', 'pos'] },
+  { id: 'channel-manager',name: 'Channel Manager',       category: 'sales',      icon: 'Share2',          x: 31, y: 38, connections: ['ota', 'booking-engine'] },
+  { id: 'ota',            name: 'OTA',                   category: 'sales',      icon: 'Building2',       x: 13, y: 17, connections: [] },
+  { id: 'booking-engine', name: 'Moteur de réservation', category: 'booking',    icon: 'Calendar',        x: 51, y: 17, connections: ['site-internet', 'psp'] },
+  { id: 'site-internet',  name: 'Site internet',         category: 'sales',      icon: 'Globe',           x: 74, y: 17, connections: [] },
+  { id: 'psp',            name: 'PSP',                   category: 'customer',   icon: 'CreditCard',      x: 74, y: 59, connections: [] },
+  { id: 'pos',            name: 'POS restaurant',        category: 'restaurant', icon: 'UtensilsCrossed', x: 33, y: 78, connections: [] }
 ];
 
 // 🟠 Socle 2 - Performance
 const socle2Performance: SystemNode[] = [
-  { id: 'pms',            name: 'PMS',                  category: 'management', icon: 'Bed',           x: 48, y: 48, connections: ['channel-manager', 'pos', 'compta', 'crm'] },
-  { id: 'channel-manager',name: 'Channel Manager',       category: 'sales',      icon: 'Share2',        x: 18, y: 22, connections: ['ota', 'booking-engine'] },
-  { id: 'ota',            name: 'OTA',                   category: 'sales',      icon: 'Building2',     x: 18, y:  8, connections: [] },
-  { id: 'booking-engine', name: 'Moteur de réservation', category: 'booking',    icon: 'Calendar',      x: 48, y: 10, connections: ['site-internet', 'psp'] },
-  { id: 'site-internet',  name: 'Site internet',         category: 'sales',      icon: 'Globe',         x: 75, y:  8, connections: [] },
-  { id: 'psp',            name: 'PSP',                   category: 'customer',   icon: 'CreditCard',    x: 78, y: 25, connections: [] },
-  { id: 'pos',            name: 'POS restaurant',        category: 'restaurant', icon: 'UtensilsCrossed', x: 18, y: 70, connections: [] },
-  { id: 'compta',         name: 'Comptabilité',          category: 'management', icon: 'Calculator',    x: 75, y: 48, connections: [] },
-  { id: 'crm',            name: 'CRM',                   category: 'management', icon: 'Users',         x: 75, y: 68, connections: [] },
+  { id: 'pms',            name: 'PMS',                  category: 'management', icon: 'Bed',             x: 47, y: 55, connections: ['channel-manager', 'pos', 'compta', 'crm'] },
+  { id: 'channel-manager',name: 'Channel Manager',       category: 'sales',      icon: 'Share2',          x: 36, y: 36, connections: ['ota', 'booking-engine'] },
+  { id: 'ota',            name: 'OTA',                   category: 'sales',      icon: 'Building2',       x: 26, y: 14, connections: [] },
+  { id: 'booking-engine', name: 'Moteur de réservation', category: 'booking',    icon: 'Calendar',        x: 49, y: 14, connections: ['site-internet', 'psp'] },
+  { id: 'site-internet',  name: 'Site internet',         category: 'sales',      icon: 'Globe',           x: 70, y: 14, connections: [] },
+  { id: 'psp',            name: 'PSP',                   category: 'customer',   icon: 'CreditCard',      x: 59, y: 34, connections: [] },
+  { id: 'pos',            name: 'POS restaurant',        category: 'restaurant', icon: 'UtensilsCrossed', x: 31, y: 77, connections: [] },
+  { id: 'compta',         name: 'Comptabilité',          category: 'management', icon: 'Calculator',      x: 67, y: 53, connections: [] },
+  { id: 'crm',            name: 'CRM',                   category: 'management', icon: 'Users',           x: 63, y: 73, connections: [] },
 ];
 
 // 🔵 Socle 3 - Signature
 const socle3Signature: SystemNode[] = [
-  { id: 'pms',            name: 'PMS',                  category: 'management', icon: 'Bed',           x: 48, y: 42, connections: ['channel-manager', 'pos', 'compta', 'crm', 'spa', 'exp-client', 'rms'] },
-  { id: 'channel-manager',name: 'Channel Manager',       category: 'sales',      icon: 'Share2',        x: 20, y: 22, connections: ['ota', 'booking-engine', 'gds'] },
-  { id: 'ota',            name: 'OTA',                   category: 'sales',      icon: 'Building2',     x: 20, y:  8, connections: [] },
-  { id: 'gds',            name: 'GDS',                   category: 'sales',      icon: 'Globe',         x: 20, y: 38, connections: [] },
-  { id: 'booking-engine', name: 'Moteur de réservation', category: 'booking',    icon: 'Calendar',      x: 48, y:  8, connections: ['site-internet', 'psp'] },
-  { id: 'site-internet',  name: 'Site internet',         category: 'sales',      icon: 'Globe',         x: 72, y:  8, connections: ['moteur-resto'] },
-  { id: 'moteur-resto',   name: 'Moteur résa resto',     category: 'restaurant', icon: 'UtensilsCrossed', x: 88, y: 22, connections: [] },
-  { id: 'psp',            name: 'PSP',                   category: 'customer',   icon: 'CreditCard',    x: 72, y: 24, connections: [] },
-  { id: 'compta',         name: 'Comptabilité',          category: 'management', icon: 'Calculator',    x: 72, y: 42, connections: [] },
-  { id: 'crm',            name: 'CRM',                   category: 'management', icon: 'Users',         x: 78, y: 60, connections: [] },
-  { id: 'pos',            name: 'POS restaurant',        category: 'restaurant', icon: 'UtensilsCrossed', x: 18, y: 68, connections: [] },
-  { id: 'rms',            name: 'RMS',                   category: 'management', icon: 'TrendingUp',    x: 36, y: 78, connections: [] },
-  { id: 'spa',            name: 'SPA',                   category: 'wellness',   icon: 'Sparkles',      x: 58, y: 72, connections: [] },
-  { id: 'exp-client',     name: 'Exp client in-house',   category: 'customer',   icon: 'Star',          x: 78, y: 78, connections: [] },
+  { id: 'pms',            name: 'PMS',                  category: 'management', icon: 'Bed',             x: 47, y: 52, connections: ['channel-manager', 'pos', 'compta', 'crm', 'spa', 'exp-client', 'rms'] },
+  { id: 'channel-manager',name: 'Channel Manager',       category: 'sales',      icon: 'Share2',          x: 36, y: 36, connections: ['ota', 'booking-engine', 'gds'] },
+  { id: 'gds',            name: 'GDS',                   category: 'sales',      icon: 'Globe',           x: 9,  y: 14, connections: [] },
+  { id: 'ota',            name: 'OTA',                   category: 'sales',      icon: 'Building2',       x: 32, y: 14, connections: [] },
+  { id: 'booking-engine', name: 'Moteur de réservation', category: 'booking',    icon: 'Calendar',        x: 49, y: 14, connections: ['site-internet', 'psp'] },
+  { id: 'site-internet',  name: 'Site internet',         category: 'sales',      icon: 'Globe',           x: 63, y: 14, connections: ['moteur-resto'] },
+  { id: 'moteur-resto',   name: 'Moteur résa resto',     category: 'restaurant', icon: 'UtensilsCrossed', x: 77, y: 14, connections: [] },
+  { id: 'psp',            name: 'PSP',                   category: 'customer',   icon: 'CreditCard',      x: 57, y: 34, connections: [] },
+  { id: 'compta',         name: 'Comptabilité',          category: 'management', icon: 'Calculator',      x: 70, y: 34, connections: [] },
+  { id: 'crm',            name: 'CRM',                   category: 'management', icon: 'Users',           x: 77, y: 52, connections: [] },
+  { id: 'pos',            name: 'POS restaurant',        category: 'restaurant', icon: 'UtensilsCrossed', x: 23, y: 67, connections: [] },
+  { id: 'rms',            name: 'RMS',                   category: 'management', icon: 'TrendingUp',      x: 37, y: 77, connections: [] },
+  { id: 'spa',            name: 'SPA',                   category: 'wellness',   icon: 'Sparkles',        x: 57, y: 77, connections: [] },
+  { id: 'exp-client',     name: 'Exp client in-house',   category: 'customer',   icon: 'Star',            x: 71, y: 77, connections: [] },
 ];
 
 const SOCLE_DESCRIPTIONS: Record<string, string> = {
@@ -1020,10 +1020,12 @@ export function HotelEcosystem() {
       {/* ══════════ HEADER COMMERCIAL ══════════ */}
       <div className="mb-3 md:mb-6">
         <div className="flex items-center justify-between gap-2 mb-3 px-3 sm:px-5 py-2 bg-white rounded-xl shadow-lg border-2 border-slate-200">
+          {/* Brand */}
           <div className="flex flex-col leading-tight flex-shrink-0">
             <span className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent whitespace-nowrap">Océane Habonneau</span>
             <span className="text-[9px] sm:text-xs text-slate-500 font-medium tracking-wide hidden sm:block">Flux &amp; Automatisations</span>
           </div>
+          {/* Nav — icônes seules sur sm, icône+texte sur md+ */}
           <nav className="hidden sm:flex items-center gap-1 md:gap-2 text-[11px] md:text-sm font-medium text-slate-600">
             <a href="#ecosystem" className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
               <Layers className="w-3.5 h-3.5 flex-shrink-0" /><span className="hidden md:inline whitespace-nowrap">Écosystème</span>
@@ -1035,11 +1037,22 @@ export function HotelEcosystem() {
               <Radio className="w-3.5 h-3.5 flex-shrink-0" /><span className="hidden md:inline whitespace-nowrap">Diagnostic</span>
             </button>
           </nav>
-          <a href="https://calendar.app.google/cKNAVTh1TFacNkXs6" target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-[11px] sm:text-xs md:text-sm font-bold rounded-lg hover:from-amber-500 hover:to-amber-600 transition-all shadow hover:shadow-md hover:-translate-y-0.5 whitespace-nowrap flex-shrink-0">
-            <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-            <span className="hidden sm:inline">Audit Gratuit</span><span className="sm:hidden">RDV</span>
-          </a>
+          {/* Right: CTA + burger mobile */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <a href="https://calendar.app.google/cKNAVTh1TFacNkXs6" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-[11px] sm:text-xs md:text-sm font-bold rounded-lg hover:from-amber-500 hover:to-amber-600 transition-all shadow hover:shadow-md hover:-translate-y-0.5 whitespace-nowrap">
+              <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="hidden sm:inline">Audit Gratuit</span><span className="sm:hidden">RDV</span>
+            </a>
+            {/* Burger — mobile uniquement, ouvre le drawer de navigation */}
+            <button
+              onClick={() => setMobileDrawerOpen(true)}
+              className="sm:hidden w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors flex-shrink-0"
+              aria-label="Menu"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+          </div>
         </div>
         <div className="text-center hidden sm:block">
           <h1 className="text-xl sm:text-2xl md:text-4xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold leading-tight">Scannez la rentabilité de votre environnement technologique.</h1>
