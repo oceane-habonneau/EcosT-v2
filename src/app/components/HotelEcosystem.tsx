@@ -1018,27 +1018,27 @@ export function HotelEcosystem() {
       )}
 
       {/* ══════════ HEADER COMMERCIAL ══════════ */}
-      <div className="mb-6 md:mb-10">
+      <div className="mb-3 md:mb-6">
         {/* Nav Bar */}
-        <div className="flex items-center justify-between flex-wrap gap-3 mb-6 px-4 sm:px-6 py-3 sm:py-4 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
+        <div className="flex items-center justify-between gap-2 mb-3 px-3 sm:px-5 py-2 sm:py-3 bg-white rounded-xl shadow-lg border-2 border-slate-200">
           {/* Brand */}
-          <div className="flex flex-col leading-tight">
-            <span className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
+          <div className="flex flex-col leading-tight min-w-0">
+            <span className="text-sm sm:text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent truncate">
               Océane Habonneau
             </span>
-            <span className="text-xs sm:text-sm text-slate-500 font-medium tracking-wide">
+            <span className="text-[10px] sm:text-xs text-slate-500 font-medium tracking-wide hidden sm:block">
               Flux &amp; Automatisations
             </span>
           </div>
-          {/* Nav links - desktop */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <a href="#ecosystem" className="hover:text-slate-900 transition-colors">Écosystème</a>
-            <a href="#services" className="hover:text-slate-900 transition-colors">Services</a>
+          {/* Nav links - visibles dès sm */}
+          <nav className="flex items-center gap-3 sm:gap-6 text-[11px] sm:text-sm font-medium text-slate-600">
+            <a href="#ecosystem" className="hover:text-slate-900 transition-colors whitespace-nowrap">Écosystème</a>
+            <a href="#services" className="hover:text-slate-900 transition-colors whitespace-nowrap hidden sm:block">Services</a>
             <button
               onClick={startWizard}
-              className="hover:text-slate-900 transition-colors"
+              className="hover:text-slate-900 transition-colors whitespace-nowrap hidden md:block"
             >
-              Lancer mon diagnostic
+              Diagnostic
             </button>
           </nav>
           {/* CTA Button */}
@@ -1046,19 +1046,20 @@ export function HotelEcosystem() {
             href="https://calendar.app.google/cKNAVTh1TFacNkXs6"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-sm sm:text-base font-bold rounded-xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+            className="inline-flex items-center gap-1.5 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-[11px] sm:text-sm font-bold rounded-xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap flex-shrink-0"
           >
-            <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="hidden xs:inline">Prendre RDV /</span> Audit Gratuit
+            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Audit Gratuit</span>
+            <span className="sm:hidden">RDV</span>
           </a>
         </div>
 
-        {/* Hero tagline */}
-        <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl md:text-5xl mb-4 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold leading-tight">
+        {/* Hero tagline — masqué sur mobile pour gagner de l'espace */}
+        <div className="text-center hidden sm:block">
+          <h1 className="text-xl sm:text-2xl md:text-4xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold leading-tight">
             Scannez la rentabilité de votre environnement technologique.
           </h1>
-          <p className="text-sm sm:text-base md:text-lg text-slate-600">
+          <p className="text-xs sm:text-sm md:text-base text-slate-600">
             <strong>Identifiez en 2 minutes les ruptures de flux qui saturent vos équipes et freinent vos réservations directes.</strong>
           </p>
         </div>
@@ -1416,17 +1417,18 @@ export function HotelEcosystem() {
       )}
 
       {/* ══════════ COMMENT LIRE CE SCHÉMA ══════════ */}
-      <div className="mb-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
+      <div className="mb-4 p-3 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
         <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Comment utiliser cet outil ?</p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Scroll horizontal sur mobile, grille sur desktop */}
+        <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
           {[
             { n: '1', title: 'Diagnostiquez', desc: 'Utilisez nos Socles de référence pour situer votre établissement.' },
             { n: '2', title: 'Analysez', desc: 'Un socle est cohérent quand les flux sont tracés. Un outil isolé est une source de perte de temps.' },
             { n: '3', title: 'Optimisez', desc: 'Visez le score de 100% pour garantir une automatisation totale de votre parcours client.' },
             { n: '4', title: 'Bénéfice pour vous', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
           ].map(step => (
-            <div key={step.n} className="flex items-start gap-2.5">
-              <div className="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-md">
+            <div key={step.n} className="flex items-start gap-2.5 min-w-[200px] sm:min-w-[220px] lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink">
+              <div className="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-md mt-0.5">
                 {step.n}
               </div>
               <div>
@@ -1455,7 +1457,7 @@ export function HotelEcosystem() {
       )}
 
       {/* Ecosystem Diagram */}
-      <div ref={diagramRef} className="relative bg-slate-50 rounded-2xl md:rounded-3xl shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none" style={{ padding: '80px 24px' }}>
+      <div ref={diagramRef} className="relative bg-slate-50 rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-12 lg:p-16 shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none">
 
         {/* ══════════ PANNEAU SCORE GLASSMORPHISM (Desktop) / STICKY PASTILLE (Mobile) ══════════ */}
         <div className="hidden md:block">
@@ -1463,7 +1465,7 @@ export function HotelEcosystem() {
             className={`
               absolute top-4 right-4 z-[100] 
               transition-all duration-500 ease-in-out
-              ${scorePanelOpen ? 'w-60 opacity-100' : 'w-20 opacity-90'}
+              ${scorePanelOpen ? 'w-80 opacity-100' : 'w-20 opacity-90'}
             `}
           >
             {/* Toggle button */}
@@ -1490,16 +1492,10 @@ export function HotelEcosystem() {
 
             {/* Panel glassmorphism ouvert */}
             {scorePanelOpen && (
-              <div className="rounded-3xl shadow-2xl overflow-hidden" style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(248,250,252,0.65) 100%)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.5)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8)'
-              }}>
+              <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-slate-200/50 overflow-hidden">
                 {/* Score principal */}
-                <div className="px-4 py-4 text-center border-b border-white/30">
-                  <div className="text-5xl font-black mb-1" style={{ color: diagnostic.barColor }}>
+                <div className="px-6 py-6 text-center border-b border-slate-200/50">
+                  <div className="text-6xl font-black mb-1" style={{ color: diagnostic.barColor }}>
                     {pct}%
                   </div>
                   <p className={`text-sm font-bold uppercase tracking-wide mb-1 ${diagnostic.color}`}>
@@ -1523,7 +1519,7 @@ export function HotelEcosystem() {
                 </div>
 
                 {/* Barre de progression fine */}
-                <div className="px-4 py-2">
+                <div className="px-6 py-3">
                   <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-700 ease-out"
@@ -1542,13 +1538,7 @@ export function HotelEcosystem() {
 
                 {/* Outils vitaux manquants */}
                 {missingVitalTools.length > 0 && (
-                  <div className="mx-4 mb-3 p-3 rounded-2xl" style={{
-                    background: 'linear-gradient(135deg, rgba(254,242,242,0.85) 0%, rgba(255,237,237,0.70) 100%)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(252,165,165,0.5)',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)'
-                  }}>
+                  <div className="mx-6 mb-3 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-2xl">
                     <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-2">
                       Outils absents
                     </p>
@@ -1576,13 +1566,7 @@ export function HotelEcosystem() {
 
                 {/* Alertes flux critiques */}
                 {alertPairs.length > 0 && (
-                  <div className="mx-4 mb-4 p-3 rounded-2xl" style={{
-                    background: 'linear-gradient(135deg, rgba(255,247,237,0.85) 0%, rgba(255,243,229,0.70) 100%)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(251,191,36,0.4)',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)'
-                  }}>
+                  <div className="mx-6 mb-4 p-3 bg-orange-50/80 backdrop-blur-sm border border-orange-200 rounded-2xl">
                     <p className="text-[10px] font-bold text-orange-600 uppercase tracking-wide mb-2">
                       ⚠️ Alertes critiques
                     </p>
@@ -1736,8 +1720,8 @@ export function HotelEcosystem() {
 
         <div 
           ref={containerRef}
-          className="relative w-full h-full"
-          style={{ minHeight: '400px', minWidth: '100%', touchAction: 'pan-x pan-y', overflow: 'visible' }}
+          className="relative w-full h-full overflow-auto"
+          style={{ minHeight: '400px', minWidth: '100%', touchAction: 'pan-x pan-y' }}
         >
           {/* Connection Lines SVG */}
           <svg 
@@ -1803,7 +1787,7 @@ export function HotelEcosystem() {
                 <div
                   key={system.id}
                   id={`node-${system.id}`}
-                  className={`group absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''} touch-none select-none ${isPMS ? 'w-[83px] sm:w-[110px]' : 'w-[68px] sm:w-[90px]'}`}
+                  className={`group absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''} touch-none select-none ${isPMS ? 'w-[58px] sm:w-[72px]' : 'w-[48px] sm:w-[60px]'}`}
                   style={{
                     left: `${pos.x}%`,
                     top: `${pos.y}%`,
@@ -1828,7 +1812,7 @@ export function HotelEcosystem() {
                 >
                   {/* Premium Card with glassmorphism + gradient + colored border */}
                   <div
-                    className={`relative rounded-2xl p-3 shadow-sm border-l-4 transition-all duration-300 ${
+                    className={`relative rounded-xl p-1.5 shadow-sm border-l-[3px] transition-all duration-300 ${
                       isDragging ? 'scale-110 shadow-2xl -translate-y-1' : 'hover:-translate-y-1 hover:shadow-lg'
                     } ${
                       isSelected ? 'ring-4 ring-purple-400 scale-110' : ''
@@ -1841,12 +1825,12 @@ export function HotelEcosystem() {
                       backdropFilter: 'blur(12px)',
                       WebkitBackdropFilter: 'blur(12px)',
                       border: `1px solid ${config.color}33`,
-                      borderLeft: `4px solid ${config.color}`,
-                      boxShadow: `0 2px 12px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)`
+                      borderLeft: `3px solid ${config.color}`,
+                      boxShadow: `0 2px 8px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)`
                     }}
                   >
                     {/* Category label */}
-                    <p className="text-[8px] uppercase tracking-wider text-slate-400 mb-1 font-semibold text-center">
+                    <p className="text-[6px] uppercase tracking-wider text-slate-400 mb-0.5 font-semibold text-center leading-none">
                       {config.label.split(' ')[0]}
                     </p>
 
@@ -1864,14 +1848,14 @@ export function HotelEcosystem() {
 
                     {/* Icon in circle with category color */}
                     <div 
-                      className={`${isPMS ? 'w-12 h-12' : 'w-10 h-10'} rounded-full mx-auto mb-2 flex items-center justify-center`}
+                      className={`${isPMS ? 'w-7 h-7' : 'w-6 h-6'} rounded-full mx-auto mb-1 flex items-center justify-center`}
                       style={{ backgroundColor: config.color + '15' }}
                     >
-                      <Icon className={`${isPMS ? 'w-6 h-6' : 'w-5 h-5'}`} style={{ color: config.color }} />
+                      <Icon className={`${isPMS ? 'w-3.5 h-3.5' : 'w-3 h-3'}`} style={{ color: config.color }} />
                     </div>
 
                     {/* Title */}
-                    <h3 className={`${isPMS ? 'text-[11px] font-bold' : 'text-[10px] font-semibold'} text-center text-slate-700 leading-tight`}>
+                    <h3 className={`${isPMS ? 'text-[9px] font-bold' : 'text-[8px] font-semibold'} text-center text-slate-700 leading-tight`}>
                       {editingId === system.id ? (
                         <input
                           type="text"
