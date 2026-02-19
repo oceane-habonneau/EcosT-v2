@@ -1019,9 +1019,8 @@ export function HotelEcosystem() {
 
       {/* ══════════ HEADER COMMERCIAL ══════════ */}
       <div className="mb-3 md:mb-6">
-        {/* Nav Bar — une seule ligne, tout visible */}
+        {/* Nav Bar */}
         <div className="flex items-center justify-between gap-2 mb-3 px-3 sm:px-5 py-2 bg-white rounded-xl shadow-lg border-2 border-slate-200">
-
           {/* Brand */}
           <div className="flex flex-col leading-tight flex-shrink-0">
             <span className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent whitespace-nowrap">
@@ -1031,45 +1030,42 @@ export function HotelEcosystem() {
               Flux &amp; Automatisations
             </span>
           </div>
-
-          {/* Nav ancres — icônes + label sur md, icône seule sur sm, dropdown sur xs */}
-          <nav className="hidden sm:flex items-center gap-1 md:gap-3 text-[11px] md:text-sm font-medium text-slate-600">
-            <a href="#ecosystem" className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap">
+          {/* Nav ancres — icône+label sur md, icône seule sur sm */}
+          <nav className="hidden sm:flex items-center gap-1 md:gap-2 text-[11px] md:text-sm font-medium text-slate-600">
+            <a href="#ecosystem" className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
               <Layers className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="hidden md:inline">Écosystème</span>
+              <span className="hidden md:inline whitespace-nowrap">Écosystème</span>
             </a>
-            <a href="#services" className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap">
+            <a href="#services" className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
               <Wrench className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="hidden md:inline">Services</span>
+              <span className="hidden md:inline whitespace-nowrap">Services</span>
             </a>
-            <button
-              onClick={startWizard}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
-            >
+            <button onClick={startWizard} className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
               <Radio className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="hidden md:inline">Diagnostic</span>
+              <span className="hidden md:inline whitespace-nowrap">Diagnostic</span>
             </button>
           </nav>
-
-          {/* Right side : CTA + burger mobile */}
+          {/* CTA + burger mobile */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <a
               href="https://calendar.app.google/cKNAVTh1TFacNkXs6"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-[11px] sm:text-xs md:text-sm font-bold rounded-lg hover:from-amber-500 hover:to-amber-600 transition-all shadow hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-[11px] sm:text-xs md:text-sm font-bold rounded-lg hover:from-amber-500 hover:to-amber-600 transition-all shadow hover:shadow-md hover:-translate-y-0.5 whitespace-nowrap"
             >
-              <Calendar className="w-3.5 h-3.5" />
-              <span className="hidden xs:inline sm:hidden md:inline">Audit Gratuit</span>
-              <span className="xs:hidden sm:inline md:hidden">RDV</span>
+              <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="hidden sm:inline">Audit Gratuit</span>
+              <span className="sm:hidden">RDV</span>
             </a>
-            {/* Burger — sm only pour afficher les ancres */}
-            <button
-              onClick={() => setMobileNavOpen?.(o => !o)}
-              className="sm:hidden w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600"
-            >
-              <Menu className="w-4 h-4" />
-            </button>
+            {/* Burger mobile */}
+            <div className="relative sm:hidden">
+              <button
+                onClick={() => setScorePanelOpen(o => !o)}
+                className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600"
+              >
+                <Menu className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1447,25 +1443,25 @@ export function HotelEcosystem() {
           <div className="mb-4 p-3 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
             <div className="flex items-center justify-between mb-3">
               <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">Comment utiliser cet outil ?</p>
-              {/* Flèche hint mobile */}
-              <span className="sm:hidden flex items-center gap-1 text-[10px] text-slate-400 font-medium">
-                Défiler <ChevronDown className="w-3 h-3 rotate-[-90deg]" />
+              <span className="sm:hidden flex items-center gap-1 text-[10px] text-amber-500 font-semibold">
+                Défiler <ChevronDown className="w-3 h-3 -rotate-90" />
               </span>
             </div>
-            {/* Mobile : scroll horizontal, chaque step prend toute la largeur visible */}
-            <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div
+              className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
               {stepsData.map((step, i) => (
-                <div key={step.n}
+                <div
+                  key={step.n}
                   className="flex items-start gap-2.5 snap-start flex-shrink-0 w-[calc(100vw-80px)] sm:w-auto lg:w-auto lg:flex-shrink"
-                  style={{ minWidth: 0 }}>
+                >
                   <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-md mt-0.5">
                     {step.n}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1">
                     <p className="text-xs font-semibold text-slate-800 mb-1 leading-tight">{step.title}</p>
                     <p className="text-[11px] text-slate-500 leading-relaxed">{step.desc}</p>
-                    {/* Indicateur de position */}
                     <div className="flex gap-1 mt-2 lg:hidden">
                       {stepsData.map((_, j) => (
                         <span key={j} className={`h-1 rounded-full transition-all ${j === i ? 'w-4 bg-amber-400' : 'w-1.5 bg-slate-200'}`} />
@@ -1496,76 +1492,69 @@ export function HotelEcosystem() {
       )}
 
       {/* Ecosystem Diagram */}
-      <div ref={diagramRef} className="relative bg-slate-50 rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-12 lg:p-16 shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none">
+      <div ref={diagramRef} className="relative bg-slate-50 rounded-2xl md:rounded-3xl shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none" style={{ padding: '72px 20px', overflow: 'visible' }}>
 
-        {/* ══════════ PANNEAU SCORE GLASSMORPHISM (Desktop) / STICKY PASTILLE (Mobile) ══════════ */}
+        {/* ══════════ PANNEAU SCORE GLASSMORPHISM (Desktop) ══════════ */}
         <div className="hidden md:block">
           <div
-            className={`
-              absolute top-4 right-4 z-[100] 
-              transition-all duration-500 ease-in-out
-              ${scorePanelOpen ? 'w-80 opacity-100' : 'w-20 opacity-90'}
-            `}
+            className="absolute top-4 right-4 z-[100] transition-all duration-500 ease-in-out"
+            style={{ width: scorePanelOpen ? '232px' : 'auto' }}
           >
-            {/* Toggle button */}
+            {/* Header pill — toujours visible, sert de toggle */}
             <button
               onClick={() => setScorePanelOpen(o => !o)}
-              className="absolute -left-3 top-3 z-10 w-7 h-7 bg-white/90 backdrop-blur-md rounded-full shadow-xl border border-slate-200 flex items-center justify-center hover:scale-110 transition-transform"
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl shadow-xl border border-white/30 text-white transition-all duration-300 hover:brightness-110"
+              style={{
+                background: `linear-gradient(135deg, ${diagnostic.barColor}ee, ${diagnostic.barColor})`,
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                minWidth: '120px'
+              }}
             >
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-sm font-black leading-none whitespace-nowrap">Score {pct}%</span>
+                {scorePanelOpen && (
+                  <span className="text-[10px] font-semibold uppercase tracking-wide opacity-80 truncate hidden lg:block">
+                    {diagnostic.label}
+                  </span>
+                )}
+              </div>
               <ChevronUpIcon
-                className="w-4 h-4 transition-transform duration-300 text-slate-600"
-                style={{ transform: scorePanelOpen ? 'rotate(-90deg)' : 'rotate(90deg)' }}
+                className="w-3.5 h-3.5 opacity-90 flex-shrink-0 transition-transform duration-300"
+                style={{ transform: scorePanelOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
               />
             </button>
 
-            {/* Pastille collapsed */}
-            {!scorePanelOpen && (
-              <div
-                className="w-20 h-20 rounded-3xl shadow-2xl flex flex-col items-center justify-center text-white font-black backdrop-blur-lg border border-white/20 transition-all duration-700"
-                style={{ background: `linear-gradient(135deg, ${diagnostic.barColor}dd, ${diagnostic.barColor})` }}
-              >
-                <span className="text-3xl">{pct}</span>
-                <span className="text-xs font-medium">%</span>
-              </div>
-            )}
-
-            {/* Panel glassmorphism ouvert */}
+            {/* Panel body */}
             {scorePanelOpen && (
-              <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-slate-200/50 overflow-hidden">
-                {/* Score principal */}
-                <div className="px-6 py-6 text-center border-b border-slate-200/50">
-                  <div className="text-6xl font-black mb-1" style={{ color: diagnostic.barColor }}>
-                    {pct}%
-                  </div>
-                  <p className={`text-sm font-bold uppercase tracking-wide mb-1 ${diagnostic.color}`}>
-                    {diagnostic.label}
-                  </p>
-                  
-                  {/* Bouton détails */}
+              <div className="mt-1.5 rounded-2xl shadow-2xl overflow-hidden" style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(248,250,252,0.75) 100%)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.5)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8)'
+              }}>
+                {/* Score */}
+                <div className="px-4 py-3 text-center border-b border-white/40">
+                  <div className="text-4xl font-black mb-0.5" style={{ color: diagnostic.barColor }}>{pct}%</div>
+                  <p className={`text-[11px] font-bold uppercase tracking-wide ${diagnostic.color}`}>{diagnostic.label}</p>
                   <button
                     onClick={() => setHealthDetailsExpanded(e => !e)}
-                    className="text-xs text-slate-500 hover:text-slate-700 underline mt-1 transition-colors"
+                    className="text-[10px] text-slate-400 hover:text-slate-600 underline mt-1 transition-colors"
                   >
-                    {healthDetailsExpanded ? '− Masquer détails' : '+ Voir détails'}
+                    {healthDetailsExpanded ? '− Masquer' : '+ Détails'}
                   </button>
-                  
-                  {/* Description collapsible */}
                   {healthDetailsExpanded && (
-                    <p className="text-xs text-slate-600 leading-relaxed mt-3 px-2">
-                      {diagnostic.desc}
-                    </p>
+                    <p className="text-[10px] text-slate-500 leading-relaxed mt-2 px-1">{diagnostic.desc}</p>
                   )}
                 </div>
 
-                {/* Barre de progression fine */}
-                <div className="px-6 py-3">
-                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-700 ease-out"
-                      style={{ width: `${pct}%`, backgroundColor: diagnostic.barColor }}
-                    />
+                {/* Barre */}
+                <div className="px-4 py-2.5">
+                  <div className="w-full h-1.5 bg-slate-200/60 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: diagnostic.barColor }} />
                   </div>
-                  <div className="flex justify-between text-[10px] text-slate-400 mt-1.5">
+                  <div className="flex justify-between text-[9px] text-slate-400 mt-1">
                     <span>0%</span>
                     <span className="text-slate-600 font-semibold">
                       {maxScore > 0 ? `${Math.round((pct * maxScore) / 100)} / ${maxScore} pts` : '—'}
@@ -1575,16 +1564,17 @@ export function HotelEcosystem() {
                   </div>
                 </div>
 
-                {/* Outils vitaux manquants */}
+                {/* Outils manquants */}
                 {missingVitalTools.length > 0 && (
-                  <div className="mx-6 mb-3 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-2xl">
-                    <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-2">
-                      Outils absents
-                    </p>
+                  <div className="mx-3 mb-2.5 p-2.5 rounded-xl" style={{
+                    background: 'linear-gradient(135deg, rgba(254,242,242,0.9), rgba(255,237,237,0.75))',
+                    border: '1px solid rgba(252,165,165,0.5)'
+                  }}>
+                    <p className="text-[9px] font-bold text-red-600 uppercase tracking-wide mb-1.5">Outils absents</p>
                     {missingVitalTools.map(toolId => (
-                      <div key={toolId} className="flex items-center gap-2 mb-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
-                        <span className="text-xs text-red-700 font-medium">
+                      <div key={toolId} className="flex items-center gap-1.5 mb-1">
+                        <span className="w-1 h-1 rounded-full bg-red-500 flex-shrink-0" />
+                        <span className="text-[10px] text-red-700 font-medium">
                           {toolId === 'booking-engine' && 'Moteur de Réservation'}
                           {toolId === 'channel-manager' && 'Channel Manager'}
                           {toolId === 'pms' && 'PMS'}
@@ -1595,20 +1585,20 @@ export function HotelEcosystem() {
                     ))}
                     <button
                       onClick={() => setShowAddModal(true)}
-                      className="w-full mt-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5"
+                      className="w-full mt-1.5 px-2 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
                     >
-                      <Plus className="w-3.5 h-3.5" />
-                      Compléter mon socle
+                      <Plus className="w-3 h-3" /> Compléter mon socle
                     </button>
                   </div>
                 )}
 
-                {/* Alertes flux critiques */}
+                {/* Alertes */}
                 {alertPairs.length > 0 && (
-                  <div className="mx-6 mb-4 p-3 bg-orange-50/80 backdrop-blur-sm border border-orange-200 rounded-2xl">
-                    <p className="text-[10px] font-bold text-orange-600 uppercase tracking-wide mb-2">
-                      ⚠️ Alertes critiques
-                    </p>
+                  <div className="mx-3 mb-3 p-2.5 rounded-xl" style={{
+                    background: 'linear-gradient(135deg, rgba(255,247,237,0.9), rgba(255,243,229,0.75))',
+                    border: '1px solid rgba(251,191,36,0.4)'
+                  }}>
+                    <p className="text-[9px] font-bold text-orange-600 uppercase tracking-wide mb-1.5">⚠️ Alertes critiques</p>
                     {alertPairs.slice(0, 2).map(({ a, b }) => {
                       let message = '';
                       const pairKey = [a, b].sort().join('|');
@@ -1621,16 +1611,15 @@ export function HotelEcosystem() {
                       } else {
                         message = `${allSystems.find(s => s.id === a)?.name || a} → ${allSystems.find(s => s.id === b)?.name || b}`;
                       }
-                      
                       return (
-                        <div key={`${a}-${b}`} className="flex items-start gap-2 mb-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse flex-shrink-0 mt-1" />
-                          <p className="text-xs text-orange-700 font-medium leading-tight">{message}</p>
+                        <div key={`${a}-${b}`} className="flex items-start gap-1.5 mb-1">
+                          <span className="w-1 h-1 rounded-full bg-orange-500 animate-pulse flex-shrink-0 mt-1" />
+                          <p className="text-[10px] text-orange-700 font-medium leading-tight">{message}</p>
                         </div>
                       );
                     })}
                     {alertPairs.length > 2 && (
-                      <p className="text-xs text-orange-500 mt-2">+{alertPairs.length - 2} autre(s)</p>
+                      <p className="text-[9px] text-orange-500 mt-1">+{alertPairs.length - 2} autre(s)</p>
                     )}
                   </div>
                 )}
@@ -1641,14 +1630,14 @@ export function HotelEcosystem() {
 
         {/* ══════════ STICKY PASTILLE MOBILE + MODAL SANTÉ ══════════ */}
         <div className="md:hidden">
-          {/* Sticky pastille en haut à droite */}
+          {/* Pastille positionnée EN BAS À DROITE pour ne pas gêner le burger en haut */}
           <button
             onClick={() => setMobileHealthModalOpen(true)}
-            className="fixed top-4 right-4 z-[100] w-16 h-16 rounded-2xl shadow-2xl flex flex-col items-center justify-center text-white font-black backdrop-blur-lg border border-white/20 transition-all"
-            style={{ background: `linear-gradient(135deg, ${diagnostic.barColor}dd, ${diagnostic.barColor})` }}
+            className="fixed bottom-5 right-4 z-[100] flex items-center gap-2 px-3 py-2 rounded-xl shadow-2xl border border-white/30 text-white font-black backdrop-blur-lg transition-all"
+            style={{ background: `linear-gradient(135deg, ${diagnostic.barColor}ee, ${diagnostic.barColor})` }}
           >
-            <span className="text-2xl">{pct}</span>
-            <span className="text-[10px] font-medium">%</span>
+            <span className="text-base font-black leading-none">Score {pct}%</span>
+            <ChevronUpIcon className="w-4 h-4 opacity-80" style={{ transform: 'rotate(180deg)' }} />
           </button>
 
           {/* Modal plein écran */}
@@ -1759,8 +1748,8 @@ export function HotelEcosystem() {
 
         <div 
           ref={containerRef}
-          className="relative w-full h-full overflow-auto"
-          style={{ minHeight: '400px', minWidth: '100%', touchAction: 'pan-x pan-y' }}
+          className="relative w-full h-full"
+          style={{ minHeight: '400px', minWidth: '100%', touchAction: 'pan-x pan-y', overflow: 'visible' }}
         >
           {/* Connection Lines SVG */}
           <svg 
@@ -1826,7 +1815,7 @@ export function HotelEcosystem() {
                 <div
                   key={system.id}
                   id={`node-${system.id}`}
-                  className={`group absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''} touch-none select-none ${isPMS ? 'w-[60px] sm:w-[83px] md:w-[110px]' : 'w-[50px] sm:w-[68px] md:w-[90px]'}`}
+                  className={`group absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''} touch-none select-none ${isPMS ? 'w-[60px] sm:w-[75px] md:w-[110px]' : 'w-[50px] sm:w-[62px] md:w-[90px]'}`}
                   style={{
                     left: `${pos.x}%`,
                     top: `${pos.y}%`,
@@ -1851,7 +1840,7 @@ export function HotelEcosystem() {
                 >
                   {/* Premium Card */}
                   <div
-                    className={`relative rounded-2xl p-1.5 sm:p-2 md:p-3 shadow-sm border-l-[3px] md:border-l-4 transition-all duration-300 ${
+                    className={`relative rounded-xl md:rounded-2xl p-1.5 md:p-3 shadow-sm transition-all duration-300 ${
                       isDragging ? 'scale-110 shadow-2xl -translate-y-1' : 'hover:-translate-y-1 hover:shadow-lg'
                     } ${
                       isSelected ? 'ring-4 ring-purple-400 scale-110' : ''
@@ -1859,8 +1848,7 @@ export function HotelEcosystem() {
                       hasConnectionToSelected ? 'ring-2 ring-purple-200' : ''
                     }`}
                     style={{
-                      borderLeftColor: config.color,
-                      background: `linear-gradient(135deg, rgba(255,255,255,0.82) 0%, ${config.color}0d 100%)`,
+                      background: `linear-gradient(135deg, rgba(255,255,255,0.85) 0%, ${config.color}0d 100%)`,
                       backdropFilter: 'blur(12px)',
                       WebkitBackdropFilter: 'blur(12px)',
                       border: `1px solid ${config.color}33`,
@@ -1869,7 +1857,7 @@ export function HotelEcosystem() {
                     }}
                   >
                     {/* Category label */}
-                    <p className="text-[6px] sm:text-[7px] md:text-[8px] uppercase tracking-wider text-slate-400 mb-0.5 md:mb-1 font-semibold text-center leading-none">
+                    <p className="text-[6px] md:text-[8px] uppercase tracking-wider text-slate-400 mb-0.5 md:mb-1 font-semibold text-center leading-none">
                       {config.label.split(' ')[0]}
                     </p>
 
@@ -1887,14 +1875,14 @@ export function HotelEcosystem() {
 
                     {/* Icon in circle with category color */}
                     <div 
-                      className={`${isPMS ? 'w-7 h-7 sm:w-9 sm:h-9 md:w-12 md:h-12' : 'w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10'} rounded-full mx-auto mb-1 md:mb-2 flex items-center justify-center`}
+                      className={`${isPMS ? 'w-7 h-7 md:w-12 md:h-12' : 'w-6 h-6 md:w-10 md:h-10'} rounded-full mx-auto mb-1 md:mb-2 flex items-center justify-center`}
                       style={{ backgroundColor: config.color + '15' }}
                     >
-                      <Icon className={`${isPMS ? 'w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-6 md:h-6' : 'w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5'}`} style={{ color: config.color }} />
+                      <Icon className={`${isPMS ? 'w-3.5 h-3.5 md:w-6 md:h-6' : 'w-3 h-3 md:w-5 md:h-5'}`} style={{ color: config.color }} />
                     </div>
 
                     {/* Title */}
-                    <h3 className={`${isPMS ? 'text-[8px] sm:text-[10px] md:text-[11px] font-bold' : 'text-[7px] sm:text-[9px] md:text-[10px] font-semibold'} text-center text-slate-700 leading-tight`}>
+                    <h3 className={`${isPMS ? 'text-[8px] md:text-[11px] font-bold' : 'text-[7px] md:text-[10px] font-semibold'} text-center text-slate-700 leading-tight`}>
                       {editingId === system.id ? (
                         <input
                           type="text"
@@ -1928,7 +1916,7 @@ export function HotelEcosystem() {
                       </div>
                     )}
 
-                    {/* Edit/Delete buttons - toujours visibles */}
+                    {/* Edit/Delete buttons — toujours visibles */}
                     {viewMode === 'admin' && (
                       <div className="absolute bottom-1 right-1 flex gap-0.5">
                         <button
