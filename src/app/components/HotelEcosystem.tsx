@@ -178,8 +178,8 @@ const socle3Signature: SystemNode[] = [
 
 const SOCLE_DESCRIPTIONS: Record<string, string> = {
   essentiel: 'Le minimum vital pour exister et vendre en ligne sans erreur.',
-  performance: 'L'automatisation au service de l'efficacité opérationnelle et de la facturation.',
-  signature: 'L'excellence technologique pour une expérience client personnalisée et data-driven.',
+  performance: 'L\'automatisation au service de l\'efficacité opérationnelle et de la facturation.',
+  signature: 'L\'excellence technologique pour une expérience client personnalisée et data-driven.',
 };
 
 const categoryConfig = {
