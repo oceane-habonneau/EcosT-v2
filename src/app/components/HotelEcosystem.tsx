@@ -1455,7 +1455,7 @@ export function HotelEcosystem() {
       )}
 
       {/* Ecosystem Diagram */}
-      <div ref={diagramRef} className="relative bg-slate-50 rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-12 lg:p-16 shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none">
+      <div ref={diagramRef} className="relative bg-slate-50 rounded-2xl md:rounded-3xl shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none" style={{ padding: '80px 24px' }}>
 
         {/* ══════════ PANNEAU SCORE GLASSMORPHISM (Desktop) / STICKY PASTILLE (Mobile) ══════════ */}
         <div className="hidden md:block">
@@ -1463,7 +1463,7 @@ export function HotelEcosystem() {
             className={`
               absolute top-4 right-4 z-[100] 
               transition-all duration-500 ease-in-out
-              ${scorePanelOpen ? 'w-80 opacity-100' : 'w-20 opacity-90'}
+              ${scorePanelOpen ? 'w-60 opacity-100' : 'w-20 opacity-90'}
             `}
           >
             {/* Toggle button */}
@@ -1490,10 +1490,16 @@ export function HotelEcosystem() {
 
             {/* Panel glassmorphism ouvert */}
             {scorePanelOpen && (
-              <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-slate-200/50 overflow-hidden">
+              <div className="rounded-3xl shadow-2xl overflow-hidden" style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(248,250,252,0.65) 100%)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.5)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8)'
+              }}>
                 {/* Score principal */}
-                <div className="px-6 py-6 text-center border-b border-slate-200/50">
-                  <div className="text-6xl font-black mb-1" style={{ color: diagnostic.barColor }}>
+                <div className="px-4 py-4 text-center border-b border-white/30">
+                  <div className="text-5xl font-black mb-1" style={{ color: diagnostic.barColor }}>
                     {pct}%
                   </div>
                   <p className={`text-sm font-bold uppercase tracking-wide mb-1 ${diagnostic.color}`}>
@@ -1517,7 +1523,7 @@ export function HotelEcosystem() {
                 </div>
 
                 {/* Barre de progression fine */}
-                <div className="px-6 py-3">
+                <div className="px-4 py-2">
                   <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-700 ease-out"
@@ -1536,7 +1542,13 @@ export function HotelEcosystem() {
 
                 {/* Outils vitaux manquants */}
                 {missingVitalTools.length > 0 && (
-                  <div className="mx-6 mb-3 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-2xl">
+                  <div className="mx-4 mb-3 p-3 rounded-2xl" style={{
+                    background: 'linear-gradient(135deg, rgba(254,242,242,0.85) 0%, rgba(255,237,237,0.70) 100%)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(252,165,165,0.5)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)'
+                  }}>
                     <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-2">
                       Outils absents
                     </p>
@@ -1564,7 +1576,13 @@ export function HotelEcosystem() {
 
                 {/* Alertes flux critiques */}
                 {alertPairs.length > 0 && (
-                  <div className="mx-6 mb-4 p-3 bg-orange-50/80 backdrop-blur-sm border border-orange-200 rounded-2xl">
+                  <div className="mx-4 mb-4 p-3 rounded-2xl" style={{
+                    background: 'linear-gradient(135deg, rgba(255,247,237,0.85) 0%, rgba(255,243,229,0.70) 100%)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(251,191,36,0.4)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)'
+                  }}>
                     <p className="text-[10px] font-bold text-orange-600 uppercase tracking-wide mb-2">
                       ⚠️ Alertes critiques
                     </p>
@@ -1718,8 +1736,8 @@ export function HotelEcosystem() {
 
         <div 
           ref={containerRef}
-          className="relative w-full h-full overflow-auto"
-          style={{ minHeight: '400px', minWidth: '100%', touchAction: 'pan-x pan-y' }}
+          className="relative w-full h-full"
+          style={{ minHeight: '400px', minWidth: '100%', touchAction: 'pan-x pan-y', overflow: 'visible' }}
         >
           {/* Connection Lines SVG */}
           <svg 
@@ -1808,16 +1826,24 @@ export function HotelEcosystem() {
                   }}
                   onMouseLeave={() => setTooltip(prev => ({ ...prev, visible: false }))}
                 >
-                  {/* Premium Card with left border */}
+                  {/* Premium Card with glassmorphism + gradient + colored border */}
                   <div
-                    className={`relative bg-white rounded-2xl p-3 shadow-sm border-l-4 transition-all duration-300 ${
+                    className={`relative rounded-2xl p-3 shadow-sm border-l-4 transition-all duration-300 ${
                       isDragging ? 'scale-110 shadow-2xl -translate-y-1' : 'hover:-translate-y-1 hover:shadow-lg'
                     } ${
                       isSelected ? 'ring-4 ring-purple-400 scale-110' : ''
                     } ${
                       hasConnectionToSelected ? 'ring-2 ring-purple-200' : ''
                     }`}
-                    style={{ borderLeftColor: config.color }}
+                    style={{
+                      borderLeftColor: config.color,
+                      background: `linear-gradient(135deg, rgba(255,255,255,0.82) 0%, ${config.color}0d 100%)`,
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
+                      border: `1px solid ${config.color}33`,
+                      borderLeft: `4px solid ${config.color}`,
+                      boxShadow: `0 2px 12px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)`
+                    }}
                   >
                     {/* Category label */}
                     <p className="text-[8px] uppercase tracking-wider text-slate-400 mb-1 font-semibold text-center">
