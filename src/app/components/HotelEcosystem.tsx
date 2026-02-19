@@ -829,7 +829,7 @@ export function HotelEcosystem() {
           <div className="text-center px-6 py-8 max-w-md">
             <div className="mb-8">
               <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 leading-tight">
-                Évaluez votre<br />Écosystème IT
+                Calculer mon score d’automatisation
               </h2>
               <p className="text-base text-slate-200 leading-relaxed">
                 Répondez à quelques questions pour obtenir un diagnostic personnalisé de votre infrastructure hôtelière.
@@ -845,7 +845,7 @@ export function HotelEcosystem() {
               onClick={skipWizard}
               className="text-sm text-slate-300 hover:text-white underline underline-offset-4 transition-colors"
             >
-              Passer et explorer l'outil manuellement
+              Explorer Manuellement. Expert
             </button>
           </div>
         </div>
@@ -1038,10 +1038,10 @@ export function HotelEcosystem() {
         {/* Hero tagline */}
         <div className="text-center">
           <h1 className="text-2xl sm:text-3xl md:text-5xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold">
-            Écosystème Hôtelier
+            Scannez la rentabilité de votre environnement technologique.
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-slate-600">
-            <strong>Évaluez votre infrastructure</strong> : si votre écosystème n'atteint pas le <strong>Stack Simple</strong>, votre rentabilité est en péril. Entre les niveaux <strong>Intermédiaire et Avancé</strong>, identifiez dès maintenant les flux de données manquants pour débugger vos opérations et <strong>libérer vos équipes</strong> avant la saison.
+            <strong>Identifiez en 2 minutes les ruptures de flux qui saturent vos équipes et freinent vos réservations directes.</strong>
           </p>
         </div>
       </div>
@@ -1215,13 +1215,13 @@ export function HotelEcosystem() {
 
       {/* ══════════ COMMENT LIRE CE SCHÉMA ══════════ */}
       <div className="mb-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
-        <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Comment lire ce schéma ?</p>
+        <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Comment utiliser cet outil ?</p>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { n: '1', title: 'Chaque carte = un système', desc: 'Un logiciel ou une technologie installée dans votre hôtel, reliée aux autres par des flux de données.' },
-            { n: '2', title: 'Les lignes = des flux', desc: 'Chaque connexion représente un échange automatique de données — sans action manuelle de votre équipe.' },
-            { n: '3', title: 'Le PMS au centre', desc: 'Il orchestre tout et garantit la cohérence de vos données en temps réel entre tous les systèmes.' },
-            { n: '4', title: 'Survol = bénéfice concret', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
+            { n: '1', title: 'Diagnostiquez', desc: 'Utilisez nos Socles de référence pour situer votre établissement.' },
+            { n: '2', title: 'Analysez', desc: 'Un socle est cohérent quand les flux sont tracés. Un outil isolé est une source de perte de temps.' },
+            { n: '3', title: 'Optimisez', desc: 'Visez le score de 100% pour garantir une automatisation totale de votre parcours client.' },
+            { n: '4', title: 'Bénéfice pour vous', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
           ].map(step => (
             <div key={step.n} className="flex items-start gap-2.5">
               <div className="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-md">
