@@ -845,7 +845,7 @@ export function HotelEcosystem() {
               onClick={skipWizard}
               className="text-sm text-slate-300 hover:text-white underline underline-offset-4 transition-colors"
             >
-              Explorer Manuellement. Expert
+              Explorer Manuellement - Expert
             </button>
           </div>
         </div>
