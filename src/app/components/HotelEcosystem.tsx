@@ -539,6 +539,11 @@ export function HotelEcosystem() {
   const [wizardStep, setWizardStep] = useState<1 | 2>(1);
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
   const [selectedConnections, setSelectedConnections] = useState<Set<string>>(new Set());
+
+  // 📱 Mobile: drawer et modal santé plein écran
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [mobileHealthModalOpen, setMobileHealthModalOpen] = useState(false);
+  const [healthDetailsExpanded, setHealthDetailsExpanded] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const diagramRef = useRef<HTMLDivElement>(null);
@@ -1059,11 +1064,11 @@ export function HotelEcosystem() {
         </div>
       </div>
 
-      {/* Admin Controls + Toolbar (always visible) */}
+      {/* Admin Controls + Toolbar */}
       {(true) && (
         <>
-          {/* ═══ TOOLBAR — pill radio buttons ═══ */}
-          <div className="mb-4 p-3 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
+          {/* ═══ TOOLBAR DESKTOP — pill radio buttons ═══ */}
+          <div className="hidden md:block mb-4 p-3 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
             <div className="flex flex-wrap gap-3 items-center justify-between">
 
               {/* ── Groupe Vue ── */}
@@ -1226,6 +1231,181 @@ export function HotelEcosystem() {
         </>
       )}{/* /toolbar wrapper */}
 
+      {/* ═══ MOBILE FAB + BOTTOM DRAWER ═══ */}
+      <div className="md:hidden">
+        {/* Floating Action Button */}
+        <button
+          onClick={() => setMobileDrawerOpen(true)}
+          className="fixed bottom-6 right-6 z-[90] w-14 h-14 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-white shadow-2xl flex items-center justify-center hover:scale-110 transition-transform"
+        >
+          <Settings className="w-6 h-6" />
+        </button>
+
+        {/* Bottom Drawer */}
+        {mobileDrawerOpen && (
+          <>
+            {/* Overlay */}
+            <div
+              className="fixed inset-0 z-[95] bg-black/50 backdrop-blur-sm"
+              onClick={() => setMobileDrawerOpen(false)}
+            />
+            
+            {/* Drawer */}
+            <div className="fixed bottom-0 left-0 right-0 z-[96] bg-white rounded-t-3xl shadow-2xl max-h-[80vh] overflow-y-auto">
+              {/* Handle */}
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="w-12 h-1.5 bg-slate-300 rounded-full" />
+              </div>
+
+              {/* Header */}
+              <div className="px-6 pb-4 border-b border-slate-200 flex items-center justify-between">
+                <h3 className="text-lg font-bold text-slate-800">Paramètres</h3>
+                <button
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
+                >
+                  <X className="w-5 h-5 text-slate-600" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 space-y-6">
+                {/* Vue */}
+                <div>
+                  <p className="text-xs uppercase tracking-widest font-semibold text-slate-400 mb-3">Vue</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setViewMode('admin')}
+                      className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-all ${
+                        viewMode === 'admin' 
+                          ? 'bg-slate-800 text-white shadow-lg' 
+                          : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      <Settings className="w-4 h-4 inline mr-2" />
+                      Admin
+                    </button>
+                    <button
+                      onClick={() => {
+                        setViewMode('public');
+                        setMode('move');
+                        setSelectedForLink(null);
+                      }}
+                      className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-all ${
+                        viewMode === 'public' 
+                          ? 'bg-slate-800 text-white shadow-lg' 
+                          : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      <Eye className="w-4 h-4 inline mr-2" />
+                      Publique
+                    </button>
+                  </div>
+                </div>
+
+                {viewMode === 'admin' && (
+                  <>
+                    {/* Mode */}
+                    <div>
+                      <p className="text-xs uppercase tracking-widest font-semibold text-slate-400 mb-3">Mode</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setMode('move')}
+                          className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-all ${
+                            mode === 'move' 
+                              ? 'bg-blue-600 text-white shadow-lg' 
+                              : 'bg-blue-50 text-blue-600'
+                          }`}
+                        >
+                          <Move className="w-4 h-4 inline mr-2" />
+                          Déplacement
+                        </button>
+                        <button
+                          onClick={() => setMode('link')}
+                          className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-all ${
+                            mode === 'link' 
+                              ? 'bg-blue-600 text-white shadow-lg' 
+                              : 'bg-blue-50 text-blue-600'
+                          }`}
+                        >
+                          <Link2 className="w-4 h-4 inline mr-2" />
+                          Liaison
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Socle */}
+                    <div>
+                      <p className="text-xs uppercase tracking-widest font-semibold text-slate-400 mb-3">Choisir mon Socle</p>
+                      <div className="space-y-2">
+                        {[
+                          { label: 'Essentiel', socle: socle1Essentiel, type: 'essentiel' as const },
+                          { label: 'Performance', socle: socle2Performance, type: 'performance' as const },
+                          { label: 'Signature', socle: socle3Signature, type: 'signature' as const },
+                        ].map(({ label, socle, type }) => (
+                          <button
+                            key={type}
+                            onClick={() => {
+                              loadSocle(socle, type);
+                              setMobileDrawerOpen(false);
+                            }}
+                            className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
+                              currentSocle === type 
+                                ? 'bg-emerald-600 text-white shadow-lg' 
+                                : 'bg-emerald-50 text-emerald-700'
+                            }`}
+                          >
+                            <Layers className="w-4 h-4 inline mr-2" />
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div>
+                      <p className="text-xs uppercase tracking-widest font-semibold text-slate-400 mb-3">Actions</p>
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => {
+                            setShowAddModal(true);
+                            setMobileDrawerOpen(false);
+                          }}
+                          className="w-full py-3 rounded-xl font-semibold text-sm bg-orange-500 text-white shadow-lg"
+                        >
+                          <Plus className="w-4 h-4 inline mr-2" />
+                          Ajouter un outil
+                        </button>
+                        <button
+                          onClick={() => {
+                            resetConnections();
+                            setMobileDrawerOpen(false);
+                          }}
+                          className="w-full py-3 rounded-xl font-semibold text-sm bg-slate-100 text-slate-700"
+                        >
+                          <Unlink className="w-4 h-4 inline mr-2" />
+                          Réinitialiser liaisons
+                        </button>
+                        <button
+                          onClick={() => {
+                            resetPositions();
+                            setMobileDrawerOpen(false);
+                          }}
+                          className="w-full py-3 rounded-xl font-semibold text-sm bg-slate-100 text-slate-700"
+                        >
+                          <RotateCcw className="w-4 h-4 inline mr-2" />
+                          Réinitialiser positions
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
       {/* ── Descriptif du socle actif (visible uniquement en mode admin) ── */}
       {viewMode === 'admin' && (
         <div className="mb-3 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
@@ -1277,148 +1457,264 @@ export function HotelEcosystem() {
       {/* Ecosystem Diagram */}
       <div ref={diagramRef} className="relative bg-slate-50 rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-12 lg:p-16 shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none">
 
-        {/* ══════════ PANNEAU SCORE LATÉRAL DÉPLIANT ══════════ */}
-        <div
-          className={`
-            absolute top-4 right-4 z-[100] 
-            transition-all duration-500 ease-in-out
-            ${scorePanelOpen ? 'w-72 opacity-100' : 'w-12 opacity-90'}
-          `}
-        >
-          {/* Toggle button — toujours visible */}
-          <button
-            onClick={() => setScorePanelOpen(o => !o)}
-            className="absolute -left-3 top-2 z-10 w-6 h-6 bg-white rounded-full shadow-lg border-2 flex items-center justify-center hover:scale-110 transition-transform"
-            style={{ borderColor: diagnostic.barColor }}
+        {/* ══════════ PANNEAU SCORE GLASSMORPHISM (Desktop) / STICKY PASTILLE (Mobile) ══════════ */}
+        <div className="hidden md:block">
+          <div
+            className={`
+              absolute top-4 right-4 z-[100] 
+              transition-all duration-500 ease-in-out
+              ${scorePanelOpen ? 'w-80 opacity-100' : 'w-20 opacity-90'}
+            `}
           >
-            <ChevronUpIcon
-              className="w-3.5 h-3.5 transition-transform duration-300"
-              style={{ color: diagnostic.barColor, transform: scorePanelOpen ? 'rotate(-90deg)' : 'rotate(90deg)' }}
-            />
+            {/* Toggle button */}
+            <button
+              onClick={() => setScorePanelOpen(o => !o)}
+              className="absolute -left-3 top-3 z-10 w-7 h-7 bg-white/90 backdrop-blur-md rounded-full shadow-xl border border-slate-200 flex items-center justify-center hover:scale-110 transition-transform"
+            >
+              <ChevronUpIcon
+                className="w-4 h-4 transition-transform duration-300 text-slate-600"
+                style={{ transform: scorePanelOpen ? 'rotate(-90deg)' : 'rotate(90deg)' }}
+              />
+            </button>
+
+            {/* Pastille collapsed */}
+            {!scorePanelOpen && (
+              <div
+                className="w-20 h-20 rounded-3xl shadow-2xl flex flex-col items-center justify-center text-white font-black backdrop-blur-lg border border-white/20 transition-all duration-700"
+                style={{ background: `linear-gradient(135deg, ${diagnostic.barColor}dd, ${diagnostic.barColor})` }}
+              >
+                <span className="text-3xl">{pct}</span>
+                <span className="text-xs font-medium">%</span>
+              </div>
+            )}
+
+            {/* Panel glassmorphism ouvert */}
+            {scorePanelOpen && (
+              <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-slate-200/50 overflow-hidden">
+                {/* Score principal */}
+                <div className="px-6 py-6 text-center border-b border-slate-200/50">
+                  <div className="text-6xl font-black mb-1" style={{ color: diagnostic.barColor }}>
+                    {pct}%
+                  </div>
+                  <p className={`text-sm font-bold uppercase tracking-wide mb-1 ${diagnostic.color}`}>
+                    {diagnostic.label}
+                  </p>
+                  
+                  {/* Bouton détails */}
+                  <button
+                    onClick={() => setHealthDetailsExpanded(e => !e)}
+                    className="text-xs text-slate-500 hover:text-slate-700 underline mt-1 transition-colors"
+                  >
+                    {healthDetailsExpanded ? '− Masquer détails' : '+ Voir détails'}
+                  </button>
+                  
+                  {/* Description collapsible */}
+                  {healthDetailsExpanded && (
+                    <p className="text-xs text-slate-600 leading-relaxed mt-3 px-2">
+                      {diagnostic.desc}
+                    </p>
+                  )}
+                </div>
+
+                {/* Barre de progression fine */}
+                <div className="px-6 py-3">
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-700 ease-out"
+                      style={{ width: `${pct}%`, backgroundColor: diagnostic.barColor }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-slate-400 mt-1.5">
+                    <span>0%</span>
+                    <span className="text-slate-600 font-semibold">
+                      {maxScore > 0 ? `${Math.round((pct * maxScore) / 100)} / ${maxScore} pts` : '—'}
+                      {penalty < 0 && <span className="text-red-600"> ({penalty})</span>}
+                    </span>
+                    <span>100%</span>
+                  </div>
+                </div>
+
+                {/* Outils vitaux manquants */}
+                {missingVitalTools.length > 0 && (
+                  <div className="mx-6 mb-3 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-2xl">
+                    <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-2">
+                      Outils absents
+                    </p>
+                    {missingVitalTools.map(toolId => (
+                      <div key={toolId} className="flex items-center gap-2 mb-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                        <span className="text-xs text-red-700 font-medium">
+                          {toolId === 'booking-engine' && 'Moteur de Réservation'}
+                          {toolId === 'channel-manager' && 'Channel Manager'}
+                          {toolId === 'pms' && 'PMS'}
+                          {toolId === 'site-internet' && 'Site Internet'}
+                          {toolId === 'ota' && 'OTA'}
+                        </span>
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => setShowAddModal(true)}
+                      className="w-full mt-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Compléter mon socle
+                    </button>
+                  </div>
+                )}
+
+                {/* Alertes flux critiques */}
+                {alertPairs.length > 0 && (
+                  <div className="mx-6 mb-4 p-3 bg-orange-50/80 backdrop-blur-sm border border-orange-200 rounded-2xl">
+                    <p className="text-[10px] font-bold text-orange-600 uppercase tracking-wide mb-2">
+                      ⚠️ Alertes critiques
+                    </p>
+                    {alertPairs.slice(0, 2).map(({ a, b }) => {
+                      let message = '';
+                      const pairKey = [a, b].sort().join('|');
+                      if (pairKey === ['pms', 'channel-manager'].sort().join('|')) {
+                        message = 'Flux de stock non synchronisé';
+                      } else if (pairKey === ['booking-engine', 'site-internet'].sort().join('|') || pairKey === ['pms', 'site-internet'].sort().join('|')) {
+                        message = 'Site non configuré pour vente directe';
+                      } else if (pairKey === ['booking-engine', 'psp'].sort().join('|') || pairKey === ['pms', 'psp'].sort().join('|')) {
+                        message = 'Paiement non sécurisé';
+                      } else {
+                        message = `${allSystems.find(s => s.id === a)?.name || a} → ${allSystems.find(s => s.id === b)?.name || b}`;
+                      }
+                      
+                      return (
+                        <div key={`${a}-${b}`} className="flex items-start gap-2 mb-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse flex-shrink-0 mt-1" />
+                          <p className="text-xs text-orange-700 font-medium leading-tight">{message}</p>
+                        </div>
+                      );
+                    })}
+                    {alertPairs.length > 2 && (
+                      <p className="text-xs text-orange-500 mt-2">+{alertPairs.length - 2} autre(s)</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ══════════ STICKY PASTILLE MOBILE + MODAL SANTÉ ══════════ */}
+        <div className="md:hidden">
+          {/* Sticky pastille en haut à droite */}
+          <button
+            onClick={() => setMobileHealthModalOpen(true)}
+            className="fixed top-4 right-4 z-[100] w-16 h-16 rounded-2xl shadow-2xl flex flex-col items-center justify-center text-white font-black backdrop-blur-lg border border-white/20 transition-all"
+            style={{ background: `linear-gradient(135deg, ${diagnostic.barColor}dd, ${diagnostic.barColor})` }}
+          >
+            <span className="text-2xl">{pct}</span>
+            <span className="text-[10px] font-medium">%</span>
           </button>
 
-          {/* Pastille % — visible quand fermé */}
-          {!scorePanelOpen && (
-            <div
-              className="w-16 h-16 rounded-xl shadow-2xl flex items-center justify-center text-white font-black text-lg border-2 border-white transition-colors duration-700"
-              style={{ backgroundColor: diagnostic.barColor }}
-            >
-              {pct}%
-            </div>
-          )}
-
-          {/* Panneau complet — visible quand ouvert */}
-          {scorePanelOpen && (
-            <div className="bg-white rounded-2xl shadow-2xl border-2 border-slate-200 overflow-hidden">
-              {/* Header coloré */}
+          {/* Modal plein écran */}
+          {mobileHealthModalOpen && (
+            <div className="fixed inset-0 z-[9999] bg-white overflow-y-auto">
+              {/* Header */}
               <div
-                className="px-3 py-2.5 flex items-center justify-between transition-colors duration-700"
-                style={{ backgroundColor: diagnostic.barColor }}
+                className="sticky top-0 px-6 py-4 flex items-center justify-between border-b border-slate-200"
+                style={{ background: `linear-gradient(135deg, ${diagnostic.barColor}22, transparent)` }}
               >
-                <span className="text-white text-[10px] font-bold tracking-wide uppercase">Score</span>
-                <span className="text-white text-base font-black">{pct}%</span>
+                <h2 className="text-lg font-black" style={{ color: diagnostic.barColor }}>
+                  Diagnostic
+                </h2>
+                <button
+                  onClick={() => setMobileHealthModalOpen(false)}
+                  className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center"
+                >
+                  <X className="w-5 h-5 text-slate-600" />
+                </button>
               </div>
 
-              {/* Barre de progression */}
-              <div className="px-3 pt-2 pb-1">
-                <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                  <div
-                    className="h-full rounded-full transition-all duration-700 ease-out"
-                    style={{ width: `${pct}%`, backgroundColor: diagnostic.barColor }}
-                  />
+              {/* Content */}
+              <div className="px-6 py-6">
+                {/* Score */}
+                <div className="text-center mb-6">
+                  <div className="text-7xl font-black mb-2" style={{ color: diagnostic.barColor }}>
+                    {pct}%
+                  </div>
+                  <p className={`text-base font-bold uppercase tracking-wide ${diagnostic.color}`}>
+                    {diagnostic.label}
+                  </p>
+                  <p className="text-sm text-slate-600 leading-relaxed mt-3">
+                    {diagnostic.desc}
+                  </p>
                 </div>
-                <div className="flex justify-between text-[9px] text-slate-400 mt-0.5">
-                  <span>0%</span>
-                  <span className="text-slate-500 font-medium">
+
+                {/* Progress */}
+                <div className="mb-6">
+                  <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{ width: `${pct}%`, backgroundColor: diagnostic.barColor }}
+                    />
+                  </div>
+                  <p className="text-center text-sm text-slate-600 mt-2 font-semibold">
                     {maxScore > 0 ? `${Math.round((pct * maxScore) / 100)} / ${maxScore} pts` : '—'}
                     {penalty < 0 && <span className="text-red-600"> ({penalty})</span>}
-                  </span>
-                  <span>100%</span>
+                  </p>
                 </div>
-              </div>
 
-              {/* Seuils visuels */}
-              <div className="px-3 pb-1.5 flex gap-0.5">
-                {[
-                  { label: 'Péril', max: 35, color: '#ef4444' },
-                  { label: 'Tension', max: 70, color: '#f97316' },
-                  { label: 'Perf', max: 95, color: '#10b981' },
-                  { label: 'Couture', max: 100, color: '#059669' },
-                ].map(s => (
-                  <div key={s.label} className="flex-1 text-center">
-                    <div
-                      className="h-0.5 rounded-full mb-0.5"
-                      style={{
-                        backgroundColor:
-                          pct <= s.max &&
-                          (s.label === 'Péril' ||
-                            pct > (s.label === 'Tension' ? 35 : s.label === 'Perf' ? 70 : 95))
-                            ? s.color
-                            : '#e2e8f0',
+                {/* Alerts */}
+                {missingVitalTools.length > 0 && (
+                  <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl">
+                    <p className="text-sm font-bold text-red-600 uppercase mb-3">Outils absents</p>
+                    {missingVitalTools.map(toolId => (
+                      <div key={toolId} className="flex items-center gap-2 mb-2">
+                        <span className="w-2 h-2 rounded-full bg-red-500" />
+                        <span className="text-sm text-red-700">
+                          {toolId === 'booking-engine' && 'Moteur de Réservation'}
+                          {toolId === 'channel-manager' && 'Channel Manager'}
+                          {toolId === 'pms' && 'PMS'}
+                          {toolId === 'site-internet' && 'Site Internet'}
+                          {toolId === 'ota' && 'OTA'}
+                        </span>
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => {
+                        setMobileHealthModalOpen(false);
+                        setShowAddModal(true);
                       }}
-                    />
-                    <span className="text-[8px] text-slate-400">{s.label}</span>
+                      className="w-full mt-3 px-4 py-3 bg-red-600 text-white text-sm font-bold rounded-xl"
+                    >
+                      <Plus className="w-4 h-4 inline mr-2" />
+                      Compléter mon socle
+                    </button>
                   </div>
-                ))}
+                )}
+
+                {alertPairs.length > 0 && (
+                  <div className="p-4 bg-orange-50 border border-orange-200 rounded-2xl">
+                    <p className="text-sm font-bold text-orange-600 uppercase mb-3">⚠️ Alertes critiques</p>
+                    {alertPairs.map(({ a, b }) => {
+                      let message = '';
+                      const pairKey = [a, b].sort().join('|');
+                      if (pairKey === ['pms', 'channel-manager'].sort().join('|')) {
+                        message = 'Flux de stock non synchronisé (Risque de surréservation)';
+                      } else if (pairKey === ['booking-engine', 'site-internet'].sort().join('|') || pairKey === ['pms', 'site-internet'].sort().join('|')) {
+                        message = 'Votre site internet n\'est pas configuré pour la vente directe';
+                      } else if (pairKey === ['booking-engine', 'psp'].sort().join('|') || pairKey === ['pms', 'psp'].sort().join('|')) {
+                        message = 'Risque d\'abandon de panier (Paiement non sécurisé)';
+                      } else {
+                        message = `${allSystems.find(s => s.id === a)?.name || a} → ${allSystems.find(s => s.id === b)?.name || b}`;
+                      }
+                      return (
+                        <div key={`${a}-${b}`} className="flex items-start gap-2 mb-2">
+                          <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse mt-1" />
+                          <p className="text-sm text-orange-700 leading-tight">{message}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-
-              {/* Diagnostic */}
-              <div className="px-3 pb-2 border-t border-slate-100 pt-1.5">
-                <p className={`text-[11px] font-bold mb-0.5 leading-tight ${diagnostic.color}`}>
-                  {diagnostic.label}
-                </p>
-                <p className="text-[10px] text-slate-500 leading-relaxed">{diagnostic.desc}</p>
-              </div>
-
-              {/* Outils vitaux manquants */}
-              {missingVitalTools.length > 0 && (
-                <div className="mx-3 mb-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-[9px] font-bold text-red-600 uppercase tracking-wide mb-1">
-                    Outils absents
-                  </p>
-                  {missingVitalTools.map(toolId => (
-                    <div key={toolId} className="flex items-center gap-1 mb-0.5">
-                      <span className="w-1 h-1 rounded-full bg-red-500 flex-shrink-0" />
-                      <span className="text-[9px] text-red-700 font-medium">
-                        {toolId === 'booking-engine' && 'Moteur de Réservation'}
-                        {toolId === 'channel-manager' && 'Channel Manager'}
-                        {toolId === 'pms' && 'PMS'}
-                        {toolId === 'site-internet' && 'Site Internet'}
-                        {toolId === 'ota' && 'OTA'}
-                      </span>
-                    </div>
-                  ))}
-                  {/* Bouton pour compléter le socle */}
-                  <button
-                    onClick={() => setShowAddModal(true)}
-                    className="w-full mt-2 px-2 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[9px] font-bold rounded-md transition-colors flex items-center justify-center gap-1"
-                  >
-                    <Plus className="w-3 h-3" />
-                    Compléter mon socle
-                  </button>
-                </div>
-              )}
-
-              {/* Connexions vitales manquantes avec messages spécifiques */}
-              {alertPairs.length > 0 && (
-                <div className="mx-3 mb-2 p-2 bg-orange-50 border border-orange-200 rounded-lg">
-                  <p className="text-[9px] font-bold text-orange-600 uppercase tracking-wide mb-1.5">
-                    ⚠️ Alertes flux critiques
-                  </p>
-                  {alertPairs.slice(0, 3).map(({ a, b }) => {
-                    // Messages spécifiques selon la paire
-                    let message = '';
-                    const pairKey = [a, b].sort().join('|');
-                    if (pairKey === ['pms', 'channel-manager'].sort().join('|')) {
-                      message = 'Flux de stock non synchronisé (Risque de surréservation)';
-                    } else if (pairKey === ['booking-engine', 'site-internet'].sort().join('|') || pairKey === ['pms', 'site-internet'].sort().join('|')) {
-                      message = 'Votre site internet n\'est pas configuré pour la vente directe';
-                    } else if (pairKey === ['booking-engine', 'psp'].sort().join('|') || pairKey === ['pms', 'psp'].sort().join('|')) {
-                      message = 'Risque d\'abandon de panier (Paiement non sécurisé)';
-                    } else {
-                      message = `${allSystems.find(s => s.id === a)?.name || a} → ${allSystems.find(s => s.id === b)?.name || b}`;
-                    }
-                    
+            </div>
+          )}
+        </div>
                     return (
                       <div key={`${a}-${b}`} className="flex items-start gap-1 mb-1">
                         <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse flex-shrink-0 mt-1" />
@@ -1437,8 +1733,8 @@ export function HotelEcosystem() {
 
         <div 
           ref={containerRef}
-          className="relative w-full h-full"
-          style={{ minHeight: '400px', touchAction: 'none' }}
+          className="relative w-full h-full overflow-auto"
+          style={{ minHeight: '400px', minWidth: '100%', touchAction: 'pan-x pan-y' }}
         >
           {/* Connection Lines SVG */}
           <svg 
@@ -1504,12 +1800,11 @@ export function HotelEcosystem() {
                 <div
                   key={system.id}
                   id={`node-${system.id}`}
-                  className={`absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''} touch-none select-none`}
+                  className={`group absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''} touch-none select-none ${isPMS ? 'w-[83px] sm:w-[110px]' : 'w-[68px] sm:w-[90px]'}`}
                   style={{
                     left: `${pos.x}%`,
                     top: `${pos.y}%`,
                     transform: 'translate(-50%, -50%)',
-                    width: isPMS ? '100px' : '80px',
                     zIndex: isDragging || isSelected ? 10 : 2
                   }}
                   onMouseDown={viewMode === 'admin' ? (e) => handleMouseDown(system.id, e) : undefined}
@@ -1528,38 +1823,44 @@ export function HotelEcosystem() {
                   }}
                   onMouseLeave={() => setTooltip(prev => ({ ...prev, visible: false }))}
                 >
-                  {/* Card */}
+                  {/* Premium Card with left border */}
                   <div
-                    className={`relative bg-white bg-opacity-90 backdrop-blur-sm rounded-xl md:rounded-2xl p-2 md:p-3 shadow-xl border-2 transition-all ${
-                      isDragging ? 'scale-110 shadow-2xl bg-opacity-100' : ''
+                    className={`relative bg-white rounded-2xl p-3 shadow-sm border-l-4 transition-all duration-300 ${
+                      isDragging ? 'scale-110 shadow-2xl -translate-y-1' : 'hover:-translate-y-1 hover:shadow-lg'
                     } ${
-                      isSelected ? 'ring-4 ring-purple-400 scale-110 bg-opacity-100' : ''
+                      isSelected ? 'ring-4 ring-purple-400 scale-110' : ''
                     } ${
                       hasConnectionToSelected ? 'ring-2 ring-purple-200' : ''
                     }`}
-                    style={{ borderColor: config.color }}
+                    style={{ borderLeftColor: config.color }}
                   >
-                    {/* Mode indicator - only in admin mode */}
-                    {viewMode === 'admin' && (
-                      <div className="absolute top-0.5 md:top-1 left-1/2 -translate-x-1/2">
-                        {mode === 'move' ? (
-                          <Move className="w-2.5 h-2.5 md:w-3 md:h-3 text-slate-400" />
-                        ) : (
-                          <Link2 className={`w-2.5 h-2.5 md:w-3 md:h-3 ${isSelected ? 'text-purple-600' : 'text-slate-400'}`} />
-                        )}
+                    {/* Category label */}
+                    <p className="text-[8px] uppercase tracking-wider text-slate-400 mb-1 font-semibold text-center">
+                      {config.label.split(' ')[0]}
+                    </p>
+
+                    {/* 🚨 Badge alerte lien vital manquant */}
+                    {alertNodeIds.has(system.id) && (
+                      <div className="absolute -top-2 -right-2 z-20">
+                        <span className="flex h-5 w-5 items-center justify-center">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 items-center justify-center">
+                            <AlertCircle className="w-2.5 h-2.5 text-white" />
+                          </span>
+                        </span>
                       </div>
                     )}
 
-                    {/* Icon with colored background */}
+                    {/* Icon in circle with category color */}
                     <div 
-                      className={`${isPMS ? 'w-10 h-10 md:w-14 md:h-14' : 'w-8 h-8 md:w-11 md:h-11'} rounded-lg md:rounded-xl mb-1 md:mb-2 mx-auto flex items-center justify-center shadow-md`}
-                      style={{ backgroundColor: config.color, opacity: 0.92 }}
+                      className={`${isPMS ? 'w-12 h-12' : 'w-10 h-10'} rounded-full mx-auto mb-2 flex items-center justify-center`}
+                      style={{ backgroundColor: config.color + '15' }}
                     >
-                      <Icon className={`${isPMS ? 'w-5 h-5 md:w-7 md:h-7' : 'w-4 h-4 md:w-6 md:h-6'} text-white`} />
+                      <Icon className={`${isPMS ? 'w-6 h-6' : 'w-5 h-5'}`} style={{ color: config.color }} />
                     </div>
 
                     {/* Title */}
-                    <h3 className={`${isPMS ? 'text-[10px] md:text-xs font-semibold' : 'text-[9px] md:text-xs'} text-center text-slate-800 leading-tight min-h-[20px] md:min-h-[24px] flex items-center justify-center px-0.5 md:px-1`}>
+                    <h3 className={`${isPMS ? 'text-[11px] font-bold' : 'text-[10px] font-semibold'} text-center text-slate-700 leading-tight`}>
                       {editingId === system.id ? (
                         <input
                           type="text"
@@ -1567,7 +1868,7 @@ export function HotelEcosystem() {
                           onChange={(e) => setEditingName(e.target.value)}
                           onBlur={saveEdit}
                           onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                          className="w-full text-center text-[9px] md:text-xs font-semibold leading-tight"
+                          className="w-full text-center text-[10px] font-semibold leading-tight bg-transparent border-b border-slate-300"
                           autoFocus
                         />
                       ) : (
@@ -1575,51 +1876,44 @@ export function HotelEcosystem() {
                       )}
                     </h3>
 
-                    {/* Category indicator dot */}
-                    <div 
-                      className="absolute top-1 md:top-2 right-1 md:right-2 w-2 h-2 md:w-2.5 md:h-2.5 rounded-full shadow-sm"
-                      style={{ backgroundColor: config.color }}
-                    />
-
-                    {/* 🚨 Badge alerte lien vital manquant */}
-                    {alertNodeIds.has(system.id) && (
-                      <div className="absolute -top-2 -left-2 z-20">
-                        <span className="flex h-4 w-4 items-center justify-center">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 items-center justify-center">
-                            <AlertCircle className="w-2 h-2 text-white" />
-                          </span>
-                        </span>
+                    {/* Mode indicator - admin only */}
+                    {viewMode === 'admin' && (
+                      <div className="absolute top-2 left-2">
+                        {mode === 'move' ? (
+                          <Move className="w-3 h-3 text-slate-300" />
+                        ) : (
+                          <Link2 className={`w-3 h-3 ${isSelected ? 'text-purple-600' : 'text-slate-300'}`} />
+                        )}
                       </div>
                     )}
 
-                    {/* Connection count badge - only in admin mode */}
+                    {/* Connection count badge */}
                     {viewMode === 'admin' && connections[system.id] && connections[system.id].length > 0 && (
-                      <div className="absolute -bottom-1.5 md:-bottom-2 left-1/2 -translate-x-1/2 bg-purple-500 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full shadow-md">
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-purple-500 text-white text-[10px] px-2 py-0.5 rounded-full shadow-md font-bold">
                         {connections[system.id].length}
                       </div>
                     )}
 
-                    {/* Edit/Delete buttons - only in admin mode and on desktop */}
+                    {/* Edit/Delete buttons - hidden by default, visible on hover */}
                     {viewMode === 'admin' && (
-                      <div className="absolute bottom-1 md:bottom-2 right-1 md:right-2 flex gap-0.5 md:gap-1">
+                      <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             startEditing(system.id);
                           }}
-                          className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 hover:text-slate-600 flex items-center justify-center"
+                          className="w-5 h-5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors"
                         >
-                          <Edit2 className="w-3 h-3 md:w-4 md:h-4" />
+                          <Edit2 className="w-3 h-3" />
                         </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             deleteSystem(system.id);
                           }}
-                          className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 hover:text-slate-600 flex items-center justify-center"
+                          className="w-5 h-5 rounded-md bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors"
                         >
-                          <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
+                          <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
                     )}
