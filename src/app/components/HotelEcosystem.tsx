@@ -1715,21 +1715,6 @@ export function HotelEcosystem() {
             </div>
           )}
         </div>
-                    return (
-                      <div key={`${a}-${b}`} className="flex items-start gap-1 mb-1">
-                        <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse flex-shrink-0 mt-1" />
-                        <p className="text-[9px] text-red-700 font-medium leading-tight">{message}</p>
-                      </div>
-                    );
-                  })}
-                  {alertPairs.length > 3 && (
-                    <p className="text-[9px] text-orange-500 mt-0.5">+{alertPairs.length - 3} autre(s) flux manquant(s)</p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
 
         <div 
           ref={containerRef}
