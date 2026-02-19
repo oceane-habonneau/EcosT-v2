@@ -134,8 +134,8 @@ const cardSuggestions = [
   'Wifi'
 ].sort();
 
-// 🟢 Stack 1 - Simple (par défaut)
-const stack1Simple: SystemNode[] = [
+// 🟢 Socle 1 - Essentiel (par défaut)
+const socle1Essentiel: SystemNode[] = [
   { id: 'pms', name: 'PMS', category: 'management', icon: 'Bed', x: 50, y: 50, connections: ['channel-manager', 'pos'] },
   { id: 'channel-manager', name: 'Channel Manager', category: 'sales', icon: 'Share2', x: 25, y: 30, connections: ['ota', 'booking-engine'] },
   { id: 'ota', name: 'OTA', category: 'sales', icon: 'Building2', x: 15, y: 15, connections: [] },
@@ -145,8 +145,8 @@ const stack1Simple: SystemNode[] = [
   { id: 'pos', name: 'POS restaurant', category: 'restaurant', icon: 'UtensilsCrossed', x: 35, y: 70, connections: [] }
 ];
 
-// 🟠 Stack 2 - Intermédiaire
-const stack2Intermediate: SystemNode[] = [
+// 🟠 Socle 2 - Performance
+const socle2Performance: SystemNode[] = [
   { id: 'pms', name: 'PMS', category: 'management', icon: 'Bed', x: 50, y: 45, connections: ['channel-manager', 'pos', 'compta', 'crm'] },
   { id: 'channel-manager', name: 'Channel Manager', category: 'sales', icon: 'Share2', x: 25, y: 25, connections: ['ota', 'booking-engine'] },
   { id: 'ota', name: 'OTA', category: 'sales', icon: 'Building2', x: 10, y: 15, connections: [] },
@@ -156,11 +156,10 @@ const stack2Intermediate: SystemNode[] = [
   { id: 'pos', name: 'POS restaurant', category: 'restaurant', icon: 'UtensilsCrossed', x: 30, y: 65, connections: [] },
   { id: 'compta', name: 'Comptabilité', category: 'management', icon: 'Calculator', x: 70, y: 45, connections: [] },
   { id: 'crm', name: 'CRM', category: 'management', icon: 'Users', x: 75, y: 60, connections: [] },
-  { id: 'site-booking', name: 'Site web', category: 'sales', icon: 'ShoppingBag', x: 20, y: 75, connections: [] }
 ];
 
-// 🔵 Stack 3 - Avancé
-const stack3Advanced: SystemNode[] = [
+// 🔵 Socle 3 - Signature
+const socle3Signature: SystemNode[] = [
   { id: 'pms', name: 'PMS', category: 'management', icon: 'Bed', x: 50, y: 45, connections: ['channel-manager', 'pos', 'compta', 'crm', 'spa', 'exp-client', 'rms'] },
   { id: 'channel-manager', name: 'Channel Manager', category: 'sales', icon: 'Share2', x: 25, y: 25, connections: ['ota', 'booking-engine', 'gds'] },
   { id: 'ota', name: 'OTA', category: 'sales', icon: 'Building2', x: 10, y: 15, connections: [] },
@@ -176,6 +175,12 @@ const stack3Advanced: SystemNode[] = [
   { id: 'gds', name: 'GDS', category: 'sales', icon: 'Globe', x: 12, y: 35, connections: [] },
   { id: 'moteur-resto', name: 'Moteur résa resto', category: 'restaurant', icon: 'UtensilsCrossed', x: 80, y: 12, connections: [] }
 ];
+
+const SOCLE_DESCRIPTIONS: Record<string, string> = {
+  essentiel: 'Le minimum vital pour exister et vendre en ligne sans erreur.',
+  performance: 'L'automatisation au service de l'efficacité opérationnelle et de la facturation.',
+  signature: 'L'excellence technologique pour une expérience client personnalisée et data-driven.',
+};
 
 const categoryConfig = {
   management: { 
@@ -485,15 +490,15 @@ function getDiagnostic(pct: number, hasMissingVitalTools: boolean): {
 }
 
 export function HotelEcosystem() {
-  const [allSystems, setAllSystems] = useState<SystemNode[]>(stack1Simple);
+  const [allSystems, setAllSystems] = useState<SystemNode[]>(socle1Essentiel);
   const [nodePositions, setNodePositions] = useState<Record<string, { x: number; y: number }>>(() =>
-    stack1Simple.reduce((acc, system) => {
+    socle1Essentiel.reduce((acc, system) => {
       acc[system.id] = { x: system.x, y: system.y };
       return acc;
     }, {} as Record<string, { x: number; y: number }>)
   );
   const [connections, setConnections] = useState<Record<string, string[]>>(() =>
-    stack1Simple.reduce((acc, system) => {
+    socle1Essentiel.reduce((acc, system) => {
       acc[system.id] = system.connections || [];
       return acc;
     }, {} as Record<string, string[]>)
@@ -522,8 +527,11 @@ export function HotelEcosystem() {
   const [isStackMenuOpen, setIsStackMenuOpen] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   
-  // 📊 Widget scoring — sidebar panel dépliant (ouvert uniquement sur Stack Simple par défaut)
+  // 📊 Widget scoring — sidebar panel dépliant (ouvert uniquement sur Socle Essentiel par défaut)
   const [scorePanelOpen, setScorePanelOpen] = useState(true);
+  
+  // 🎯 Socle actuel (pour afficher le descriptif)
+  const [currentSocle, setCurrentSocle] = useState<'essentiel' | 'performance' | 'signature'>('essentiel');
 
   // 🧙‍♂️ Wizard de diagnostic
   const [showWizardOverlay, setShowWizardOverlay] = useState(true);
@@ -609,9 +617,9 @@ export function HotelEcosystem() {
   const resetPositions = () => {
     setNodePositions(
       allSystems.reduce((acc, system) => {
-        const original = stack1Simple.find(s => s.id === system.id) || 
-                        stack2Intermediate.find(s => s.id === system.id) ||
-                        stack3Advanced.find(s => s.id === system.id);
+        const original = socle1Essentiel.find(s => s.id === system.id) || 
+                        socle2Performance.find(s => s.id === system.id) ||
+                        socle3Signature.find(s => s.id === system.id);
         acc[system.id] = original ? { x: original.x, y: original.y } : { x: 50, y: 50 };
         return acc;
       }, {} as Record<string, { x: number; y: number }>)
@@ -693,16 +701,16 @@ export function HotelEcosystem() {
   };
 
 
-  const loadStack = (stack: SystemNode[]) => {
-    setAllSystems(stack);
+  const loadSocle = (socle: SystemNode[], socleType: 'essentiel' | 'performance' | 'signature') => {
+    setAllSystems(socle);
     setNodePositions(
-      stack.reduce((acc, system) => {
+      socle.reduce((acc, system) => {
         acc[system.id] = { x: system.x, y: system.y };
         return acc;
       }, {} as Record<string, { x: number; y: number }>)
     );
     setConnections(
-      stack.reduce((acc, system) => {
+      socle.reduce((acc, system) => {
         acc[system.id] = system.connections || [];
         return acc;
       }, {} as Record<string, string[]>)
@@ -711,9 +719,9 @@ export function HotelEcosystem() {
     setMode('move');
     setIsStackMenuOpen(false);
     
-    // Fermer le panneau sur Intermédiaire/Avancé, ouvrir sur Simple
-    const isSimple = stack.length === stack1Simple.length && stack.every(s => stack1Simple.find(st => st.id === s.id));
-    setScorePanelOpen(isSimple);
+    // Fermer le panneau sur Performance/Signature, ouvrir sur Essentiel
+    setScorePanelOpen(socleType === 'essentiel');
+    setCurrentSocle(socleType);
   };
 
   const handleConnectionClick = (fromId: string, toId: string) => {
@@ -739,7 +747,7 @@ export function HotelEcosystem() {
 
   const skipWizard = () => {
     setShowWizardOverlay(false);
-    // Stack Simple déjà chargé par défaut
+    // Socle Essentiel déjà chargé par défaut
   };
 
   const toggleTool = (toolId: string) => {
@@ -1018,10 +1026,15 @@ export function HotelEcosystem() {
             </span>
           </div>
           {/* Nav links - desktop */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-            <a href="#ecosystem" className="hover:text-slate-900 transition-colors">L'Écosystème</a>
-            <a href="#legende" className="hover:text-slate-900 transition-colors">Légende &amp; Valeur</a>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+            <a href="#ecosystem" className="hover:text-slate-900 transition-colors">Écosystème</a>
             <a href="#services" className="hover:text-slate-900 transition-colors">Services</a>
+            <button
+              onClick={startWizard}
+              className="hover:text-slate-900 transition-colors"
+            >
+              Lancer mon diagnostic
+            </button>
           </nav>
           {/* CTA Button */}
           <a
@@ -1037,7 +1050,7 @@ export function HotelEcosystem() {
 
         {/* Hero tagline */}
         <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl md:text-5xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl mb-4 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold leading-tight">
             Scannez la rentabilité de votre environnement technologique.
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-slate-600">
@@ -1117,20 +1130,20 @@ export function HotelEcosystem() {
                 </div>
               </div>
 
-              {/* ── Groupe Stack ── */}
+              {/* ── Groupe Socle ── */}
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">Stack</span>
+                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">Choisir mon Socle</span>
                 <div className="flex rounded-full overflow-hidden shadow-md border-2" style={{ borderColor: '#119843' }}>
                   {[
-                    { label: 'Simple', stack: stack1Simple, id: 'simple' },
-                    { label: 'Intermédiaire', stack: stack2Intermediate, id: 'intermediate' },
-                    { label: 'Avancé', stack: stack3Advanced, id: 'advanced' },
-                  ].map(({ label, stack, id }) => {
-                    const isActive = JSON.stringify(allSystems.map(s => s.id).sort()) === JSON.stringify(stack.map(s => s.id).sort());
+                    { label: 'Essentiel', socle: socle1Essentiel, type: 'essentiel' as const },
+                    { label: 'Performance', socle: socle2Performance, type: 'performance' as const },
+                    { label: 'Signature', socle: socle3Signature, type: 'signature' as const },
+                  ].map(({ label, socle, type }) => {
+                    const isActive = currentSocle === type;
                     return (
                       <button
-                        key={id}
-                        onClick={() => loadStack(stack)}
+                        key={type}
+                        onClick={() => loadSocle(socle, type)}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-all duration-200"
                         style={isActive
                           ? { background: '#119843', color: '#fff', boxShadow: 'inset 0 0 10px rgba(17,152,67,0.5)' }
@@ -1213,6 +1226,15 @@ export function HotelEcosystem() {
         </>
       )}{/* /toolbar wrapper */}
 
+      {/* ── Descriptif du socle actif (visible uniquement en mode admin) ── */}
+      {viewMode === 'admin' && (
+        <div className="mb-3 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
+          <p className="text-xs text-emerald-700 font-medium leading-relaxed">
+            <span className="font-bold">Le Socle {currentSocle === 'essentiel' ? 'Essentiel' : currentSocle === 'performance' ? 'Performance' : 'Signature'}</span> : {SOCLE_DESCRIPTIONS[currentSocle]}
+          </p>
+        </div>
+      )}
+
       {/* ══════════ COMMENT LIRE CE SCHÉMA ══════════ */}
       <div className="mb-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
         <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Comment utiliser cet outil ?</p>
@@ -1275,10 +1297,10 @@ export function HotelEcosystem() {
             />
           </button>
 
-          {/* Pastille % — visible quand fermé (mobile surtout) */}
+          {/* Pastille % — visible quand fermé */}
           {!scorePanelOpen && (
             <div
-              className="w-12 h-12 rounded-xl shadow-xl flex items-center justify-center text-white font-black text-sm transition-colors duration-700"
+              className="w-16 h-16 rounded-xl shadow-2xl flex items-center justify-center text-white font-black text-lg border-2 border-white transition-colors duration-700"
               style={{ backgroundColor: diagnostic.barColor }}
             >
               {pct}%
@@ -1366,25 +1388,46 @@ export function HotelEcosystem() {
                       </span>
                     </div>
                   ))}
+                  {/* Bouton pour compléter le socle */}
+                  <button
+                    onClick={() => setShowAddModal(true)}
+                    className="w-full mt-2 px-2 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[9px] font-bold rounded-md transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Compléter mon socle
+                  </button>
                 </div>
               )}
 
-              {/* Connexions vitales manquantes */}
+              {/* Connexions vitales manquantes avec messages spécifiques */}
               {alertPairs.length > 0 && (
                 <div className="mx-3 mb-2 p-2 bg-orange-50 border border-orange-200 rounded-lg">
-                  <p className="text-[9px] font-bold text-orange-600 uppercase tracking-wide mb-1">
-                    Flux manquants
+                  <p className="text-[9px] font-bold text-orange-600 uppercase tracking-wide mb-1.5">
+                    ⚠️ Alertes flux critiques
                   </p>
-                  {alertPairs.slice(0, 2).map(({ a, b }) => (
-                    <div key={`${a}-${b}`} className="flex items-center gap-1 mb-0.5">
-                      <span className="w-1 h-1 rounded-full bg-orange-500 animate-pulse flex-shrink-0" />
-                      <span className="text-[9px] text-orange-700 font-medium leading-tight">
-                        {allSystems.find(s => s.id === a)?.name || a} → {allSystems.find(s => s.id === b)?.name || b}
-                      </span>
-                    </div>
-                  ))}
-                  {alertPairs.length > 2 && (
-                    <p className="text-[9px] text-orange-500 mt-0.5">+{alertPairs.length - 2} autre(s)</p>
+                  {alertPairs.slice(0, 3).map(({ a, b }) => {
+                    // Messages spécifiques selon la paire
+                    let message = '';
+                    const pairKey = [a, b].sort().join('|');
+                    if (pairKey === ['pms', 'channel-manager'].sort().join('|')) {
+                      message = 'Flux de stock non synchronisé (Risque de surréservation)';
+                    } else if (pairKey === ['booking-engine', 'site-internet'].sort().join('|') || pairKey === ['pms', 'site-internet'].sort().join('|')) {
+                      message = 'Votre site internet n\'est pas configuré pour la vente directe';
+                    } else if (pairKey === ['booking-engine', 'psp'].sort().join('|') || pairKey === ['pms', 'psp'].sort().join('|')) {
+                      message = 'Risque d\'abandon de panier (Paiement non sécurisé)';
+                    } else {
+                      message = `${allSystems.find(s => s.id === a)?.name || a} → ${allSystems.find(s => s.id === b)?.name || b}`;
+                    }
+                    
+                    return (
+                      <div key={`${a}-${b}`} className="flex items-start gap-1 mb-1">
+                        <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse flex-shrink-0 mt-1" />
+                        <p className="text-[9px] text-red-700 font-medium leading-tight">{message}</p>
+                      </div>
+                    );
+                  })}
+                  {alertPairs.length > 3 && (
+                    <p className="text-[9px] text-orange-500 mt-0.5">+{alertPairs.length - 3} autre(s) flux manquant(s)</p>
                   )}
                 </div>
               )}
