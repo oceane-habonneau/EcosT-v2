@@ -1030,7 +1030,7 @@ export function HotelEcosystem() {
               Flux &amp; Automatisations
             </span>
           </div>
-          {/* Nav ancres — icône+label sur md, icône seule sur sm */}
+          {/* Nav ancres icônes+label md, icônes seules sm */}
           <nav className="hidden sm:flex items-center gap-1 md:gap-2 text-[11px] md:text-sm font-medium text-slate-600">
             <a href="#ecosystem" className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
               <Layers className="w-3.5 h-3.5 flex-shrink-0" />
@@ -1045,28 +1045,17 @@ export function HotelEcosystem() {
               <span className="hidden md:inline whitespace-nowrap">Diagnostic</span>
             </button>
           </nav>
-          {/* CTA + burger mobile */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <a
-              href="https://calendar.app.google/cKNAVTh1TFacNkXs6"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-[11px] sm:text-xs md:text-sm font-bold rounded-lg hover:from-amber-500 hover:to-amber-600 transition-all shadow hover:shadow-md hover:-translate-y-0.5 whitespace-nowrap"
-            >
-              <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="hidden sm:inline">Audit Gratuit</span>
-              <span className="sm:hidden">RDV</span>
-            </a>
-            {/* Burger mobile */}
-            <div className="relative sm:hidden">
-              <button
-                onClick={() => setScorePanelOpen(o => !o)}
-                className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600"
-              >
-                <Menu className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+          {/* CTA */}
+          <a
+            href="https://calendar.app.google/cKNAVTh1TFacNkXs6"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-[11px] sm:text-xs md:text-sm font-bold rounded-lg hover:from-amber-500 hover:to-amber-600 transition-all shadow hover:shadow-md hover:-translate-y-0.5 whitespace-nowrap flex-shrink-0"
+          >
+            <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="hidden sm:inline">Audit Gratuit</span>
+            <span className="sm:hidden">RDV</span>
+          </a>
         </div>
 
         {/* Hero tagline — masqué sur mobile */}
@@ -1432,48 +1421,27 @@ export function HotelEcosystem() {
       )}
 
       {/* ══════════ COMMENT LIRE CE SCHÉMA ══════════ */}
-      {(() => {
-        const stepsData = [
-          { n: '1', title: 'Diagnostiquez', desc: 'Utilisez nos Socles de référence pour situer votre établissement.' },
-          { n: '2', title: 'Analysez', desc: 'Un socle est cohérent quand les flux sont tracés. Un outil isolé est une source de perte de temps.' },
-          { n: '3', title: 'Optimisez', desc: 'Visez le score de 100% pour garantir une automatisation totale de votre parcours client.' },
-          { n: '4', title: 'Bénéfice pour vous', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
-        ];
-        return (
-          <div className="mb-4 p-3 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">Comment utiliser cet outil ?</p>
-              <span className="sm:hidden flex items-center gap-1 text-[10px] text-amber-500 font-semibold">
-                Défiler <ChevronDown className="w-3 h-3 -rotate-90" />
-              </span>
+      <div className="mb-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
+        <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Comment utiliser cet outil ?</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            { n: '1', title: 'Diagnostiquez', desc: 'Utilisez nos Socles de référence pour situer votre établissement.' },
+            { n: '2', title: 'Analysez', desc: 'Un socle est cohérent quand les flux sont tracés. Un outil isolé est une source de perte de temps.' },
+            { n: '3', title: 'Optimisez', desc: 'Visez le score de 100% pour garantir une automatisation totale de votre parcours client.' },
+            { n: '4', title: 'Bénéfice pour vous', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
+          ].map(step => (
+            <div key={step.n} className="flex items-start gap-2.5">
+              <div className="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-md">
+                {step.n}
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-800 mb-0.5 leading-tight">{step.title}</p>
+                <p className="text-[11px] text-slate-500 leading-relaxed">{step.desc}</p>
+              </div>
             </div>
-            <div
-              className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {stepsData.map((step, i) => (
-                <div
-                  key={step.n}
-                  className="flex items-start gap-2.5 snap-start flex-shrink-0 w-[calc(100vw-80px)] sm:w-auto lg:w-auto lg:flex-shrink"
-                >
-                  <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-md mt-0.5">
-                    {step.n}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-semibold text-slate-800 mb-1 leading-tight">{step.title}</p>
-                    <p className="text-[11px] text-slate-500 leading-relaxed">{step.desc}</p>
-                    <div className="flex gap-1 mt-2 lg:hidden">
-                      {stepsData.map((_, j) => (
-                        <span key={j} className={`h-1 rounded-full transition-all ${j === i ? 'w-4 bg-amber-400' : 'w-1.5 bg-slate-200'}`} />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      })()}
+          ))}
+        </div>
+      </div>
 
       {/* ══════════ ECOSYSTEM DIAGRAM ══════════ */}
       <div id="ecosystem">
@@ -1494,13 +1462,13 @@ export function HotelEcosystem() {
       {/* Ecosystem Diagram */}
       <div ref={diagramRef} className="relative bg-slate-50 rounded-2xl md:rounded-3xl shadow-2xl border-2 border-slate-200 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] touch-none" style={{ padding: '72px 20px', overflow: 'visible' }}>
 
-        {/* ══════════ PANNEAU SCORE GLASSMORPHISM (Desktop) ══════════ */}
+        {/* ══════════ PANNEAU SCORE (Desktop) ══════════ */}
         <div className="hidden md:block">
           <div
             className="absolute top-4 right-4 z-[100] transition-all duration-500 ease-in-out"
             style={{ width: scorePanelOpen ? '232px' : 'auto' }}
           >
-            {/* Header pill — toujours visible, sert de toggle */}
+            {/* Pill header — toujours visible, sert de toggle */}
             <button
               onClick={() => setScorePanelOpen(o => !o)}
               className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl shadow-xl border border-white/30 text-white transition-all duration-300 hover:brightness-110"
@@ -1508,17 +1476,10 @@ export function HotelEcosystem() {
                 background: `linear-gradient(135deg, ${diagnostic.barColor}ee, ${diagnostic.barColor})`,
                 backdropFilter: 'blur(16px)',
                 WebkitBackdropFilter: 'blur(16px)',
-                minWidth: '120px'
+                minWidth: '130px'
               }}
             >
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="text-sm font-black leading-none whitespace-nowrap">Score {pct}%</span>
-                {scorePanelOpen && (
-                  <span className="text-[10px] font-semibold uppercase tracking-wide opacity-80 truncate hidden lg:block">
-                    {diagnostic.label}
-                  </span>
-                )}
-              </div>
+              <span className="text-sm font-black leading-none whitespace-nowrap">Score {pct}%</span>
               <ChevronUpIcon
                 className="w-3.5 h-3.5 opacity-90 flex-shrink-0 transition-transform duration-300"
                 style={{ transform: scorePanelOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
@@ -1534,7 +1495,6 @@ export function HotelEcosystem() {
                 border: '1px solid rgba(255,255,255,0.5)',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8)'
               }}>
-                {/* Score */}
                 <div className="px-4 py-3 text-center border-b border-white/40">
                   <div className="text-4xl font-black mb-0.5" style={{ color: diagnostic.barColor }}>{pct}%</div>
                   <p className={`text-[11px] font-bold uppercase tracking-wide ${diagnostic.color}`}>{diagnostic.label}</p>
@@ -1548,8 +1508,6 @@ export function HotelEcosystem() {
                     <p className="text-[10px] text-slate-500 leading-relaxed mt-2 px-1">{diagnostic.desc}</p>
                   )}
                 </div>
-
-                {/* Barre */}
                 <div className="px-4 py-2.5">
                   <div className="w-full h-1.5 bg-slate-200/60 rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: diagnostic.barColor }} />
@@ -1563,8 +1521,6 @@ export function HotelEcosystem() {
                     <span>100%</span>
                   </div>
                 </div>
-
-                {/* Outils manquants */}
                 {missingVitalTools.length > 0 && (
                   <div className="mx-3 mb-2.5 p-2.5 rounded-xl" style={{
                     background: 'linear-gradient(135deg, rgba(254,242,242,0.9), rgba(255,237,237,0.75))',
@@ -1591,8 +1547,6 @@ export function HotelEcosystem() {
                     </button>
                   </div>
                 )}
-
-                {/* Alertes */}
                 {alertPairs.length > 0 && (
                   <div className="mx-3 mb-3 p-2.5 rounded-xl" style={{
                     background: 'linear-gradient(135deg, rgba(255,247,237,0.9), rgba(255,243,229,0.75))',
@@ -1630,14 +1584,14 @@ export function HotelEcosystem() {
 
         {/* ══════════ STICKY PASTILLE MOBILE + MODAL SANTÉ ══════════ */}
         <div className="md:hidden">
-          {/* Pastille positionnée EN BAS À DROITE pour ne pas gêner le burger en haut */}
+          {/* Pastille santé — au-dessus du FAB (bottom-24) pour éviter le chevauchement */}
           <button
             onClick={() => setMobileHealthModalOpen(true)}
-            className="fixed bottom-5 right-4 z-[100] flex items-center gap-2 px-3 py-2 rounded-xl shadow-2xl border border-white/30 text-white font-black backdrop-blur-lg transition-all"
+            className="fixed bottom-24 right-4 z-[100] flex items-center gap-2 px-3 py-2 rounded-xl shadow-2xl border border-white/30 text-white font-black backdrop-blur-lg transition-all hover:brightness-110 active:scale-95"
             style={{ background: `linear-gradient(135deg, ${diagnostic.barColor}ee, ${diagnostic.barColor})` }}
           >
-            <span className="text-base font-black leading-none">Score {pct}%</span>
-            <ChevronUpIcon className="w-4 h-4 opacity-80" style={{ transform: 'rotate(180deg)' }} />
+            <span className="text-sm font-black leading-none whitespace-nowrap">Score {pct}%</span>
+            <ChevronUpIcon className="w-3.5 h-3.5 opacity-80" style={{ transform: 'rotate(180deg)' }} />
           </button>
 
           {/* Modal plein écran */}
