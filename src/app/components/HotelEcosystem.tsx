@@ -1019,42 +1019,61 @@ export function HotelEcosystem() {
 
       {/* ══════════ HEADER COMMERCIAL ══════════ */}
       <div className="mb-3 md:mb-6">
-        {/* Nav Bar */}
-        <div className="flex items-center justify-between gap-2 mb-3 px-3 sm:px-5 py-2 sm:py-3 bg-white rounded-xl shadow-lg border-2 border-slate-200">
+        {/* Nav Bar — une seule ligne, tout visible */}
+        <div className="flex items-center justify-between gap-2 mb-3 px-3 sm:px-5 py-2 bg-white rounded-xl shadow-lg border-2 border-slate-200">
+
           {/* Brand */}
-          <div className="flex flex-col leading-tight min-w-0">
-            <span className="text-sm sm:text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent truncate">
+          <div className="flex flex-col leading-tight flex-shrink-0">
+            <span className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent whitespace-nowrap">
               Océane Habonneau
             </span>
-            <span className="text-[10px] sm:text-xs text-slate-500 font-medium tracking-wide hidden sm:block">
+            <span className="text-[9px] sm:text-xs text-slate-500 font-medium tracking-wide hidden sm:block">
               Flux &amp; Automatisations
             </span>
           </div>
-          {/* Nav links - visibles dès sm */}
-          <nav className="flex items-center gap-3 sm:gap-6 text-[11px] sm:text-sm font-medium text-slate-600">
-            <a href="#ecosystem" className="hover:text-slate-900 transition-colors whitespace-nowrap">Écosystème</a>
-            <a href="#services" className="hover:text-slate-900 transition-colors whitespace-nowrap hidden sm:block">Services</a>
+
+          {/* Nav ancres — icônes + label sur md, icône seule sur sm, dropdown sur xs */}
+          <nav className="hidden sm:flex items-center gap-1 md:gap-3 text-[11px] md:text-sm font-medium text-slate-600">
+            <a href="#ecosystem" className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap">
+              <Layers className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="hidden md:inline">Écosystème</span>
+            </a>
+            <a href="#services" className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap">
+              <Wrench className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="hidden md:inline">Services</span>
+            </a>
             <button
               onClick={startWizard}
-              className="hover:text-slate-900 transition-colors whitespace-nowrap hidden md:block"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
             >
-              Diagnostic
+              <Radio className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="hidden md:inline">Diagnostic</span>
             </button>
           </nav>
-          {/* CTA Button */}
-          <a
-            href="https://calendar.app.google/cKNAVTh1TFacNkXs6"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-[11px] sm:text-sm font-bold rounded-xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap flex-shrink-0"
-          >
-            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Audit Gratuit</span>
-            <span className="sm:hidden">RDV</span>
-          </a>
+
+          {/* Right side : CTA + burger mobile */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <a
+              href="https://calendar.app.google/cKNAVTh1TFacNkXs6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-[11px] sm:text-xs md:text-sm font-bold rounded-lg hover:from-amber-500 hover:to-amber-600 transition-all shadow hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap"
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              <span className="hidden xs:inline sm:hidden md:inline">Audit Gratuit</span>
+              <span className="xs:hidden sm:inline md:hidden">RDV</span>
+            </a>
+            {/* Burger — sm only pour afficher les ancres */}
+            <button
+              onClick={() => setMobileNavOpen?.(o => !o)}
+              className="sm:hidden w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Hero tagline — masqué sur mobile pour gagner de l'espace */}
+        {/* Hero tagline — masqué sur mobile */}
         <div className="text-center hidden sm:block">
           <h1 className="text-xl sm:text-2xl md:text-4xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold leading-tight">
             Scannez la rentabilité de votre environnement technologique.
@@ -1417,28 +1436,48 @@ export function HotelEcosystem() {
       )}
 
       {/* ══════════ COMMENT LIRE CE SCHÉMA ══════════ */}
-      <div className="mb-4 p-3 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
-        <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Comment utiliser cet outil ?</p>
-        {/* Scroll horizontal sur mobile, grille sur desktop */}
-        <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
-          {[
-            { n: '1', title: 'Diagnostiquez', desc: 'Utilisez nos Socles de référence pour situer votre établissement.' },
-            { n: '2', title: 'Analysez', desc: 'Un socle est cohérent quand les flux sont tracés. Un outil isolé est une source de perte de temps.' },
-            { n: '3', title: 'Optimisez', desc: 'Visez le score de 100% pour garantir une automatisation totale de votre parcours client.' },
-            { n: '4', title: 'Bénéfice pour vous', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
-          ].map(step => (
-            <div key={step.n} className="flex items-start gap-2.5 min-w-[200px] sm:min-w-[220px] lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink">
-              <div className="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-md mt-0.5">
-                {step.n}
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-800 mb-0.5 leading-tight">{step.title}</p>
-                <p className="text-[11px] text-slate-500 leading-relaxed">{step.desc}</p>
-              </div>
+      {(() => {
+        const stepsData = [
+          { n: '1', title: 'Diagnostiquez', desc: 'Utilisez nos Socles de référence pour situer votre établissement.' },
+          { n: '2', title: 'Analysez', desc: 'Un socle est cohérent quand les flux sont tracés. Un outil isolé est une source de perte de temps.' },
+          { n: '3', title: 'Optimisez', desc: 'Visez le score de 100% pour garantir une automatisation totale de votre parcours client.' },
+          { n: '4', title: 'Bénéfice pour vous', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
+        ];
+        return (
+          <div className="mb-4 p-3 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">Comment utiliser cet outil ?</p>
+              {/* Flèche hint mobile */}
+              <span className="sm:hidden flex items-center gap-1 text-[10px] text-slate-400 font-medium">
+                Défiler <ChevronDown className="w-3 h-3 rotate-[-90deg]" />
+              </span>
             </div>
-          ))}
-        </div>
-      </div>
+            {/* Mobile : scroll horizontal, chaque step prend toute la largeur visible */}
+            <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {stepsData.map((step, i) => (
+                <div key={step.n}
+                  className="flex items-start gap-2.5 snap-start flex-shrink-0 w-[calc(100vw-80px)] sm:w-auto lg:w-auto lg:flex-shrink"
+                  style={{ minWidth: 0 }}>
+                  <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-md mt-0.5">
+                    {step.n}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-slate-800 mb-1 leading-tight">{step.title}</p>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">{step.desc}</p>
+                    {/* Indicateur de position */}
+                    <div className="flex gap-1 mt-2 lg:hidden">
+                      {stepsData.map((_, j) => (
+                        <span key={j} className={`h-1 rounded-full transition-all ${j === i ? 'w-4 bg-amber-400' : 'w-1.5 bg-slate-200'}`} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ══════════ ECOSYSTEM DIAGRAM ══════════ */}
       <div id="ecosystem">
@@ -1787,7 +1826,7 @@ export function HotelEcosystem() {
                 <div
                   key={system.id}
                   id={`node-${system.id}`}
-                  className={`group absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''} touch-none select-none ${isPMS ? 'w-[58px] sm:w-[72px]' : 'w-[48px] sm:w-[60px]'}`}
+                  className={`group absolute ${viewMode === 'admin' && mode === 'move' ? 'cursor-move' : viewMode === 'admin' && mode === 'link' ? 'cursor-pointer' : ''} touch-none select-none ${isPMS ? 'w-[60px] sm:w-[83px] md:w-[110px]' : 'w-[50px] sm:w-[68px] md:w-[90px]'}`}
                   style={{
                     left: `${pos.x}%`,
                     top: `${pos.y}%`,
@@ -1810,9 +1849,9 @@ export function HotelEcosystem() {
                   }}
                   onMouseLeave={() => setTooltip(prev => ({ ...prev, visible: false }))}
                 >
-                  {/* Premium Card with glassmorphism + gradient + colored border */}
+                  {/* Premium Card */}
                   <div
-                    className={`relative rounded-xl p-1.5 shadow-sm border-l-[3px] transition-all duration-300 ${
+                    className={`relative rounded-2xl p-1.5 sm:p-2 md:p-3 shadow-sm border-l-[3px] md:border-l-4 transition-all duration-300 ${
                       isDragging ? 'scale-110 shadow-2xl -translate-y-1' : 'hover:-translate-y-1 hover:shadow-lg'
                     } ${
                       isSelected ? 'ring-4 ring-purple-400 scale-110' : ''
@@ -1830,7 +1869,7 @@ export function HotelEcosystem() {
                     }}
                   >
                     {/* Category label */}
-                    <p className="text-[6px] uppercase tracking-wider text-slate-400 mb-0.5 font-semibold text-center leading-none">
+                    <p className="text-[6px] sm:text-[7px] md:text-[8px] uppercase tracking-wider text-slate-400 mb-0.5 md:mb-1 font-semibold text-center leading-none">
                       {config.label.split(' ')[0]}
                     </p>
 
@@ -1848,14 +1887,14 @@ export function HotelEcosystem() {
 
                     {/* Icon in circle with category color */}
                     <div 
-                      className={`${isPMS ? 'w-7 h-7' : 'w-6 h-6'} rounded-full mx-auto mb-1 flex items-center justify-center`}
+                      className={`${isPMS ? 'w-7 h-7 sm:w-9 sm:h-9 md:w-12 md:h-12' : 'w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10'} rounded-full mx-auto mb-1 md:mb-2 flex items-center justify-center`}
                       style={{ backgroundColor: config.color + '15' }}
                     >
-                      <Icon className={`${isPMS ? 'w-3.5 h-3.5' : 'w-3 h-3'}`} style={{ color: config.color }} />
+                      <Icon className={`${isPMS ? 'w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-6 md:h-6' : 'w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5'}`} style={{ color: config.color }} />
                     </div>
 
                     {/* Title */}
-                    <h3 className={`${isPMS ? 'text-[9px] font-bold' : 'text-[8px] font-semibold'} text-center text-slate-700 leading-tight`}>
+                    <h3 className={`${isPMS ? 'text-[8px] sm:text-[10px] md:text-[11px] font-bold' : 'text-[7px] sm:text-[9px] md:text-[10px] font-semibold'} text-center text-slate-700 leading-tight`}>
                       {editingId === system.id ? (
                         <input
                           type="text"
@@ -1889,26 +1928,26 @@ export function HotelEcosystem() {
                       </div>
                     )}
 
-                    {/* Edit/Delete buttons - hidden by default, visible on hover */}
+                    {/* Edit/Delete buttons - toujours visibles */}
                     {viewMode === 'admin' && (
-                      <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <div className="absolute bottom-1 right-1 flex gap-0.5">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             startEditing(system.id);
                           }}
-                          className="w-5 h-5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors"
+                          className="w-4 h-4 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors"
                         >
-                          <Edit2 className="w-3 h-3" />
+                          <Edit2 className="w-2.5 h-2.5" />
                         </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             deleteSystem(system.id);
                           }}
-                          className="w-5 h-5 rounded-md bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors"
+                          className="w-4 h-4 rounded bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors"
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <Trash2 className="w-2.5 h-2.5" />
                         </button>
                       </div>
                     )}
