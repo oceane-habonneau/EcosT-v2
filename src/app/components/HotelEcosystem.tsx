@@ -136,44 +136,44 @@ const cardSuggestions = [
 
 // 🟢 Socle 1 - Essentiel (par défaut)
 const socle1Essentiel: SystemNode[] = [
-  { id: 'pms', name: 'PMS', category: 'management', icon: 'Bed', x: 50, y: 50, connections: ['channel-manager', 'pos'] },
-  { id: 'channel-manager', name: 'Channel Manager', category: 'sales', icon: 'Share2', x: 25, y: 30, connections: ['ota', 'booking-engine'] },
-  { id: 'ota', name: 'OTA', category: 'sales', icon: 'Building2', x: 15, y: 15, connections: [] },
-  { id: 'booking-engine', name: 'Moteur de réservation', category: 'booking', icon: 'Calendar', x: 50, y: 15, connections: ['site-internet', 'psp'] },
-  { id: 'site-internet', name: 'Site internet', category: 'sales', icon: 'Globe', x: 70, y: 10, connections: [] },
-  { id: 'psp', name: 'PSP', category: 'customer', icon: 'CreditCard', x: 75, y: 25, connections: [] },
-  { id: 'pos', name: 'POS restaurant', category: 'restaurant', icon: 'UtensilsCrossed', x: 35, y: 70, connections: [] }
+  { id: 'pms',            name: 'PMS',                  category: 'management', icon: 'Bed',           x: 50, y: 50, connections: ['channel-manager', 'pos'] },
+  { id: 'channel-manager',name: 'Channel Manager',       category: 'sales',      icon: 'Share2',        x: 18, y: 28, connections: ['ota', 'booking-engine'] },
+  { id: 'ota',            name: 'OTA',                   category: 'sales',      icon: 'Building2',     x: 18, y: 10, connections: [] },
+  { id: 'booking-engine', name: 'Moteur de réservation', category: 'booking',    icon: 'Calendar',      x: 50, y: 12, connections: ['site-internet', 'psp'] },
+  { id: 'site-internet',  name: 'Site internet',         category: 'sales',      icon: 'Globe',         x: 78, y: 10, connections: [] },
+  { id: 'psp',            name: 'PSP',                   category: 'customer',   icon: 'CreditCard',    x: 80, y: 30, connections: [] },
+  { id: 'pos',            name: 'POS restaurant',        category: 'restaurant', icon: 'UtensilsCrossed', x: 22, y: 72, connections: [] }
 ];
 
 // 🟠 Socle 2 - Performance
 const socle2Performance: SystemNode[] = [
-  { id: 'pms', name: 'PMS', category: 'management', icon: 'Bed', x: 50, y: 45, connections: ['channel-manager', 'pos', 'compta', 'crm'] },
-  { id: 'channel-manager', name: 'Channel Manager', category: 'sales', icon: 'Share2', x: 25, y: 25, connections: ['ota', 'booking-engine'] },
-  { id: 'ota', name: 'OTA', category: 'sales', icon: 'Building2', x: 10, y: 15, connections: [] },
-  { id: 'booking-engine', name: 'Moteur de réservation', category: 'booking', icon: 'Calendar', x: 45, y: 12, connections: ['site-internet', 'psp'] },
-  { id: 'site-internet', name: 'Site internet', category: 'sales', icon: 'Globe', x: 65, y: 8, connections: [] },
-  { id: 'psp', name: 'PSP', category: 'customer', icon: 'CreditCard', x: 70, y: 22, connections: [] },
-  { id: 'pos', name: 'POS restaurant', category: 'restaurant', icon: 'UtensilsCrossed', x: 30, y: 65, connections: [] },
-  { id: 'compta', name: 'Comptabilité', category: 'management', icon: 'Calculator', x: 70, y: 45, connections: [] },
-  { id: 'crm', name: 'CRM', category: 'management', icon: 'Users', x: 75, y: 60, connections: [] },
+  { id: 'pms',            name: 'PMS',                  category: 'management', icon: 'Bed',           x: 48, y: 48, connections: ['channel-manager', 'pos', 'compta', 'crm'] },
+  { id: 'channel-manager',name: 'Channel Manager',       category: 'sales',      icon: 'Share2',        x: 18, y: 22, connections: ['ota', 'booking-engine'] },
+  { id: 'ota',            name: 'OTA',                   category: 'sales',      icon: 'Building2',     x: 18, y:  8, connections: [] },
+  { id: 'booking-engine', name: 'Moteur de réservation', category: 'booking',    icon: 'Calendar',      x: 48, y: 10, connections: ['site-internet', 'psp'] },
+  { id: 'site-internet',  name: 'Site internet',         category: 'sales',      icon: 'Globe',         x: 75, y:  8, connections: [] },
+  { id: 'psp',            name: 'PSP',                   category: 'customer',   icon: 'CreditCard',    x: 78, y: 25, connections: [] },
+  { id: 'pos',            name: 'POS restaurant',        category: 'restaurant', icon: 'UtensilsCrossed', x: 18, y: 70, connections: [] },
+  { id: 'compta',         name: 'Comptabilité',          category: 'management', icon: 'Calculator',    x: 75, y: 48, connections: [] },
+  { id: 'crm',            name: 'CRM',                   category: 'management', icon: 'Users',         x: 75, y: 68, connections: [] },
 ];
 
 // 🔵 Socle 3 - Signature
 const socle3Signature: SystemNode[] = [
-  { id: 'pms', name: 'PMS', category: 'management', icon: 'Bed', x: 50, y: 45, connections: ['channel-manager', 'pos', 'compta', 'crm', 'spa', 'exp-client', 'rms'] },
-  { id: 'channel-manager', name: 'Channel Manager', category: 'sales', icon: 'Share2', x: 25, y: 25, connections: ['ota', 'booking-engine', 'gds'] },
-  { id: 'ota', name: 'OTA', category: 'sales', icon: 'Building2', x: 10, y: 15, connections: [] },
-  { id: 'booking-engine', name: 'Moteur de réservation', category: 'booking', icon: 'Calendar', x: 45, y: 10, connections: ['site-internet', 'psp'] },
-  { id: 'site-internet', name: 'Site internet', category: 'sales', icon: 'Globe', x: 65, y: 5, connections: ['moteur-resto'] },
-  { id: 'psp', name: 'PSP', category: 'customer', icon: 'CreditCard', x: 72, y: 18, connections: [] },
-  { id: 'pos', name: 'POS restaurant', category: 'restaurant', icon: 'UtensilsCrossed', x: 28, y: 65, connections: [] },
-  { id: 'compta', name: 'Comptabilité', category: 'management', icon: 'Calculator', x: 70, y: 42, connections: [] },
-  { id: 'crm', name: 'CRM', category: 'management', icon: 'Users', x: 75, y: 55, connections: [] },
-  { id: 'spa', name: 'SPA', category: 'wellness', icon: 'Sparkles', x: 60, y: 65, connections: [] },
-  { id: 'exp-client', name: 'Exp client in-house', category: 'customer', icon: 'Star', x: 75, y: 75, connections: [] },
-  { id: 'rms', name: 'RMS', category: 'management', icon: 'TrendingUp', x: 38, y: 80, connections: [] },
-  { id: 'gds', name: 'GDS', category: 'sales', icon: 'Globe', x: 12, y: 35, connections: [] },
-  { id: 'moteur-resto', name: 'Moteur résa resto', category: 'restaurant', icon: 'UtensilsCrossed', x: 80, y: 12, connections: [] }
+  { id: 'pms',            name: 'PMS',                  category: 'management', icon: 'Bed',           x: 48, y: 42, connections: ['channel-manager', 'pos', 'compta', 'crm', 'spa', 'exp-client', 'rms'] },
+  { id: 'channel-manager',name: 'Channel Manager',       category: 'sales',      icon: 'Share2',        x: 20, y: 22, connections: ['ota', 'booking-engine', 'gds'] },
+  { id: 'ota',            name: 'OTA',                   category: 'sales',      icon: 'Building2',     x: 20, y:  8, connections: [] },
+  { id: 'gds',            name: 'GDS',                   category: 'sales',      icon: 'Globe',         x: 20, y: 38, connections: [] },
+  { id: 'booking-engine', name: 'Moteur de réservation', category: 'booking',    icon: 'Calendar',      x: 48, y:  8, connections: ['site-internet', 'psp'] },
+  { id: 'site-internet',  name: 'Site internet',         category: 'sales',      icon: 'Globe',         x: 72, y:  8, connections: ['moteur-resto'] },
+  { id: 'moteur-resto',   name: 'Moteur résa resto',     category: 'restaurant', icon: 'UtensilsCrossed', x: 88, y: 22, connections: [] },
+  { id: 'psp',            name: 'PSP',                   category: 'customer',   icon: 'CreditCard',    x: 72, y: 24, connections: [] },
+  { id: 'compta',         name: 'Comptabilité',          category: 'management', icon: 'Calculator',    x: 72, y: 42, connections: [] },
+  { id: 'crm',            name: 'CRM',                   category: 'management', icon: 'Users',         x: 78, y: 60, connections: [] },
+  { id: 'pos',            name: 'POS restaurant',        category: 'restaurant', icon: 'UtensilsCrossed', x: 18, y: 68, connections: [] },
+  { id: 'rms',            name: 'RMS',                   category: 'management', icon: 'TrendingUp',    x: 36, y: 78, connections: [] },
+  { id: 'spa',            name: 'SPA',                   category: 'wellness',   icon: 'Sparkles',      x: 58, y: 72, connections: [] },
+  { id: 'exp-client',     name: 'Exp client in-house',   category: 'customer',   icon: 'Star',          x: 78, y: 78, connections: [] },
 ];
 
 const SOCLE_DESCRIPTIONS: Record<string, string> = {
