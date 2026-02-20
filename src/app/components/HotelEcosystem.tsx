@@ -2105,7 +2105,7 @@ export function HotelEcosystem() {
 
       {/* Add Card Modal - Responsive */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-3 sm:p-4" style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(15,23,42,0.25)' }}>
           <div className="bg-white p-4 sm:p-6 rounded-xl md:rounded-2xl shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg sm:text-xl font-bold">Ajouter une nouvelle carte</h3>
