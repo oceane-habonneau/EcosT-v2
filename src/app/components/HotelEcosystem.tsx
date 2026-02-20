@@ -509,6 +509,9 @@ function computeScore(
     maxScore += link.points;
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
+    } else {
+      const w = PAIR_WARN_MAP[[link.a, link.b].sort().join(',')];
+      alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: (w?.[1] as Severity) ?? 'warning' });
     }
   }
 
@@ -521,6 +524,9 @@ function computeScore(
     maxScore += link.points;
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
+    } else {
+      const w = PAIR_WARN_MAP[[link.a, link.b].sort().join(',')];
+      alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: (w?.[1] as Severity) ?? 'info' });
     }
   }
 
@@ -1822,24 +1828,24 @@ export function HotelEcosystem() {
                 )}
 
                 {alertPairs.length > 0 && (
-                  <div className="p-4 bg-orange-50 border border-orange-200 rounded-2xl">
-                    <p className="text-sm font-bold text-orange-600 uppercase mb-3">⚠️ Alertes critiques</p>
-                    {alertPairs.map(({ a, b }) => {
-                      let message = '';
-                      const pairKey = [a, b].sort().join('|');
-                      if (pairKey === ['pms', 'channel-manager'].sort().join('|')) {
-                        message = 'Flux de stock non synchronisé (Risque de surréservation)';
-                      } else if (pairKey === ['booking-engine', 'site-internet'].sort().join('|') || pairKey === ['pms', 'site-internet'].sort().join('|')) {
-                        message = 'Votre site internet n\'est pas configuré pour la vente directe';
-                      } else if (pairKey === ['booking-engine', 'psp'].sort().join('|') || pairKey === ['pms', 'psp'].sort().join('|')) {
-                        message = 'Risque d\'abandon de panier (Paiement non sécurisé)';
-                      } else {
-                        message = `${allSystems.find(s => s.id === a)?.name || a} → ${allSystems.find(s => s.id === b)?.name || b}`;
-                      }
+                  <div className="space-y-2">
+                    <p className="text-xs font-bold text-white/50 uppercase tracking-wide mb-1">⚡ Ruptures de flux</p>
+                    {alertPairs.map(({ a, b, warning, severity }) => {
+                      const isCrit = severity === 'critique';
+                      const nameA = allSystems.find(s => s.id === a)?.name || a;
+                      const nameB = allSystems.find(s => s.id === b)?.name || b;
                       return (
-                        <div key={`${a}-${b}`} className="flex items-start gap-2 mb-2">
-                          <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse mt-1" />
-                          <p className="text-sm text-orange-700 leading-tight">{message}</p>
+                        <div key={`${a}-${b}`} className="p-2.5 rounded-xl" style={{
+                          background: isCrit ? 'rgba(239,68,68,0.08)' : 'rgba(245,158,11,0.08)',
+                          border: `1px solid ${isCrit ? 'rgba(239,68,68,0.25)' : 'rgba(245,158,11,0.25)'}`
+                        }}>
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isCrit ? 'bg-red-400 animate-pulse' : 'bg-amber-400'}`} />
+                            <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: isCrit ? '#f87171' : '#fbbf24' }}>
+                              {nameA} ↔ {nameB}
+                            </span>
+                          </div>
+                          {warning && <p className="text-[10px] leading-snug pl-3" style={{ color: isCrit ? 'rgba(252,165,165,0.8)' : 'rgba(253,230,138,0.7)' }}>{warning}</p>}
                         </div>
                       );
                     })}
