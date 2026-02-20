@@ -765,10 +765,17 @@ export function HotelEcosystem() {
       alert('Veuillez entrer un nom pour la carte');
       return;
     }
-    const newId = `new-${Date.now()}`;
+    // Utiliser l'ID canonique si le nom correspond à un outil connu
+    // (permet au scoring de reconnaître PMS, POS, etc.)
+    const knownMatch = WIZARD_TOOLS.find(
+      t => t.name.toLowerCase() === newCard.name.trim().toLowerCase()
+    );
+    // Éviter les doublons si l'outil est déjà sur le canvas
+    const alreadyPresent = knownMatch && allSystems.some(s => s.id === knownMatch.id);
+    const newId = (knownMatch && !alreadyPresent) ? knownMatch.id : `new-${Date.now()}`;
     const newSystem: SystemNode = {
       id: newId,
-      name: newCard.name,
+      name: newCard.name.trim(),
       category: newCard.category,
       icon: newCard.icon,
       x: 50,
@@ -782,14 +789,13 @@ export function HotelEcosystem() {
     }));
     setConnections(prev => ({
       ...prev,
-      [newId]: []
+      [newId]: prev[newId] ?? [] // conserver les connexions existantes si même ID
     }));
     setShowAddModal(false);
-    setNewCard({
-      name: '',
-      category: 'management',
-      icon: 'Bed'
-    });
+    setNewCard({ name: '', category: 'management', icon: 'Bed' });
+    // Passer en mode liaison pour connecter immédiatement le nouvel outil
+    setViewMode('admin');
+    setMode('link');
   };
 
 
@@ -911,14 +917,26 @@ export function HotelEcosystem() {
     setNodePositions(newPositions);
     setConnections(newConnections);
     setShowWizardModal(false);
-    setScorePanelOpen(true); // Ouvrir le panneau pour voir le score
+    setScorePanelOpen(true);
+    // Mettre en mode admin+link pour permettre corrections immédiates
+    setViewMode('admin');
+    setMode('link');
+    // Scroller vers le canvas
+    setTimeout(() => {
+      document.getElementById('ecosystem')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
   };
 
-  // ── Score calculé en temps réel ──
+  // ── Score calculé en temps réel — recalculé à chaque render ──
   const { pct, maxScore, alertPairs, missingVitalTools, penalty } = computeScore(connections, allSystems);
   const diagnostic = getDiagnostic(pct, missingVitalTools.length > 0);
   // Set rapide pour lookup O(1)
   const alertNodeIds = new Set(alertPairs.flatMap(p => [p.a, p.b]));
+
+  // Ouvrir automatiquement le panel score quand il y a des alertes ou score < 100%
+  useEffect(() => {
+    if (pct < 100 && pct > 0) setScorePanelOpen(true);
+  }, [pct]);
 
   return (
     <div className="max-w-[1400px] mx-auto p-3 sm:p-4 md:p-8">
@@ -1355,12 +1373,18 @@ export function HotelEcosystem() {
               </div>
             )}
             {mode === 'link' && (
-              <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-50 border-2 border-blue-200 text-blue-700 rounded-lg md:rounded-xl shadow-md">
-                <Link2 className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
-                <span className="text-xs md:text-sm">
-                  {selectedForLink 
-                    ? <><span className="hidden sm:inline">Cliquez sur une autre carte pour créer/supprimer une liaison, ou cliquez sur une liaison existante pour la supprimer</span><span className="sm:hidden">Cliquez sur une carte ou une liaison</span></> 
-                    : <><span className="hidden sm:inline">Cliquez sur une carte pour commencer une liaison, ou cliquez sur une liaison existante pour la supprimer</span><span className="sm:hidden">Cliquez sur une carte</span></>}
+              <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-2 rounded-lg md:rounded-xl shadow-md" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08))', border: '2px solid rgba(139,92,246,0.3)' }}>
+                <div className="flex items-center gap-2">
+                  <Link2 className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0 text-purple-600" />
+                  <span className="text-xs md:text-sm text-purple-700 font-medium">
+                    {selectedForLink
+                      ? <><span className="hidden sm:inline">Cliquez sur une autre carte pour créer/supprimer une liaison</span><span className="sm:hidden">Cliquez sur une carte cible</span></>
+                      : <><span className="hidden sm:inline">Mode liaison actif — cliquez sur une carte pour commencer</span><span className="sm:hidden">Cliquez sur une carte</span></>}
+                  </span>
+                </div>
+                {/* Le score se met à jour en temps réel */}
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: 'rgba(139,92,246,0.15)', color: '#7c3aed' }}>
+                  Score : {pct}%
                 </span>
               </div>
             )}
