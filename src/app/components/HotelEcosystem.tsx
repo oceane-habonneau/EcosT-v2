@@ -1648,87 +1648,129 @@ export function HotelEcosystem() {
             </button>
 
             {scorePanelOpen && (
-              <div className="mt-1.5 rounded-2xl overflow-hidden" style={{
+              <div className="mt-1.5 rounded-2xl flex flex-col" style={{
                 background: 'linear-gradient(145deg, rgba(15,23,42,0.97) 0%, rgba(30,41,59,0.95) 100%)',
                 border: '1px solid rgba(148,163,184,0.12)',
                 backdropFilter: 'blur(20px)',
-                boxShadow: '0 16px 40px rgba(0,0,0,0.5)'
+                boxShadow: '0 16px 40px rgba(0,0,0,0.5)',
+                maxHeight: '70vh',
               }}>
-                <div className="px-4 py-3 text-center border-b border-white/10">
-                  <div className="text-4xl font-black mb-0.5" style={{ color: diagnostic.barColor, textShadow: `0 0 20px ${diagnostic.barColor}60` }}>{pct}%</div>
-                  <p className="text-[11px] font-bold uppercase tracking-wide text-white/70">{diagnostic.label}</p>
-                  <button
-                    onClick={() => setHealthDetailsExpanded(e => !e)}
-                    className="text-[10px] text-white/40 hover:text-white/70 underline mt-1 transition-colors"
-                  >
-                    {healthDetailsExpanded ? '− Masquer' : '+ Détails'}
-                  </button>
-                  {healthDetailsExpanded && (
-                    <p className="text-[10px] text-white/50 leading-relaxed mt-2 px-1">{diagnostic.desc}</p>
-                  )}
-                </div>
-                <div className="px-4 py-2.5">
-                  <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: diagnostic.barColor, boxShadow: `0 0 8px ${diagnostic.barColor}80` }} />
-                  </div>
-                  <div className="flex justify-between text-[9px] text-white/30 mt-1">
-                    <span>0%</span>
-                    <span className="text-white/60 font-semibold">
-                      {maxScore > 0 ? `${Math.round((pct * maxScore) / 100)} / ${maxScore} pts` : '—'}
-                      {penalty < 0 && <span className="text-red-400"> ({penalty})</span>}
-                    </span>
-                    <span>100%</span>
-                  </div>
-                </div>
-                {missingVitalTools.length > 0 && (
-                  <div className="mx-3 mb-2.5 p-2.5 rounded-xl" style={{ background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.35)' }}>
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse flex-shrink-0" />
-                      <p className="text-[9px] font-black text-red-400 uppercase tracking-wide">Outil indispensable manquant</p>
-                    </div>
-                    {missingVitalTools.map(toolId => {
-                      const names: Record<string,string> = { 'booking-engine':'Moteur de Réservation','channel-manager':'Channel Manager','pms':'PMS','site-internet':'Site Internet','ota':'OTA' };
-                      return (
-                        <div key={toolId} className="mb-1.5 p-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)' }}>
-                          <p className="text-[10px] text-red-300 font-bold">{names[toolId] || toolId}</p>
-                          <p className="text-[9px] text-red-400/70 leading-snug mt-0.5">Cet élément est la colonne vertébrale de votre rentabilité.</p>
-                        </div>
-                      );
-                    })}
+
+                {/* ── Header fixe : score + barre ── */}
+                <div className="flex-shrink-0">
+                  <div className="px-4 py-3 text-center border-b border-white/10">
+                    <div className="text-4xl font-black mb-0.5" style={{ color: diagnostic.barColor, textShadow: `0 0 20px ${diagnostic.barColor}60` }}>{pct}%</div>
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-white/70">{diagnostic.label}</p>
                     <button
-                      onClick={() => setShowAddModal(true)}
-                      className="w-full mt-1.5 px-2 py-1.5 bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
+                      onClick={() => setHealthDetailsExpanded(e => !e)}
+                      className="text-[10px] text-white/40 hover:text-white/70 underline mt-1 transition-colors"
                     >
-                      <Plus className="w-3 h-3" /> Compléter mon socle
+                      {healthDetailsExpanded ? '− Masquer' : '+ Détails'}
                     </button>
+                    {healthDetailsExpanded && (
+                      <p className="text-[10px] text-white/50 leading-relaxed mt-2 px-1">{diagnostic.desc}</p>
+                    )}
                   </div>
-                )}
-                {alertPairs.length > 0 && (
-                  <div className="mx-3 mb-3 space-y-1.5">
-                    <p className="text-[9px] font-bold text-white/40 uppercase tracking-wide px-1">⚡ Ruptures de flux</p>
-                    {alertPairs.slice(0, 4).map(({ a, b, warning, severity }) => {
-                      const sev = severity || 'warning';
+                  <div className="px-4 py-2.5 border-b border-white/10">
+                    <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: diagnostic.barColor, boxShadow: `0 0 8px ${diagnostic.barColor}80` }} />
+                    </div>
+                    <div className="flex justify-between text-[9px] text-white/30 mt-1">
+                      <span>0%</span>
+                      <span className="text-white/60 font-semibold">
+                        {maxScore > 0 ? `${Math.round((pct * maxScore) / 100)} / ${maxScore} pts` : '—'}
+                        {penalty < 0 && <span className="text-red-400"> ({penalty})</span>}
+                      </span>
+                      <span>100%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Zone scrollable : alertes triées par gravité ── */}
+                {(alertPairs.length > 0 || missingVitalTools.length > 0) && (
+                  <div
+                    className="flex-1 overflow-y-auto px-3 py-2.5 space-y-1.5"
+                    style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.12) transparent' }}
+                  >
+                    {/* 1️⃣ Critiques en premier */}
+                    {alertPairs.filter(p => p.severity === 'critique').map(({ a, b, warning }) => {
                       const nameA = allSystems.find(s => s.id === a)?.name || a;
                       const nameB = allSystems.find(s => s.id === b)?.name || b;
-                      const isCrit = sev === 'critique';
                       return (
-                        <div key={`${a}-${b}`} className="p-2 rounded-xl" style={{
-                          background: isCrit ? 'rgba(239,68,68,0.08)' : 'rgba(245,158,11,0.08)',
-                          border: `1px solid ${isCrit ? 'rgba(239,68,68,0.25)' : 'rgba(245,158,11,0.25)'}`
-                        }}>
+                        <div key={`${a}-${b}`} className="p-2 rounded-xl" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
                           <div className="flex items-center gap-1.5 mb-0.5">
-                            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isCrit ? 'bg-red-400 animate-pulse' : 'bg-amber-400'}`} />
-                            <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: isCrit ? '#f87171' : '#fbbf24' }}>
-                              {nameA} ↔ {nameB}
-                            </span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse flex-shrink-0" />
+                            <span className="text-[9px] font-bold uppercase tracking-wide text-red-400">{nameA} ↔ {nameB}</span>
+                            <span className="ml-auto text-[8px] font-black uppercase bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full">critique</span>
                           </div>
-                          {warning && <p className="text-[9px] leading-snug pl-3" style={{ color: isCrit ? 'rgba(252,165,165,0.8)' : 'rgba(253,230,138,0.7)' }}>{warning}</p>}
+                          {warning && <p className="text-[9px] leading-snug pl-3 text-red-300/70">{warning}</p>}
                         </div>
                       );
                     })}
-                    {alertPairs.length > 4 && <p className="text-[9px] text-white/30 text-center mt-1">+{alertPairs.length - 4} autre(s) rupture(s)</p>}
+
+                    {/* 2️⃣ Warnings */}
+                    {alertPairs.filter(p => p.severity === 'warning').map(({ a, b, warning }) => {
+                      const nameA = allSystems.find(s => s.id === a)?.name || a;
+                      const nameB = allSystems.find(s => s.id === b)?.name || b;
+                      return (
+                        <div key={`${a}-${b}`} className="p-2 rounded-xl" style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.22)' }}>
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
+                            <span className="text-[9px] font-bold uppercase tracking-wide text-amber-400">{nameA} ↔ {nameB}</span>
+                            <span className="ml-auto text-[8px] font-black uppercase bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">warning</span>
+                          </div>
+                          {warning && <p className="text-[9px] leading-snug pl-3 text-amber-300/60">{warning}</p>}
+                        </div>
+                      );
+                    })}
+
+                    {/* 3️⃣ Info */}
+                    {alertPairs.filter(p => p.severity === 'info').map(({ a, b, warning }) => {
+                      const nameA = allSystems.find(s => s.id === a)?.name || a;
+                      const nameB = allSystems.find(s => s.id === b)?.name || b;
+                      return (
+                        <div key={`${a}-${b}`} className="p-2 rounded-xl" style={{ background: 'rgba(59,130,246,0.07)', border: '1px solid rgba(59,130,246,0.20)' }}>
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+                            <span className="text-[9px] font-bold uppercase tracking-wide text-blue-400">{nameA} ↔ {nameB}</span>
+                            <span className="ml-auto text-[8px] font-black uppercase bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full">info</span>
+                          </div>
+                          {warning && <p className="text-[9px] leading-snug pl-3 text-blue-300/60">{warning}</p>}
+                        </div>
+                      );
+                    })}
+
+                    {/* 4️⃣ Outils absents */}
+                    {missingVitalTools.length > 0 && (
+                      <div className="p-2.5 rounded-xl" style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.20)' }}>
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse flex-shrink-0" />
+                          <p className="text-[9px] font-black text-red-400 uppercase tracking-wide">Outils indispensables absents</p>
+                        </div>
+                        {missingVitalTools.map(toolId => {
+                          const names: Record<string,string> = { 'booking-engine':'Moteur de Réservation','channel-manager':'Channel Manager','pms':'PMS','site-internet':'Site Internet','ota':'OTA' };
+                          return (
+                            <div key={toolId} className="mb-1 p-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)' }}>
+                              <p className="text-[10px] text-red-300 font-bold">{names[toolId] || toolId}</p>
+                              <p className="text-[9px] text-red-400/60 leading-snug mt-0.5">Colonne vertébrale de votre rentabilité.</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
+
+                {/* ── Footer sticky : bouton ajouter ── */}
+                <div className="flex-shrink-0 px-3 pb-3 pt-2 border-t border-white/10">
+                  <button
+                    onClick={() => setShowAddModal(true)}
+                    className="w-full py-2 rounded-xl text-[11px] font-bold text-white flex items-center justify-center gap-1.5 transition-all hover:brightness-110 active:scale-95"
+                    style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.8), rgba(5,150,105,0.9))', border: '1px solid rgba(16,185,129,0.4)', boxShadow: '0 4px 12px rgba(16,185,129,0.2)' }}
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Ajouter un outil
+                  </button>
+                </div>
               </div>
             )}
           </div>
