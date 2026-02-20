@@ -393,22 +393,6 @@ const STRATEGIC_LINKS: ScoreLink[] = [
   { a: 'pms', b: 'tv',         points: 5 },
 ];
 
-// Map des messages d'impact par paire (clé = ids triés)
-const PAIR_WARN_MAP: Record<string, [string, string]> = {
-  'channel-manager,pms':          ['Risque majeur de surbooking et de disparité tarifaire.', 'critique'],
-  'booking-engine,channel-manager':['Tarifs directs non synchronisés : perte de ventes directes.', 'critique'],
-  'booking-engine,psp':           ['Pas de garantie bancaire : risque de no-shows impayés.', 'critique'],
-  'channel-manager,ota':          ['Canaux déconnectés : fermeture forcée sur Booking/Expedia.', 'critique'],
-  'booking-engine,site-internet': ['Parcours client rompu : perte de conversion immédiate.', 'critique'],
-  'pos,pms':                      ["Pas de transfert chambre : oublis de facturation au check-out.", 'warning'],
-  'pms,serrure':                  ["Saisie manuelle des clés : perte de temps staff.", 'warning'],
-  'pms,spa':                      ["Plannings non synchronisés : erreurs sur facture globale.", 'warning'],
-  'crm,pms':                      ["Données isolées : impossible de fidéliser.", 'warning'],
-  'compta,pms':                   ["Saisie manuelle du CA : retard de clôture.", 'warning'],
-  'pms,rms':                      ["Tarification statique : manque à gagner sur le RevPAR.", 'warning'],
-  'channel-manager,gds':          ["Canaux corporate non alimentés : manque à gagner B2B.", 'info'],
-};
-
 // Map des messages d'impact par paire (clé = ids triés join ',')
 const PAIR_WARN_MAP: Record<string, [string, string]> = {
   'channel-manager,pms':           ['Risque majeur de surbooking et de disparité tarifaire.', 'critique'],
