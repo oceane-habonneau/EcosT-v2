@@ -281,7 +281,7 @@ function getLogicalPairs(tools: Set<string>): LogicalPair[] {
   if (has('pms') && has('pos'))
     pairs.push({ a: 'pms', b: 'pos',
       question: 'Le POS envoie-t-il automatiquement les notes en chambre au PMS ?',
-      warning: 'Pas de transfert en chambre : risque d'oublis de facturation au check-out.',
+      warning: "Pas de transfert en chambre : risque d'oublis de facturation au check-out.",
       severity: 'warning' });
 
   if (has('pms') && has('serrure'))
@@ -293,19 +293,19 @@ function getLogicalPairs(tools: Set<string>): LogicalPair[] {
   if (has('pms') && has('spa'))
     pairs.push({ a: 'pms', b: 'spa',
       question: 'Les réservations SPA sont-elles synchronisées avec le PMS ?',
-      warning: 'Plannings non synchronisés : risque d'erreurs sur la facture globale.',
+      warning: "Plannings non synchronisés : risque d'erreurs sur la facture globale.",
       severity: 'warning' });
 
   if (has('pms') && has('crm'))
     pairs.push({ a: 'pms', b: 'crm',
       question: 'Le CRM est-il alimenté automatiquement par le PMS ?',
-      warning: 'Données isolées : impossible de personnaliser l'accueil ou de fidéliser.',
+      warning: "Données isolées : impossible de personnaliser l'accueil ou de fidéliser.",
       severity: 'warning' });
 
   if (has('pms') && has('compta'))
     pairs.push({ a: 'pms', b: 'compta',
       question: 'Les écritures comptables sont-elles exportées automatiquement du PMS ?',
-      warning: 'Saisie manuelle du CA : risque d'erreurs et retard de clôture.',
+      warning: "Saisie manuelle du CA : risque d'erreurs et retard de clôture.",
       severity: 'warning' });
 
   if (has('pms') && has('rms'))
