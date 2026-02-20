@@ -233,36 +233,98 @@ const WIZARD_TOOLS = [
 ];
 
 // Paires de connexions logiques possibles selon les outils sélectionnés
-function getLogicalPairs(tools: Set<string>): Array<{ a: string; b: string; question: string }> {
-  const pairs: Array<{ a: string; b: string; question: string }> = [];
+// Sévérité d'une rupture de flux
+type Severity = 'critique' | 'warning' | 'info';
+
+interface LogicalPair {
+  a: string;
+  b: string;
+  question: string;
+  warning: string;
+  severity: Severity;
+}
+
+function getLogicalPairs(tools: Set<string>): LogicalPair[] {
+  const pairs: LogicalPair[] = [];
   const has = (id: string) => tools.has(id);
 
   if (has('pms') && has('channel-manager'))
-    pairs.push({ a: 'pms', b: 'channel-manager', question: 'Votre PMS est-il connecté au Channel Manager ?' });
+    pairs.push({ a: 'pms', b: 'channel-manager',
+      question: 'Votre PMS est-il connecté au Channel Manager ?',
+      warning: 'Risque majeur de surbooking et de disparité tarifaire.',
+      severity: 'critique' });
+
   if (has('channel-manager') && has('booking-engine'))
-    pairs.push({ a: 'channel-manager', b: 'booking-engine', question: 'Votre Channel Manager envoie-t-il les réservations au Moteur ?' });
+    pairs.push({ a: 'channel-manager', b: 'booking-engine',
+      question: 'Votre Channel Manager envoie-t-il les réservations au Moteur ?',
+      warning: 'Tarifs directs non synchronisés : risque de perte de ventes directes.',
+      severity: 'critique' });
+
   if (has('channel-manager') && has('ota'))
-    pairs.push({ a: 'channel-manager', b: 'ota', question: 'Les OTA sont-elles connectées via le Channel Manager ?' });
+    pairs.push({ a: 'channel-manager', b: 'ota',
+      question: 'Les OTA sont-elles connectées via le Channel Manager ?',
+      warning: 'Canaux déconnectés : fermeture forcée des ventes sur Booking/Expedia.',
+      severity: 'critique' });
+
   if (has('booking-engine') && has('psp'))
-    pairs.push({ a: 'booking-engine', b: 'psp', question: 'Les paiements en ligne passent-ils par le Moteur vers le PSP ?' });
+    pairs.push({ a: 'booking-engine', b: 'psp',
+      question: 'Les paiements en ligne passent-ils par le Moteur vers le PSP ?',
+      warning: 'Pas de garantie bancaire en temps réel : risque de no-shows impayés.',
+      severity: 'critique' });
+
   if (has('booking-engine') && has('site-internet'))
-    pairs.push({ a: 'booking-engine', b: 'site-internet', question: 'Le Moteur de Résa est-il intégré au Site Internet ?' });
+    pairs.push({ a: 'booking-engine', b: 'site-internet',
+      question: 'Le Moteur de Résa est-il intégré au Site Internet ?',
+      warning: 'Parcours client rompu : perte de conversion immédiate.',
+      severity: 'critique' });
+
   if (has('pms') && has('pos'))
-    pairs.push({ a: 'pms', b: 'pos', question: 'Le POS envoie-t-il automatiquement les notes en chambre au PMS ?' });
-  if (has('pms') && has('compta'))
-    pairs.push({ a: 'pms', b: 'compta', question: 'Les écritures comptables sont-elles exportées automatiquement du PMS ?' });
-  if (has('pms') && has('crm'))
-    pairs.push({ a: 'pms', b: 'crm', question: 'Le CRM est-il alimenté automatiquement par le PMS ?' });
-  if (has('pms') && has('spa'))
-    pairs.push({ a: 'pms', b: 'spa', question: 'Les réservations SPA sont-elles synchronisées avec le PMS ?' });
+    pairs.push({ a: 'pms', b: 'pos',
+      question: 'Le POS envoie-t-il automatiquement les notes en chambre au PMS ?',
+      warning: 'Pas de transfert en chambre : risque d'oublis de facturation au check-out.',
+      severity: 'warning' });
+
   if (has('pms') && has('serrure'))
-    pairs.push({ a: 'pms', b: 'serrure', question: 'Les serrures sont-elles pilotées par le PMS ?' });
+    pairs.push({ a: 'pms', b: 'serrure',
+      question: 'Les serrures sont-elles pilotées par le PMS ?',
+      warning: 'Saisie manuelle des clés : perte de temps staff et attente client.',
+      severity: 'warning' });
+
+  if (has('pms') && has('spa'))
+    pairs.push({ a: 'pms', b: 'spa',
+      question: 'Les réservations SPA sont-elles synchronisées avec le PMS ?',
+      warning: 'Plannings non synchronisés : risque d'erreurs sur la facture globale.',
+      severity: 'warning' });
+
+  if (has('pms') && has('crm'))
+    pairs.push({ a: 'pms', b: 'crm',
+      question: 'Le CRM est-il alimenté automatiquement par le PMS ?',
+      warning: 'Données isolées : impossible de personnaliser l'accueil ou de fidéliser.',
+      severity: 'warning' });
+
+  if (has('pms') && has('compta'))
+    pairs.push({ a: 'pms', b: 'compta',
+      question: 'Les écritures comptables sont-elles exportées automatiquement du PMS ?',
+      warning: 'Saisie manuelle du CA : risque d'erreurs et retard de clôture.',
+      severity: 'warning' });
+
   if (has('pms') && has('rms'))
-    pairs.push({ a: 'pms', b: 'rms', question: 'Le RMS ajuste-t-il les tarifs automatiquement dans le PMS ?' });
+    pairs.push({ a: 'pms', b: 'rms',
+      question: 'Le RMS ajuste-t-il les tarifs automatiquement dans le PMS ?',
+      warning: 'Tarification statique : manque à gagner sur le RevPAR.',
+      severity: 'warning' });
+
   if (has('site-internet') && has('pms'))
-    pairs.push({ a: 'site-internet', b: 'pms', question: 'Le Site Internet affiche-t-il les disponibilités du PMS en temps réel ?' });
+    pairs.push({ a: 'site-internet', b: 'pms',
+      question: 'Le Site Internet affiche-t-il les disponibilités du PMS en temps réel ?',
+      warning: 'Disponibilités non synchronisées : risque de sur-vente manuelle.',
+      severity: 'warning' });
+
   if (has('channel-manager') && has('gds'))
-    pairs.push({ a: 'channel-manager', b: 'gds', question: 'Les GDS sont-ils reliés au Channel Manager ?' });
+    pairs.push({ a: 'channel-manager', b: 'gds',
+      question: 'Les GDS sont-ils reliés au Channel Manager ?',
+      warning: 'Canaux corporate non alimentés : manque à gagner sur la clientèle B2B.',
+      severity: 'info' });
 
   return pairs;
 }
@@ -331,6 +393,38 @@ const STRATEGIC_LINKS: ScoreLink[] = [
   { a: 'pms', b: 'tv',         points: 5 },
 ];
 
+// Map des messages d'impact par paire (clé = ids triés)
+const PAIR_WARN_MAP: Record<string, [string, string]> = {
+  'channel-manager,pms':          ['Risque majeur de surbooking et de disparité tarifaire.', 'critique'],
+  'booking-engine,channel-manager':['Tarifs directs non synchronisés : perte de ventes directes.', 'critique'],
+  'booking-engine,psp':           ['Pas de garantie bancaire : risque de no-shows impayés.', 'critique'],
+  'channel-manager,ota':          ['Canaux déconnectés : fermeture forcée sur Booking/Expedia.', 'critique'],
+  'booking-engine,site-internet': ['Parcours client rompu : perte de conversion immédiate.', 'critique'],
+  'pos,pms':                      ["Pas de transfert chambre : oublis de facturation au check-out.", 'warning'],
+  'pms,serrure':                  ["Saisie manuelle des clés : perte de temps staff.", 'warning'],
+  'pms,spa':                      ["Plannings non synchronisés : erreurs sur facture globale.", 'warning'],
+  'crm,pms':                      ["Données isolées : impossible de fidéliser.", 'warning'],
+  'compta,pms':                   ["Saisie manuelle du CA : retard de clôture.", 'warning'],
+  'pms,rms':                      ["Tarification statique : manque à gagner sur le RevPAR.", 'warning'],
+  'channel-manager,gds':          ["Canaux corporate non alimentés : manque à gagner B2B.", 'info'],
+};
+
+// Map des messages d'impact par paire (clé = ids triés join ',')
+const PAIR_WARN_MAP: Record<string, [string, string]> = {
+  'channel-manager,pms':           ['Risque majeur de surbooking et de disparité tarifaire.', 'critique'],
+  'booking-engine,channel-manager':['Tarifs directs non synchronisés : perte de ventes directes.', 'critique'],
+  'booking-engine,psp':            ['Pas de garantie bancaire : risque de no-shows impayés.', 'critique'],
+  'channel-manager,ota':           ['Canaux déconnectés : fermeture forcée sur Booking/Expedia.', 'critique'],
+  'booking-engine,site-internet':  ['Parcours client rompu : perte de conversion immédiate.', 'critique'],
+  'pms,pos':                       ["Pas de transfert chambre : oublis de facturation au check-out.", 'warning'],
+  'pms,serrure':                   ["Saisie manuelle des clés : perte de temps staff.", 'warning'],
+  'pms,spa':                       ["Plannings non synchronisés : erreurs sur facture globale.", 'warning'],
+  'crm,pms':                       ["Données isolées : impossible de fidéliser.", 'warning'],
+  'compta,pms':                    ["Saisie manuelle du CA : retard de clôture.", 'warning'],
+  'pms,rms':                       ["Tarification statique : manque à gagner sur le RevPAR.", 'warning'],
+  'channel-manager,gds':           ["Canaux corporate non alimentés : manque à gagner B2B.", 'info'],
+};
+
 // Vérifie si un lien est actif (bidirectionnel)
 function isLinkActive(
   a: string, b: string,
@@ -370,7 +464,7 @@ function computeScore(
   score: number;
   maxScore: number;
   pct: number;
-  alertPairs: { a: string; b: string }[];
+  alertPairs: { a: string; b: string; warning?: string; severity?: Severity }[];
   missingVitalTools: string[];
   penalty: number;
 } {
@@ -378,7 +472,7 @@ function computeScore(
   let score = 0;
   let maxScore = 0;
   let penalty = 0;
-  const alertPairs: { a: string; b: string }[] = [];
+  const alertPairs: { a: string; b: string; warning?: string; severity?: Severity }[] = [];
   const missingVitalTools: string[] = [];
 
   // 1️⃣ Calculer les malus d'absence
@@ -399,7 +493,9 @@ function computeScore(
       // Badge d'alerte : au moins un chemin est pertinent mais aucun n'est tracé
       for (const { a, b } of altPath.paths) {
         if (isLinkRelevant(a, b, presentIds)) {
-          alertPairs.push({ a, b });
+          const key = [a, b].sort().join(',') as keyof typeof PAIR_WARN_MAP;
+          const w = PAIR_WARN_MAP[[a,b].sort().join(',')];
+          alertPairs.push({ a, b, warning: w?.[0], severity: w?.[1] as Severity | undefined });
         }
       }
     }
@@ -416,7 +512,7 @@ function computeScore(
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
     } else {
-      alertPairs.push({ a: link.a, b: link.b });
+      { const w = PAIR_WARN_MAP[[link.a,link.b].sort().join(',')]; alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: w?.[1] as Severity | undefined }); }
     }
   }
 
@@ -542,6 +638,7 @@ export function HotelEcosystem() {
 
   // 📱 Mobile: drawer et modal santé plein écran
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [mobileHealthModalOpen, setMobileHealthModalOpen] = useState(false);
   const [healthDetailsExpanded, setHealthDetailsExpanded] = useState(false);
   
@@ -938,32 +1035,48 @@ export function HotelEcosystem() {
                 </div>
               )}
 
-              {/* STEP 2 — Connectivité */}
+              {/* STEP 2 — Connectivité avec warning + severity */}
               {wizardStep === 2 && (
-                <div className="space-y-4">
-                  {getLogicalPairs(selectedTools).map(({ a, b, question }) => {
+                <div className="space-y-3">
+                  {getLogicalPairs(selectedTools).map(({ a, b, question, warning, severity }) => {
                     const pairKey = `${a}|${b}`;
                     const isConnected = selectedConnections.has(pairKey);
+                    const severityColors = {
+                      critique: { bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-100 text-red-700', icon: '🔴', dot: 'bg-red-500' },
+                      warning:  { bg: 'bg-amber-50', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-700', icon: '🟠', dot: 'bg-amber-400' },
+                      info:     { bg: 'bg-blue-50', border: 'border-blue-200', badge: 'bg-blue-100 text-blue-700', icon: '🔵', dot: 'bg-blue-400' },
+                    };
+                    const sc = severityColors[severity];
                     return (
                       <div
                         key={pairKey}
-                        className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-4"
+                        className={`p-3 rounded-xl border-2 transition-all duration-200 ${isConnected ? 'bg-emerald-50 border-emerald-200' : `${sc.bg} ${sc.border}`}`}
                       >
-                        <p className="text-sm font-medium text-slate-700 flex-1">{question}</p>
-                        <button
-                          onClick={() => toggleConnection(pairKey)}
-                          className={`
-                            relative w-14 h-8 rounded-full transition-colors duration-300 flex-shrink-0
-                            ${isConnected ? 'bg-emerald-500' : 'bg-slate-300'}
-                          `}
-                        >
-                          <span
-                            className={`
-                              absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300
-                              ${isConnected ? 'translate-x-7' : 'translate-x-1'}
-                            `}
-                          />
-                        </button>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-slate-700 leading-snug">{question}</p>
+                            {/* Warning message — visible uniquement si NON connecté */}
+                            {!isConnected && (
+                              <div className="flex items-start gap-1.5 mt-1.5">
+                                <span className={`w-1.5 h-1.5 rounded-full ${sc.dot} flex-shrink-0 mt-1`} />
+                                <p className="text-xs text-slate-500 leading-relaxed">{warning}</p>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                            {!isConnected && (
+                              <span className={`text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${sc.badge}`}>
+                                {severity}
+                              </span>
+                            )}
+                            <button
+                              onClick={() => toggleConnection(pairKey)}
+                              className={`relative w-12 h-7 rounded-full transition-colors duration-300 flex-shrink-0 ${isConnected ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                            >
+                              <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${isConnected ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
@@ -1044,11 +1157,11 @@ export function HotelEcosystem() {
               <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
               <span className="hidden sm:inline">Audit Gratuit</span><span className="sm:hidden">RDV</span>
             </a>
-            {/* Burger — mobile uniquement, ouvre le drawer de navigation */}
+            {/* Burger — mobile uniquement, ouvre le drawer de navigation (ancres) */}
             <button
-              onClick={() => setMobileDrawerOpen(true)}
+              onClick={() => setMobileNavOpen(o => !o)}
               className="sm:hidden w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors flex-shrink-0"
-              aria-label="Menu"
+              aria-label="Menu navigation"
             >
               <Menu className="w-4 h-4" />
             </button>
@@ -1059,6 +1172,45 @@ export function HotelEcosystem() {
           <p className="text-xs sm:text-sm md:text-base text-slate-600"><strong>Identifiez en 2 minutes les ruptures de flux qui saturent vos équipes et freinent vos réservations directes.</strong></p>
         </div>
       </div>
+
+      {/* ── Drawer navigation mobile (burger navbar) ── */}
+      {mobileNavOpen && (
+        <>
+          <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm sm:hidden" onClick={() => setMobileNavOpen(false)} />
+          <div className="fixed top-0 right-0 h-full w-64 z-[201] bg-white shadow-2xl sm:hidden flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+              <span className="font-bold text-slate-800">Navigation</span>
+              <button onClick={() => setMobileNavOpen(false)} className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                <X className="w-4 h-4 text-slate-600" />
+              </button>
+            </div>
+            <nav className="flex flex-col gap-1 p-4 flex-1">
+              <a href="#ecosystem" onClick={() => setMobileNavOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors">
+                <Layers className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                Écosystème
+              </a>
+              <a href="#services" onClick={() => setMobileNavOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors">
+                <Wrench className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                Services
+              </a>
+              <button onClick={() => { startWizard(); setMobileNavOpen(false); }}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors text-left w-full">
+                <Radio className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                Lancer mon diagnostic
+              </button>
+            </nav>
+            <div className="p-4 border-t border-slate-200">
+              <a href="https://calendar.app.google/cKNAVTh1TFacNkXs6" target="_blank" rel="noopener noreferrer"
+                onClick={() => setMobileNavOpen(false)}
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-sm font-bold rounded-xl shadow-lg">
+                <Calendar className="w-4 h-4" /> Audit Gratuit
+              </a>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Admin Controls + Toolbar */}
       {(true) && (
@@ -1412,27 +1564,54 @@ export function HotelEcosystem() {
       )}
 
       {/* ══════════ COMMENT LIRE CE SCHÉMA ══════════ */}
-      <div className="mb-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
-        <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Comment utiliser cet outil ?</p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { n: '1', title: 'Diagnostiquez', desc: 'Utilisez nos Socles de référence pour situer votre établissement.' },
-            { n: '2', title: 'Analysez', desc: 'Un socle est cohérent quand les flux sont tracés. Un outil isolé est une source de perte de temps.' },
-            { n: '3', title: 'Optimisez', desc: 'Visez le score de 100% pour garantir une automatisation totale de votre parcours client.' },
-            { n: '4', title: 'Bénéfice pour vous', desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.' },
-          ].map(step => (
-            <div key={step.n} className="flex items-start gap-2.5">
-              <div className="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-md">
-                {step.n}
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-800 mb-0.5 leading-tight">{step.title}</p>
-                <p className="text-[11px] text-slate-500 leading-relaxed">{step.desc}</p>
-              </div>
+      {(() => {
+        const stepsData = [
+          { n: '1', title: 'Diagnostiquez', desc: 'Utilisez nos Socles de référence pour situer votre établissement.' },
+          { n: '2', title: 'Analysez', desc: "Un socle est cohérent quand les flux sont tracés. Un outil isolé est une source de perte de temps." },
+          { n: '3', title: 'Optimisez', desc: 'Visez le score de 100% pour garantir une automatisation totale de votre parcours client.' },
+          { n: '4', title: 'Bénéfice pour vous', desc: "Passez la souris sur chaque carte pour comprendre ce qu'elle change dans votre quotidien opérationnel." },
+        ];
+        return (
+          <div className="mb-4 p-3 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">Comment utiliser cet outil ?</p>
+              <span className="sm:hidden flex items-center gap-1 text-[10px] text-amber-500 font-semibold select-none">
+                Défiler <ChevronDown className="w-3 h-3 -rotate-90" />
+              </span>
             </div>
-          ))}
-        </div>
-      </div>
+            {/* Mobile: scroll horizontal snap  ·  Desktop: grille 4 colonnes */}
+            <div
+              className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {stepsData.map((step, i) => (
+                <div
+                  key={step.n}
+                  className="flex items-start gap-2.5 snap-start flex-shrink-0 w-[calc(85vw)] sm:w-auto lg:w-auto"
+                >
+                  <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-md mt-0.5">
+                    {step.n}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-slate-800 mb-1 leading-tight">{step.title}</p>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">{step.desc}</p>
+                    {/* Dots pagination — mobile seulement */}
+                    <div className="flex gap-1 mt-2 lg:hidden">
+                      {stepsData.map((_, j) => (
+                        <span
+                          key={j}
+                          className="h-1 rounded-full transition-all duration-300 inline-block"
+                          style={{ width: j === i ? 16 : 6, background: j === i ? '#f59e0b' : '#e2e8f0' }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ══════════ ECOSYSTEM DIAGRAM ══════════ */}
       <div id="ecosystem">
@@ -1512,20 +1691,20 @@ export function HotelEcosystem() {
                   </div>
                 </div>
                 {missingVitalTools.length > 0 && (
-                  <div className="mx-3 mb-2.5 p-2.5 rounded-xl" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
-                    <p className="text-[9px] font-bold text-red-400 uppercase tracking-wide mb-1.5">Outils absents</p>
-                    {missingVitalTools.map(toolId => (
-                      <div key={toolId} className="flex items-center gap-1.5 mb-1">
-                        <span className="w-1 h-1 rounded-full bg-red-400 flex-shrink-0" />
-                        <span className="text-[10px] text-red-300 font-medium">
-                          {toolId === 'booking-engine' && 'Moteur de Réservation'}
-                          {toolId === 'channel-manager' && 'Channel Manager'}
-                          {toolId === 'pms' && 'PMS'}
-                          {toolId === 'site-internet' && 'Site Internet'}
-                          {toolId === 'ota' && 'OTA'}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="mx-3 mb-2.5 p-2.5 rounded-xl" style={{ background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.35)' }}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse flex-shrink-0" />
+                      <p className="text-[9px] font-black text-red-400 uppercase tracking-wide">Outil indispensable manquant</p>
+                    </div>
+                    {missingVitalTools.map(toolId => {
+                      const names: Record<string,string> = { 'booking-engine':'Moteur de Réservation','channel-manager':'Channel Manager','pms':'PMS','site-internet':'Site Internet','ota':'OTA' };
+                      return (
+                        <div key={toolId} className="mb-1.5 p-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)' }}>
+                          <p className="text-[10px] text-red-300 font-bold">{names[toolId] || toolId}</p>
+                          <p className="text-[9px] text-red-400/70 leading-snug mt-0.5">Cet élément est la colonne vertébrale de votre rentabilité.</p>
+                        </div>
+                      );
+                    })}
                     <button
                       onClick={() => setShowAddModal(true)}
                       className="w-full mt-1.5 px-2 py-1.5 bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
@@ -1535,23 +1714,29 @@ export function HotelEcosystem() {
                   </div>
                 )}
                 {alertPairs.length > 0 && (
-                  <div className="mx-3 mb-3 p-2.5 rounded-xl" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
-                    <p className="text-[9px] font-bold text-amber-400 uppercase tracking-wide mb-1.5">⚠️ Alertes critiques</p>
-                    {alertPairs.slice(0, 2).map(({ a, b }) => {
-                      let message = '';
-                      const pairKey = [a, b].sort().join('|');
-                      if (pairKey === ['pms', 'channel-manager'].sort().join('|')) { message = 'Flux de stock non synchronisé'; }
-                      else if (pairKey === ['booking-engine', 'site-internet'].sort().join('|') || pairKey === ['pms', 'site-internet'].sort().join('|')) { message = 'Site non configuré pour vente directe'; }
-                      else if (pairKey === ['booking-engine', 'psp'].sort().join('|') || pairKey === ['pms', 'psp'].sort().join('|')) { message = 'Paiement non sécurisé'; }
-                      else { message = `${allSystems.find(s => s.id === a)?.name || a} → ${allSystems.find(s => s.id === b)?.name || b}`; }
+                  <div className="mx-3 mb-3 space-y-1.5">
+                    <p className="text-[9px] font-bold text-white/40 uppercase tracking-wide px-1">⚡ Ruptures de flux</p>
+                    {alertPairs.slice(0, 4).map(({ a, b, warning, severity }) => {
+                      const sev = severity || 'warning';
+                      const nameA = allSystems.find(s => s.id === a)?.name || a;
+                      const nameB = allSystems.find(s => s.id === b)?.name || b;
+                      const isCrit = sev === 'critique';
                       return (
-                        <div key={`${a}-${b}`} className="flex items-start gap-1.5 mb-1">
-                          <span className="w-1 h-1 rounded-full bg-amber-400 animate-pulse flex-shrink-0 mt-1" />
-                          <p className="text-[10px] text-amber-300/80 font-medium leading-tight">{message}</p>
+                        <div key={`${a}-${b}`} className="p-2 rounded-xl" style={{
+                          background: isCrit ? 'rgba(239,68,68,0.08)' : 'rgba(245,158,11,0.08)',
+                          border: `1px solid ${isCrit ? 'rgba(239,68,68,0.25)' : 'rgba(245,158,11,0.25)'}`
+                        }}>
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isCrit ? 'bg-red-400 animate-pulse' : 'bg-amber-400'}`} />
+                            <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: isCrit ? '#f87171' : '#fbbf24' }}>
+                              {nameA} ↔ {nameB}
+                            </span>
+                          </div>
+                          {warning && <p className="text-[9px] leading-snug pl-3" style={{ color: isCrit ? 'rgba(252,165,165,0.8)' : 'rgba(253,230,138,0.7)' }}>{warning}</p>}
                         </div>
                       );
                     })}
-                    {alertPairs.length > 2 && <p className="text-[9px] text-amber-400/60 mt-1">+{alertPairs.length - 2} autre(s)</p>}
+                    {alertPairs.length > 4 && <p className="text-[9px] text-white/30 text-center mt-1">+{alertPairs.length - 4} autre(s) rupture(s)</p>}
                   </div>
                 )}
               </div>
