@@ -1070,59 +1070,116 @@ export function HotelEcosystem() {
                 </div>
               )}
 
-              {/* STEP 2 — Connectivité avec warning + severity */}
-              {wizardStep === 2 && (
-                <div className="space-y-3">
-                  {getLogicalPairs(selectedTools).map(({ a, b, question, warning, severity }) => {
-                    const pairKey = `${a}|${b}`;
-                    const isConnected = selectedConnections.has(pairKey);
-                    const severityColors = {
-                      critique: { bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-100 text-red-700', icon: '🔴', dot: 'bg-red-500' },
-                      warning:  { bg: 'bg-amber-50', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-700', icon: '🟠', dot: 'bg-amber-400' },
-                      info:     { bg: 'bg-blue-50', border: 'border-blue-200', badge: 'bg-blue-100 text-blue-700', icon: '🔵', dot: 'bg-blue-400' },
-                    };
-                    const sc = severityColors[severity];
-                    return (
-                      <div
-                        key={pairKey}
-                        className={`p-3 rounded-xl border-2 transition-all duration-200 ${isConnected ? 'bg-emerald-50 border-emerald-200' : `${sc.bg} ${sc.border}`}`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-700 leading-snug">{question}</p>
-                            {/* Warning message — visible uniquement si NON connecté */}
-                            {!isConnected && (
-                              <div className="flex items-start gap-1.5 mt-1.5">
-                                <span className={`w-1.5 h-1.5 rounded-full ${sc.dot} flex-shrink-0 mt-1`} />
-                                <p className="text-xs text-slate-500 leading-relaxed">{warning}</p>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                            {!isConnected && (
-                              <span className={`text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${sc.badge}`}>
-                                {severity}
+              {/* STEP 2 — Connectivité groupée par outil focal */}
+              {wizardStep === 2 && (() => {
+                const pairs = getLogicalPairs(selectedTools);
+                if (pairs.length === 0) return (
+                  <div className="text-center py-8 text-slate-400">
+                    <p className="text-sm">Aucune connexion possible avec votre sélection.</p>
+                    <p className="text-xs mt-1">Retournez à l'étape 1 pour ajouter des outils.</p>
+                  </div>
+                );
+
+                // Noms courts affichés dans l'UI
+                const SHORT: Record<string, string> = {
+                  'pms': 'PMS', 'channel-manager': 'Channel Manager',
+                  'booking-engine': 'Moteur', 'site-internet': 'Site',
+                  'ota': 'OTA', 'psp': 'PSP', 'pos': 'POS',
+                  'compta': 'Compta', 'crm': 'CRM', 'spa': 'SPA',
+                  'gds': 'GDS', 'rms': 'RMS', 'serrure': 'Serrure',
+                };
+
+                // Couleur de sévérité
+                const SEV_COLOR: Record<string, { dot: string; badge: string; text: string }> = {
+                  critique: { dot: '#ef4444', badge: 'rgba(239,68,68,0.1)', text: '#dc2626' },
+                  warning:  { dot: '#f59e0b', badge: 'rgba(245,158,11,0.1)', text: '#d97706' },
+                  info:     { dot: '#3b82f6', badge: 'rgba(59,130,246,0.1)', text: '#2563eb' },
+                };
+
+                // Grouper les paires par outil focal (a)
+                const groups: Record<string, typeof pairs> = {};
+                const order: string[] = [];
+                pairs.forEach(p => {
+                  if (!groups[p.a]) { groups[p.a] = []; order.push(p.a); }
+                  groups[p.a].push(p);
+                });
+
+                return (
+                  <div className="space-y-3">
+                    {order.map(focal => {
+                      const focalPairs = groups[focal];
+                      const focalName = SHORT[focal] || focal;
+                      const allConnected = focalPairs.every(p => selectedConnections.has(`${p.a}|${p.b}`));
+                      const someConnected = focalPairs.some(p => selectedConnections.has(`${p.a}|${p.b}`));
+
+                      return (
+                        <div key={focal} className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+                          {/* ── Titre du groupe ── */}
+                          <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100" style={{ background: allConnected ? 'rgba(16,185,129,0.06)' : someConnected ? 'rgba(245,158,11,0.05)' : 'rgba(248,250,252,1)' }}>
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: allConnected ? '#10b981' : someConnected ? '#f59e0b' : '#cbd5e1' }} />
+                              <span className="text-sm font-bold text-slate-800">
+                                {focalName} est-il connecté…
                               </span>
-                            )}
-                            <button
-                              onClick={() => toggleConnection(pairKey)}
-                              className={`relative w-11 h-6 rounded-full transition-colors duration-300 flex-shrink-0 ${isConnected ? 'bg-emerald-500' : 'bg-slate-300'}`}
-                            >
-                              <span className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300" style={{ transform: isConnected ? 'translateX(20px)' : 'translateX(0px)' }} />
-                            </button>
+                            </div>
+                            <span className="text-[10px] font-semibold text-slate-400">
+                              {focalPairs.filter(p => selectedConnections.has(`${p.a}|${p.b}`)).length}/{focalPairs.length}
+                            </span>
+                          </div>
+
+                          {/* ── Sous-lignes : une par cible ── */}
+                          <div className="divide-y divide-slate-100">
+                            {focalPairs.map(({ a, b, warning, severity }) => {
+                              const pairKey = `${a}|${b}`;
+                              const isConnected = selectedConnections.has(pairKey);
+                              const sc = SEV_COLOR[severity];
+                              const targetName = SHORT[b] || b;
+
+                              return (
+                                <div key={pairKey} className="flex items-center gap-3 px-4 py-2.5 transition-colors" style={{ background: isConnected ? 'rgba(16,185,129,0.04)' : 'transparent' }}>
+                                  {/* Cible */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                      {/* Badge sévérité — discret */}
+                                      {!isConnected && (
+                                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: sc.dot }} />
+                                      )}
+                                      {isConnected && (
+                                        <svg className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                      )}
+                                      <span className="text-sm font-semibold text-slate-700">
+                                        au {targetName}
+                                      </span>
+                                    </div>
+                                    {/* Warning — uniquement si pas connecté */}
+                                    {!isConnected && (
+                                      <p className="text-[11px] text-slate-400 leading-snug mt-0.5 pl-3">{warning}</p>
+                                    )}
+                                  </div>
+
+                                  {/* Toggle */}
+                                  <button
+                                    onClick={() => toggleConnection(pairKey)}
+                                    className="relative flex-shrink-0 rounded-full transition-colors duration-300"
+                                    style={{ width: 44, height: 24, background: isConnected ? '#10b981' : '#cbd5e1' }}
+                                  >
+                                    <span
+                                      className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"
+                                      style={{ transform: isConnected ? 'translateX(20px)' : 'translateX(0px)' }}
+                                    />
+                                  </button>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                  {getLogicalPairs(selectedTools).length === 0 && (
-                    <div className="text-center py-8 text-slate-400">
-                      <p className="text-sm">Aucune connexion possible avec votre sélection.</p>
-                      <p className="text-xs mt-1">Retournez à l'étape 1 pour ajouter des outils.</p>
-                    </div>
-                  )}
-                </div>
-              )}
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Footer */}
