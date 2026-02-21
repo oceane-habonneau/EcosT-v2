@@ -321,18 +321,10 @@ function getLogicalPairs(tools: Set<string>): LogicalPair[] {
       question: 'Le RMS ajuste-t-il les tarifs automatiquement dans le PMS ?',
       warning: 'Tarification statique : manque à gagner sur le RevPAR.',
       severity: 'warning' },
-    { a: 'rms',             b: 'channel-manager',
-      question: 'Le RMS pousse-t-il ses tarifs dynamiques vers le Channel Manager ?',
-      warning: 'Yield management non diffusé : optimisations tarifaires non publiées.',
-      severity: 'warning' },
     { a: 'booking-engine',  b: 'crm',
       question: 'Le Moteur de réservation alimente-t-il le CRM en données clients ?',
       warning: 'Profils clients incomplets : relances marketing manquées après séjour.',
       severity: 'warning' },
-    { a: 'site-internet',   b: 'crm',
-      question: 'Le Site Internet capture-t-il les visiteurs vers le CRM ?',
-      warning: 'Leads non qualifiés : pas de suivi des prospects web.',
-      severity: 'info' },
     { a: 'pos',             b: 'compta',
       question: 'Le POS exporte-t-il automatiquement ses ventes en comptabilité ?',
       warning: 'Saisie manuelle des recettes F&B : risque de décalage de clôture.',
@@ -1118,11 +1110,14 @@ export function HotelEcosystem() {
                           <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100" style={{ background: allConnected ? 'rgba(16,185,129,0.06)' : someConnected ? 'rgba(245,158,11,0.05)' : 'rgba(248,250,252,1)' }}>
                             <div className="flex items-center gap-2">
                               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: allConnected ? '#10b981' : someConnected ? '#f59e0b' : '#cbd5e1' }} />
-                              <span className="text-sm font-bold text-slate-800">
-                                {focalName} est-il connecté…
-                              </span>
+                              <div>
+                                <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Connectivité</span>
+                                <p className="text-sm font-bold text-slate-800 leading-tight">
+                                  {focalName} est-il connecté avec…
+                                </p>
+                              </div>
                             </div>
-                            <span className="text-[10px] font-semibold text-slate-400">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: allConnected ? 'rgba(16,185,129,0.12)' : 'rgba(148,163,184,0.15)', color: allConnected ? '#059669' : '#94a3b8' }}>
                               {focalPairs.filter(p => selectedConnections.has(`${p.a}|${p.b}`)).length}/{focalPairs.length}
                             </span>
                           </div>
@@ -1137,25 +1132,25 @@ export function HotelEcosystem() {
 
                               return (
                                 <div key={pairKey} className="flex items-center gap-3 px-4 py-2.5 transition-colors" style={{ background: isConnected ? 'rgba(16,185,129,0.04)' : 'transparent' }}>
-                                  {/* Cible */}
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1.5">
-                                      {/* Badge sévérité — discret */}
+                                    <div className="flex items-center gap-2">
+                                      {/* Indicateur sévérité */}
+                                      {isConnected
+                                        ? <svg className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#10b981' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                        : <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: sc.dot }} />
+                                      }
+                                      {/* Nom de l'outil cible — sans "au" */}
+                                      <span className="text-sm font-bold text-slate-800">{targetName}</span>
+                                      {/* Badge sévérité discret */}
                                       {!isConnected && (
-                                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: sc.dot }} />
+                                        <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: sc.badge, color: sc.text }}>
+                                          {severity}
+                                        </span>
                                       )}
-                                      {isConnected && (
-                                        <svg className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                      )}
-                                      <span className="text-sm font-semibold text-slate-700">
-                                        au {targetName}
-                                      </span>
                                     </div>
-                                    {/* Warning — uniquement si pas connecté */}
+                                    {/* Impact — uniquement si pas connecté */}
                                     {!isConnected && (
-                                      <p className="text-[11px] text-slate-400 leading-snug mt-0.5 pl-3">{warning}</p>
+                                      <p className="text-[11px] leading-snug mt-0.5 pl-5" style={{ color: '#94a3b8' }}>{warning}</p>
                                     )}
                                   </div>
 
