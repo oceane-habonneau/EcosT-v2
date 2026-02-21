@@ -1072,14 +1072,10 @@ export function HotelEcosystem() {
                   </div>
                 );
 
-                // Noms courts affichés dans l'UI
-                const SHORT: Record<string, string> = {
-                  'pms': 'PMS', 'channel-manager': 'Channel Manager',
-                  'booking-engine': 'Moteur', 'site-internet': 'Site',
-                  'ota': 'OTA', 'psp': 'PSP', 'pos': 'POS',
-                  'compta': 'Compta', 'crm': 'CRM', 'spa': 'SPA',
-                  'gds': 'GDS', 'rms': 'RMS', 'serrure': 'Serrure',
-                };
+                // Noms exacts depuis WIZARD_TOOLS — aucun alias inventé
+                const SHORT: Record<string, string> = Object.fromEntries(
+                  WIZARD_TOOLS.map(t => [t.id, t.name])
+                );
 
                 // Couleur de sévérité
                 const SEV_COLOR: Record<string, { dot: string; badge: string; text: string }> = {
