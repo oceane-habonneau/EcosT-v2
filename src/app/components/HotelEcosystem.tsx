@@ -245,88 +245,102 @@ interface LogicalPair {
 }
 
 function getLogicalPairs(tools: Set<string>): LogicalPair[] {
-  const pairs: LogicalPair[] = [];
-  const has = (id: string) => tools.has(id);
+  // Règle identique au scoring : toute paire dont les DEUX outils
+  // sont présents est affichée — sans condition sur un tiers.
+  // L'utilisateur peut avoir PMS↔Moteur ET CM↔Moteur simultanément,
+  // exactement comme dans les VITAL_PATHS du scoring (chemins OR).
 
-  if (has('pms') && has('channel-manager'))
-    pairs.push({ a: 'pms', b: 'channel-manager',
+  const ALL_PAIRS: LogicalPair[] = [
+    // ── Distribution / critiques ──
+    { a: 'pms',             b: 'channel-manager',
       question: 'Votre PMS est-il connecté au Channel Manager ?',
       warning: 'Risque majeur de surbooking et de disparité tarifaire.',
-      severity: 'critique' });
-
-  if (has('channel-manager') && has('booking-engine'))
-    pairs.push({ a: 'channel-manager', b: 'booking-engine',
-      question: 'Votre Channel Manager envoie-t-il les réservations au Moteur ?',
+      severity: 'critique' },
+    { a: 'pms',             b: 'booking-engine',
+      question: 'Votre PMS est-il connecté directement au Moteur de réservation ?',
+      warning: 'Disponibilités non synchronisées : risque de sur-vente et perte de réservations directes.',
+      severity: 'critique' },
+    { a: 'channel-manager', b: 'booking-engine',
+      question: 'Le Channel Manager envoie-t-il les tarifs et dispos au Moteur ?',
       warning: 'Tarifs directs non synchronisés : risque de perte de ventes directes.',
-      severity: 'critique' });
-
-  if (has('channel-manager') && has('ota'))
-    pairs.push({ a: 'channel-manager', b: 'ota',
+      severity: 'critique' },
+    { a: 'channel-manager', b: 'ota',
       question: 'Les OTA sont-elles connectées via le Channel Manager ?',
       warning: 'Canaux déconnectés : fermeture forcée des ventes sur Booking/Expedia.',
-      severity: 'critique' });
-
-  if (has('booking-engine') && has('psp'))
-    pairs.push({ a: 'booking-engine', b: 'psp',
+      severity: 'critique' },
+    { a: 'pms',             b: 'ota',
+      question: 'Votre PMS est-il synchronisé directement avec les OTA ?',
+      warning: 'Mises à jour manuelles sur les OTA : surbooking et disparité tarifaire.',
+      severity: 'critique' },
+    { a: 'booking-engine',  b: 'psp',
       question: 'Les paiements en ligne passent-ils par le Moteur vers le PSP ?',
       warning: 'Pas de garantie bancaire en temps réel : risque de no-shows impayés.',
-      severity: 'critique' });
-
-  if (has('booking-engine') && has('site-internet'))
-    pairs.push({ a: 'booking-engine', b: 'site-internet',
-      question: 'Le Moteur de Résa est-il intégré au Site Internet ?',
+      severity: 'critique' },
+    { a: 'pms',             b: 'psp',
+      question: 'Le PSP est-il connecté directement au PMS pour les paiements ?',
+      warning: 'Réconciliation manuelle des paiements : erreurs de caisse et retards.',
+      severity: 'critique' },
+    { a: 'booking-engine',  b: 'site-internet',
+      question: 'Le Moteur de réservation est-il intégré au Site Internet ?',
       warning: 'Parcours client rompu : perte de conversion immédiate.',
-      severity: 'critique' });
-
-  if (has('pms') && has('pos'))
-    pairs.push({ a: 'pms', b: 'pos',
-      question: 'Le POS envoie-t-il automatiquement les notes en chambre au PMS ?',
-      warning: "Pas de transfert en chambre : risque d'oublis de facturation au check-out.",
-      severity: 'warning' });
-
-  if (has('pms') && has('serrure'))
-    pairs.push({ a: 'pms', b: 'serrure',
-      question: 'Les serrures sont-elles pilotées par le PMS ?',
-      warning: 'Saisie manuelle des clés : perte de temps staff et attente client.',
-      severity: 'warning' });
-
-  if (has('pms') && has('spa'))
-    pairs.push({ a: 'pms', b: 'spa',
-      question: 'Les réservations SPA sont-elles synchronisées avec le PMS ?',
-      warning: "Plannings non synchronisés : risque d'erreurs sur la facture globale.",
-      severity: 'warning' });
-
-  if (has('pms') && has('crm'))
-    pairs.push({ a: 'pms', b: 'crm',
-      question: 'Le CRM est-il alimenté automatiquement par le PMS ?',
-      warning: "Données isolées : impossible de personnaliser l'accueil ou de fidéliser.",
-      severity: 'warning' });
-
-  if (has('pms') && has('compta'))
-    pairs.push({ a: 'pms', b: 'compta',
-      question: 'Les écritures comptables sont-elles exportées automatiquement du PMS ?',
-      warning: "Saisie manuelle du CA : risque d'erreurs et retard de clôture.",
-      severity: 'warning' });
-
-  if (has('pms') && has('rms'))
-    pairs.push({ a: 'pms', b: 'rms',
-      question: 'Le RMS ajuste-t-il les tarifs automatiquement dans le PMS ?',
-      warning: 'Tarification statique : manque à gagner sur le RevPAR.',
-      severity: 'warning' });
-
-  if (has('site-internet') && has('pms'))
-    pairs.push({ a: 'site-internet', b: 'pms',
+      severity: 'critique' },
+    { a: 'pms',             b: 'site-internet',
       question: 'Le Site Internet affiche-t-il les disponibilités du PMS en temps réel ?',
       warning: 'Disponibilités non synchronisées : risque de sur-vente manuelle.',
-      severity: 'warning' });
-
-  if (has('channel-manager') && has('gds'))
-    pairs.push({ a: 'channel-manager', b: 'gds',
+      severity: 'critique' },
+    { a: 'channel-manager', b: 'gds',
       question: 'Les GDS sont-ils reliés au Channel Manager ?',
       warning: 'Canaux corporate non alimentés : manque à gagner sur la clientèle B2B.',
-      severity: 'info' });
+      severity: 'info' },
+    { a: 'pms',             b: 'gds',
+      question: 'Votre PMS est-il connecté directement aux GDS ?',
+      warning: 'Mises à jour manuelles vers les GDS : disparité et perte de commissions.',
+      severity: 'info' },
+    // ── Opérationnels ──
+    { a: 'pms',             b: 'pos',
+      question: 'Le POS envoie-t-il automatiquement les notes en chambre au PMS ?',
+      warning: "Pas de transfert en chambre : oublis de facturation au check-out.",
+      severity: 'warning' },
+    { a: 'pms',             b: 'serrure',
+      question: 'Les serrures connectées sont-elles pilotées par le PMS ?',
+      warning: 'Saisie manuelle des clés : perte de temps staff et attente client.',
+      severity: 'warning' },
+    { a: 'pms',             b: 'spa',
+      question: 'Les réservations SPA sont-elles synchronisées avec le PMS ?',
+      warning: "Plannings non synchronisés : erreurs sur la facture globale.",
+      severity: 'warning' },
+    { a: 'pms',             b: 'crm',
+      question: 'Le CRM est-il alimenté automatiquement par le PMS ?',
+      warning: "Données isolées : impossible de personnaliser l'accueil ou de fidéliser.",
+      severity: 'warning' },
+    { a: 'pms',             b: 'compta',
+      question: 'Les écritures comptables sont-elles exportées automatiquement du PMS ?',
+      warning: "Saisie manuelle du CA : risque d'erreurs et retard de clôture.",
+      severity: 'warning' },
+    { a: 'pms',             b: 'rms',
+      question: 'Le RMS ajuste-t-il les tarifs automatiquement dans le PMS ?',
+      warning: 'Tarification statique : manque à gagner sur le RevPAR.',
+      severity: 'warning' },
+    { a: 'rms',             b: 'channel-manager',
+      question: 'Le RMS pousse-t-il ses tarifs dynamiques vers le Channel Manager ?',
+      warning: 'Yield management non diffusé : optimisations tarifaires non publiées.',
+      severity: 'warning' },
+    { a: 'booking-engine',  b: 'crm',
+      question: 'Le Moteur de réservation alimente-t-il le CRM en données clients ?',
+      warning: 'Profils clients incomplets : relances marketing manquées après séjour.',
+      severity: 'warning' },
+    { a: 'site-internet',   b: 'crm',
+      question: 'Le Site Internet capture-t-il les visiteurs vers le CRM ?',
+      warning: 'Leads non qualifiés : pas de suivi des prospects web.',
+      severity: 'info' },
+    { a: 'pos',             b: 'compta',
+      question: 'Le POS exporte-t-il automatiquement ses ventes en comptabilité ?',
+      warning: 'Saisie manuelle des recettes F&B : risque de décalage de clôture.',
+      severity: 'warning' },
+  ];
 
-  return pairs;
+  // Même logique que le scoring : afficher toute paire dont les deux outils sont présents
+  return ALL_PAIRS.filter(p => tools.has(p.a) && tools.has(p.b));
 }
 
 // ══════════ SCORING MATRIX V3 — Intelligence Métier ══════════
@@ -394,19 +408,32 @@ const STRATEGIC_LINKS: ScoreLink[] = [
 ];
 
 // Map des messages d'impact par paire (clé = ids triés join ',')
+// Couvre toutes les paires possibles — indépendamment de l'existence d'un tiers
 const PAIR_WARN_MAP: Record<string, [string, string]> = {
+  // Critiques — flux de distribution
   'channel-manager,pms':           ['Risque majeur de surbooking et de disparité tarifaire.', 'critique'],
+  'booking-engine,pms':            ['Disponibilités non synchronisées : risque de sur-vente et perte de réservations directes.', 'critique'],
   'booking-engine,channel-manager':['Tarifs directs non synchronisés : perte de ventes directes.', 'critique'],
-  'booking-engine,psp':            ['Pas de garantie bancaire : risque de no-shows impayés.', 'critique'],
   'channel-manager,ota':           ['Canaux déconnectés : fermeture forcée sur Booking/Expedia.', 'critique'],
+  'ota,pms':                       ['Mises à jour manuelles sur les OTA : risque de surbooking et disparité tarifaire.', 'critique'],
+  'booking-engine,psp':            ['Pas de garantie bancaire : risque de no-shows impayés.', 'critique'],
+  'pms,psp':                       ['Réconciliation manuelle des paiements : erreurs de caisse et retards.', 'critique'],
   'booking-engine,site-internet':  ['Parcours client rompu : perte de conversion immédiate.', 'critique'],
+  'pms,site-internet':             ['Disponibilités non synchronisées : risque de sur-vente manuelle.', 'critique'],
+  // Opérationnels — warning
   'pms,pos':                       ["Pas de transfert chambre : oublis de facturation au check-out.", 'warning'],
   'pms,serrure':                   ["Saisie manuelle des clés : perte de temps staff.", 'warning'],
   'pms,spa':                       ["Plannings non synchronisés : erreurs sur facture globale.", 'warning'],
   'crm,pms':                       ["Données isolées : impossible de fidéliser.", 'warning'],
   'compta,pms':                    ["Saisie manuelle du CA : retard de clôture.", 'warning'],
   'pms,rms':                       ["Tarification statique : manque à gagner sur le RevPAR.", 'warning'],
+  'booking-engine,crm':            ["Profils clients incomplets : relances marketing manquées.", 'warning'],
+  'channel-manager,rms':           ["Yield management non diffusé : optimisations tarifaires locales.", 'warning'],
+  'compta,pos':                    ["Saisie manuelle des recettes F&B : décalage de clôture.", 'warning'],
+  // Info
   'channel-manager,gds':           ["Canaux corporate non alimentés : manque à gagner B2B.", 'info'],
+  'gds,pms':                       ["Mises à jour manuelles vers les GDS : disparité et perte de commissions.", 'info'],
+  'crm,site-internet':             ["Leads non qualifiés : pas de suivi des prospects web.", 'info'],
 };
 
 // Vérifie si un lien est actif (bidirectionnel)
