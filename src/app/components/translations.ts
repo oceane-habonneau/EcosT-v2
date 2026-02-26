@@ -221,7 +221,7 @@ const fr: Translations = {
   },
 
   hero: {
-    tagline: 'Scannez la rentabilité de votre environnement technologique.',
+    tagline: 'Scannez la rentabilité de votre environnement technologique',
     subtitle: 'Identifiez en 2 minutes les ruptures de flux qui saturent vos équipes et freinent vos réservations directes.',
     brandSub: 'Flux & Automatisations',
   },
@@ -299,7 +299,7 @@ const fr: Translations = {
     scoreIndicator: 'Score : {pct}%',
     resetBtn: 'Réinitialiser',
     addCardBtn: 'Ajouter un outil',
-    viewAdmin: 'Édition',
+    viewAdmin: 'Admin',
     viewPublic: 'Aperçu',
     modeLink: 'Liaison',
     modeMove: 'Déplacer',
@@ -332,23 +332,23 @@ const fr: Translations = {
     items: [
       {
         num: '01',
-        title: 'Inventoriez vos outils',
-        desc: 'Sélectionnez les logiciels et systèmes actuellement en place dans votre hôtel.',
+        title: 'Diagnostiquez',
+        desc: 'Utilisez nos Socles de référence pour situer votre établissement.',
       },
       {
         num: '02',
-        title: 'Mappez vos connexions',
-        desc: 'Indiquez quels outils communiquent entre eux. Chaque liaison manquante est une friction identifiée.',
+        title: 'Analysez',
+        desc: 'Un socle est cohérent quand les flux sont tracés. <br />Un outil isolé est une source de perte de temps',
       },
       {
         num: '03',
-        title: 'Obtenez votre score',
-        desc: 'Votre score d\'automatisation révèle les ruptures de flux prioritaires à corriger.',
+        title: 'Optimisez',
+        desc: 'Visez le score de 100% pour garantir une automatisation totale de votre parcours client.',
       },
       {
         num: '04',
-        title: 'Passez à l\'action',
-        desc: 'Planifiez un audit gratuit pour transformer votre diagnostic en plan d\'action concret.',
+        title: 'Bénéfice pour vous',
+        desc: 'Passez la souris sur chaque carte pour comprendre ce qu\'elle change dans votre quotidien opérationnel.',
       },
     ],
   },
@@ -659,7 +659,7 @@ const en: Translations = {
   },
 
   hero: {
-    tagline: 'Scan the profitability of your tech stack.',
+    tagline: 'Scan the profitability of your tech stack',
     subtitle: 'Identify in 2 minutes the broken flows that overload your teams and hold back your direct bookings.',
     brandSub: 'Flows & Automations',
   },
