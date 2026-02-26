@@ -169,6 +169,8 @@ export interface Translations {
   // ── Footer ──
   footer: {
     copyright: string;
+    contact: string;     // "Me contacter"
+    appointment: string; // "Prendre RDV"
   };
 
   // ── Légende ──
@@ -384,6 +386,8 @@ const fr: Translations = {
 
   footer: {
     copyright: '© 2026 Océane Habonneau – Consultante en Digitalisation Hôtelière – Tous droits réservés',
+    contact: 'Me contacter',
+    appointment: 'Prendre RDV',
   },
 
   legend: {
@@ -480,6 +484,26 @@ const fr: Translations = {
     'serrure': {
       title: 'Serrure Connectée',
       benefit: 'Check-in autonome et accès sans clé physique. <strong>Libérez votre réception</strong> des contraintes horaires et améliorez l\'expérience d\'arrivée.',
+    },
+    'telephonie': {
+      title: 'Téléphonie',
+      benefit: 'Unifiez vos communications et intégrez la téléphonie au PMS. <strong>Tracez chaque appel client</strong> et améliorez la gestion des demandes.',
+    },
+    'e-reputation': {
+      title: 'E-réputation',
+      benefit: 'Centralisez la gestion des avis clients sur toutes les plateformes. <strong>Boostez votre note moyenne</strong> et votre visibilité en ligne.',
+    },
+    'tv': {
+      title: 'TV / Chromecast',
+      benefit: 'Personnalisez l\'expérience in-room avec du contenu ciblé. <strong>Générez des revenus additionnels</strong> via des services premium.',
+    },
+    'chatbot': {
+      title: 'Chatbot',
+      benefit: 'Répondez instantanément aux questions fréquentes 24/7. <strong>Réduisez la charge de la réception</strong> et capturez plus de réservations.',
+    },
+    'wifi': {
+      title: 'WiFi',
+      benefit: 'Offrez une connexion stable et sécurisée à vos clients. <strong>Collectez des données marketing</strong> via le portail captif.',
     },
   },
 
@@ -822,6 +846,8 @@ const en: Translations = {
 
   footer: {
     copyright: '© 2026 Océane Habonneau – Hotel Digitalisation Consultant – All rights reserved',
+    contact: 'Contact me',
+    appointment: 'Book appointment',
   },
 
   legend: {
@@ -918,6 +944,26 @@ const en: Translations = {
     'serrure': {
       title: 'Smart Lock',
       benefit: 'Self check-in and keyless access. <strong>Free your front desk</strong> from time constraints and improve the arrival experience.',
+    },
+    'telephonie': {
+      title: 'Telephony',
+      benefit: 'Unify communications and integrate telephony with PMS. <strong>Track every customer call</strong> and improve request management.',
+    },
+    'e-reputation': {
+      title: 'E-reputation',
+      benefit: 'Centralise customer review management across all platforms. <strong>Boost your average rating</strong> and online visibility.',
+    },
+    'tv': {
+      title: 'TV / Chromecast',
+      benefit: 'Personalise the in-room experience with targeted content. <strong>Generate additional revenue</strong> via premium services.',
+    },
+    'chatbot': {
+      title: 'Chatbot',
+      benefit: 'Answer frequently asked questions instantly 24/7. <strong>Reduce front desk load</strong> and capture more bookings.',
+    },
+    'wifi': {
+      title: 'WiFi',
+      benefit: 'Provide stable and secure connectivity to your guests. <strong>Collect marketing data</strong> via the captive portal.',
     },
   },
 
