@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { translations, type Lang } from './translations';
 import { 
   Users, 
   Star, 
@@ -36,9 +37,7 @@ import {
   Radio,
   Layers,
   AlertCircle,
-  ChevronUp as ChevronUpIcon,
-  ClipboardList,
-  CalendarDays
+  ChevronUp as ChevronUpIcon
 } from 'lucide-react';
 
 interface SystemNode {
@@ -112,14 +111,6 @@ const nodeBenefits: Record<string, { title: string; benefit: string }> = {
   'site-booking': {
     title: 'Site Web / Boutique',
     benefit: 'Vendez cartes cadeaux et expériences directement en ligne. <strong>Nouvelle source de revenus</strong> sans intermédiaire.'
-  },
-  'housekeeping': {
-    title: 'Housekeeping',
-    benefit: 'Synchronisation en temps réel des statuts de chambres avec le PMS. <strong>Réduisez les délais de recouche</strong>, supprimez les allers-retours radio et libérez vos chambres plus vite.'
-  },
-  'event-management': {
-    title: 'Event Management',
-    benefit: "Gestion centralisée des événements, salles et devis. <strong>Maximisez le taux d'occupation de vos espaces</strong> et automatisez la facturation groupe."
   }
 };
 
@@ -131,9 +122,7 @@ const cardSuggestions = [
   'Comptabilité',
   'CRM',
   'E-réputation',
-  'Event Management',
   'GDS',
-  'Housekeeping',
   'Moteur de réservation',
   'OTA',
   'PMS',
@@ -188,11 +177,7 @@ const socle3Signature: SystemNode[] = [
   { id: 'exp-client',     name: 'Exp client in-house',   category: 'customer',   icon: 'Star',            x: 71, y: 77, connections: [] },
 ];
 
-const SOCLE_DESCRIPTIONS: Record<string, string> = {
-  essentiel: 'Le minimum vital pour exister et vendre en ligne sans erreur.',
-  performance: 'L\'automatisation au service de l\'efficacité opérationnelle et de la facturation.',
-  signature: 'L\'excellence technologique pour une expérience client personnalisée et data-driven.',
-};
+// SOCLE_DESCRIPTIONS désormais dans translations.ts → t.socles
 
 const categoryConfig = {
   management: { 
@@ -224,7 +209,7 @@ const categoryConfig = {
 const iconMap: Record<string, any> = {
   Bed, Users, Star, Home, Calculator, CreditCard, Globe, ShoppingBag,
   MessageCircle, UtensilsCrossed, Calendar, Sparkles, Share2, DollarSign,
-  Building2, TrendingUp, ClipboardList, CalendarDays
+  Building2, TrendingUp
 };
 
 // ══════════ WIZARD TOOLS CATALOG ══════════
@@ -242,8 +227,6 @@ const WIZARD_TOOLS = [
   { id: 'gds', name: 'GDS', icon: 'Globe', category: 'sales' as const },
   { id: 'rms', name: 'RMS', icon: 'TrendingUp', category: 'management' as const },
   { id: 'serrure', name: 'Serrure Connectée', icon: 'Home', category: 'customer' as const },
-  { id: 'housekeeping', name: 'Housekeeping', icon: 'ClipboardList', category: 'management' as const },
-  { id: 'event-management', name: 'Event Management', icon: 'CalendarDays', category: 'management' as const },
 ];
 
 // Paires de connexions logiques possibles selon les outils sélectionnés
@@ -343,14 +326,6 @@ function getLogicalPairs(tools: Set<string>): LogicalPair[] {
       question: 'Le POS exporte-t-il automatiquement ses ventes en comptabilité ?',
       warning: 'Saisie manuelle des recettes F&B : risque de décalage de clôture.',
       severity: 'warning' },
-    { a: 'pms',             b: 'housekeeping',
-      question: 'Le Housekeeping est-il synchronisé avec le PMS ?',
-      warning: 'Statuts de chambres mis à jour manuellement : délais de recouche et erreurs de check-in.',
-      severity: 'warning' },
-    { a: 'pms',             b: 'event-management',
-      question: "Le système d'Event Management est-il connecté au PMS ?",
-      warning: 'Facturation groupe manuelle : risque de pertes et de doublons sur les dossiers événements.',
-      severity: 'warning' },
   ];
 
   // Même logique que le scoring : afficher toute paire dont les deux outils sont présents
@@ -410,8 +385,6 @@ const OPERATIONAL_LINKS: ScoreLink[] = [
   { a: 'pms',            b: 'compta',           points: 10 },
   { a: 'pms',            b: 'serrure',          points: 10 },
   { a: 'pms',            b: 'spa',              points: 10 },
-  { a: 'pms',            b: 'housekeeping',     points: 10 },
-  { a: 'pms',            b: 'event-management', points: 10 },
   { a: 'moteur-resto',   b: 'site-internet',    points: 10 },
   { a: 'site-booking',   b: 'site-internet',    points: 10 },
 ];
@@ -450,8 +423,6 @@ const PAIR_WARN_MAP: Record<string, [string, string]> = {
   'channel-manager,gds':           ["Canaux corporate non alimentés : manque à gagner B2B.", 'info'],
   'gds,pms':                       ["Mises à jour manuelles vers les GDS : disparité et perte de commissions.", 'info'],
   'crm,site-internet':             ["Leads non qualifiés : pas de suivi des prospects web.", 'info'],
-  'housekeeping,pms':              ["Statuts de chambres manuels : délais de recouche et erreurs de check-in.", 'warning'],
-  'event-management,pms':          ["Facturation groupe manuelle : risque de pertes et doublons sur les dossiers.", 'warning'],
 };
 
 // Vérifie si un lien est actif (bidirectionnel)
@@ -582,39 +553,39 @@ function computeScore(
   return { score: finalScore, maxScore, pct, alertPairs, missingVitalTools, penalty };
 }
 
-function getDiagnostic(pct: number, hasMissingVitalTools: boolean): {
+function getDiagnostic(pct: number, hasMissingVitalTools: boolean, d: typeof translations['fr']['diagnostic']): {
   label: string;
   desc: string;
   color: string;
   barColor: string;
 } {
   if (hasMissingVitalTools) return {
-    label: '⚠️ Outil vital manquant',
-    desc: 'Votre distribution repose sur des outils absents. Impossible d\'évaluer correctement votre écosystème.',
+    label: d.critical.label,
+    desc: d.critical.desc,
     color: 'text-red-700',
     barColor: '#dc2626',
   };
   if (pct <= 35) return {
-    label: '⚠️ Écosystème en péril',
-    desc: 'Votre gestion repose sur des processus manuels. Risque de surréservation et perte de CA direct.',
+    label: d.fragile.label,
+    desc: d.fragile.desc,
     color: 'text-red-600',
     barColor: '#ef4444',
   };
   if (pct <= 70) return {
-    label: '⚙️ Gestion sous tension',
-    desc: 'Le socle est là, mais vos outils travaillent en silos. La double saisie fragilise vos opérations.',
+    label: d.weak.label,
+    desc: d.weak.desc,
     color: 'text-orange-500',
     barColor: '#f97316',
   };
   if (pct <= 95) return {
-    label: '✅ Performance activée',
-    desc: 'Écosystème sain. Vous avez une base solide pour automatiser votre stratégie.',
+    label: d.solid.label,
+    desc: d.solid.desc,
     color: 'text-emerald-600',
     barColor: '#10b981',
   };
   return {
-    label: '🚀 Écosystème Haute-Couture',
-    desc: 'Intégration totale. Vos données travaillent pour vous.',
+    label: d.excellent.label,
+    desc: d.excellent.desc,
     color: 'text-emerald-700',
     barColor: '#059669',
   };
@@ -654,6 +625,8 @@ export function HotelEcosystem() {
   });
 
   // 📱 États pour le mobile
+  const [lang, setLang] = useState<Lang>('fr');
+  const t = translations[lang];
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isStackMenuOpen, setIsStackMenuOpen] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
@@ -974,7 +947,7 @@ export function HotelEcosystem() {
 
   // ── Score calculé en temps réel — recalculé à chaque render ──
   const { pct, maxScore, alertPairs, missingVitalTools, penalty } = computeScore(connections, allSystems);
-  const diagnostic = getDiagnostic(pct, missingVitalTools.length > 0);
+  const diagnostic = getDiagnostic(pct, missingVitalTools.length > 0, t.diagnostic);
   // Set rapide pour lookup O(1)
   const alertNodeIds = new Set(alertPairs.flatMap(p => [p.a, p.b]));
 
@@ -992,23 +965,23 @@ export function HotelEcosystem() {
           <div className="text-center px-6 py-8 max-w-md">
             <div className="mb-8">
               <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 leading-tight">
-                Calculer mon score d’automatisation
+                {t.wizardOverlay.title}
               </h2>
               <p className="text-base text-slate-200 leading-relaxed">
-                Répondez à quelques questions pour obtenir un diagnostic personnalisé de votre infrastructure hôtelière.
+                {t.wizardOverlay.subtitle}
               </p>
             </div>
             <button
               onClick={startWizard}
               className="w-full px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-lg font-black rounded-2xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-2xl hover:shadow-amber-500/50 hover:scale-105 active:scale-100 mb-4"
             >
-              🚀 LANCER MON DIAGNOSTIC
+              🚀 {t.wizardOverlay.startBtn}
             </button>
             <button
               onClick={skipWizard}
               className="text-sm text-slate-300 hover:text-white underline underline-offset-4 transition-colors"
             >
-              Explorer Manuellement - Expert
+              {t.wizardOverlay.skipBtn}
             </button>
           </div>
         </div>
@@ -1023,10 +996,10 @@ export function HotelEcosystem() {
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
               <div>
                 <h3 className="text-xl font-bold text-slate-800">
-                  {wizardStep === 1 ? 'Étape 1 : Inventaire' : 'Étape 2 : Connectivité'}
+                  {wizardStep === 1 ? t.wizard.step1Label : t.wizard.step2Label}
                 </h3>
                 <p className="text-sm text-slate-500">
-                  {wizardStep === 1 ? 'Sélectionnez les outils présents dans votre hôtel' : 'Indiquez les connexions actives'}
+                  {wizardStep === 1 ? t.wizard.step1Sub : t.wizard.step2Sub}
                 </p>
               </div>
               <button
@@ -1093,8 +1066,8 @@ export function HotelEcosystem() {
                 const pairs = getLogicalPairs(selectedTools);
                 if (pairs.length === 0) return (
                   <div className="text-center py-8 text-slate-400">
-                    <p className="text-sm">Aucune connexion possible avec votre sélection.</p>
-                    <p className="text-xs mt-1">Retournez à l'étape 1 pour ajouter des outils.</p>
+                    <p className="text-sm">{t.wizard.noPairs}</p>
+                    <p className="text-xs mt-1">{t.wizard.noPairsSub}</p>
                   </div>
                 );
 
@@ -1133,9 +1106,9 @@ export function HotelEcosystem() {
                             <div className="flex items-center gap-2">
                               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: allConnected ? '#10b981' : someConnected ? '#f59e0b' : '#cbd5e1' }} />
                               <div>
-                                <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Connectivité</span>
+                                <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{t.wizard.connectivityLabel}</span>
                                 <p className="text-sm font-bold text-slate-800 leading-tight">
-                                  {focalName} est-il connecté avec…
+                                  {focalName} {t.wizard.connectedWith}
                                 </p>
                               </div>
                             </div>
@@ -1207,14 +1180,14 @@ export function HotelEcosystem() {
                     onClick={() => setShowWizardModal(false)}
                     className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
                   >
-                    Annuler
+                    {t.wizard.closeBtn}
                   </button>
                   <button
                     onClick={() => setWizardStep(2)}
                     disabled={selectedTools.size === 0}
                     className="px-6 py-2 bg-slate-800 text-white text-sm font-bold rounded-xl hover:bg-slate-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    Suivant →
+                    {t.wizard.nextBtn}
                   </button>
                 </>
               )}
@@ -1224,13 +1197,13 @@ export function HotelEcosystem() {
                     onClick={() => setWizardStep(1)}
                     className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
                   >
-                    ← Retour
+                    {t.wizard.backBtn}
                   </button>
                   <button
                     onClick={finishWizard}
                     className="px-6 py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-sm font-black rounded-xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-lg"
                   >
-                    Générer mon diagnostic
+                    {t.wizard.generateBtn}
                   </button>
                 </>
               )}
@@ -1245,18 +1218,18 @@ export function HotelEcosystem() {
           {/* Brand */}
           <div className="flex flex-col leading-tight flex-shrink-0">
             <span className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent whitespace-nowrap">Océane Habonneau</span>
-            <span className="text-[9px] sm:text-xs text-slate-500 font-medium tracking-wide hidden sm:block">Flux &amp; Automatisations</span>
+            <span className="text-[9px] sm:text-xs text-slate-500 font-medium tracking-wide hidden sm:block">{t.hero.brandSub}</span>
           </div>
           {/* Nav — icônes seules sur sm, icône+texte sur md+ */}
           <nav className="hidden sm:flex items-center gap-1 md:gap-2 text-[11px] md:text-sm font-medium text-slate-600">
             <a href="#ecosystem" className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
-              <Layers className="w-3.5 h-3.5 flex-shrink-0" /><span className="hidden md:inline whitespace-nowrap">Écosystème</span>
+              <Layers className="w-3.5 h-3.5 flex-shrink-0" /><span className="hidden md:inline whitespace-nowrap">{t.nav.ecosystem}</span>
             </a>
             <a href="#services" className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
-              <Wrench className="w-3.5 h-3.5 flex-shrink-0" /><span className="hidden md:inline whitespace-nowrap">Services</span>
+              <Wrench className="w-3.5 h-3.5 flex-shrink-0" /><span className="hidden md:inline whitespace-nowrap">{t.nav.services}</span>
             </a>
             <button onClick={startWizard} className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
-              <Radio className="w-3.5 h-3.5 flex-shrink-0" /><span className="hidden md:inline whitespace-nowrap">Diagnostic</span>
+              <Radio className="w-3.5 h-3.5 flex-shrink-0" /><span className="hidden md:inline whitespace-nowrap">{t.nav.diagnostic}</span>
             </button>
           </nav>
           {/* Right: CTA + burger mobile */}
@@ -1264,8 +1237,18 @@ export function HotelEcosystem() {
             <a href="https://calendar.app.google/cKNAVTh1TFacNkXs6" target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-[11px] sm:text-xs md:text-sm font-bold rounded-lg hover:from-amber-500 hover:to-amber-600 transition-all shadow hover:shadow-md hover:-translate-y-0.5 whitespace-nowrap">
               <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="hidden sm:inline">Audit Gratuit</span><span className="sm:hidden">RDV</span>
+              <span className="hidden sm:inline">{t.nav.auditBtn}</span><span className="sm:hidden">{t.nav.auditBtnShort}</span>
             </a>
+            {/* Bouton langue FR / EN */}
+            <button
+              onClick={() => setLang(l => l === 'fr' ? 'en' : 'fr')}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all text-[11px] font-bold text-slate-500 hover:text-slate-700 flex-shrink-0"
+              aria-label="Changer de langue"
+              title={lang === 'fr' ? 'Switch to English' : 'Passer en français'}
+            >
+              <span className="text-[10px]">{lang === 'fr' ? '🇬🇧' : '🇫🇷'}</span>
+              <span>{t.nav.langToggle}</span>
+            </button>
             {/* Burger — mobile uniquement, ouvre le drawer de navigation (ancres) */}
             <button
               onClick={() => setMobileNavOpen(o => !o)}
@@ -1277,8 +1260,8 @@ export function HotelEcosystem() {
           </div>
         </div>
         <div className="text-center hidden sm:block">
-          <h1 className="text-xl sm:text-2xl md:text-4xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold leading-tight">Scannez la rentabilité de votre environnement technologique.</h1>
-          <p className="text-xs sm:text-sm md:text-base text-slate-600"><strong>Identifiez en 2 minutes les ruptures de flux qui saturent vos équipes et freinent vos réservations directes.</strong></p>
+          <h1 className="text-xl sm:text-2xl md:text-4xl mb-2 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent font-bold leading-tight">{t.hero.tagline}</h1>
+          <p className="text-xs sm:text-sm md:text-base text-slate-600"><strong>{t.hero.subtitle}</strong></p>
         </div>
       </div>
 
@@ -1297,24 +1280,24 @@ export function HotelEcosystem() {
               <a href="#ecosystem" onClick={() => setMobileNavOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors">
                 <Layers className="w-4 h-4 text-amber-500 flex-shrink-0" />
-                Écosystème
+                {t.nav.ecosystem}
               </a>
               <a href="#services" onClick={() => setMobileNavOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors">
                 <Wrench className="w-4 h-4 text-amber-500 flex-shrink-0" />
-                Services
+                {t.nav.services}
               </a>
               <button onClick={() => { startWizard(); setMobileNavOpen(false); }}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors text-left w-full">
                 <Radio className="w-4 h-4 text-amber-500 flex-shrink-0" />
-                Lancer mon diagnostic
+                {t.wizardOverlay.startBtn}
               </button>
             </nav>
             <div className="p-4 border-t border-slate-200">
               <a href="https://calendar.app.google/cKNAVTh1TFacNkXs6" target="_blank" rel="noopener noreferrer"
                 onClick={() => setMobileNavOpen(false)}
                 className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-sm font-bold rounded-xl shadow-lg">
-                <Calendar className="w-4 h-4" /> Audit Gratuit
+                <Calendar className="w-4 h-4" /> {t.nav.auditBtn}
               </a>
             </div>
           </div>
@@ -1340,7 +1323,7 @@ export function HotelEcosystem() {
                       : { background: '#fff', color: '#475569' }}
                   >
                     <Settings className="w-3.5 h-3.5" />
-                    Admin
+                    {t.canvas.viewAdmin}
                   </button>
                   <button
                     onClick={() => {
@@ -1356,7 +1339,7 @@ export function HotelEcosystem() {
                       : { background: '#fff', color: '#475569' }}
                   >
                     <Eye className="w-3.5 h-3.5" />
-                    Publique
+                    {t.canvas.viewPublic}
                   </button>
                 </div>
               </div>
@@ -1367,7 +1350,7 @@ export function HotelEcosystem() {
 
               {/* ── Groupe Mode ── */}
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">Mode</span>
+                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">{t.canvas.modeMove.split(' ')[0] === 'Cliquez' ? 'Mode' : 'Mode'}</span>
                 <div className="flex rounded-full overflow-hidden shadow-md border-2" style={{ borderColor: '#3B82F6' }}>
                   <button
                     onClick={() => { setMode('move'); setSelectedForLink(null); }}
@@ -1394,12 +1377,12 @@ export function HotelEcosystem() {
 
               {/* ── Groupe Socle ── */}
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">Choisir mon Socle</span>
+                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">{t.socles.sectionLabel}</span>
                 <div className="flex rounded-full overflow-hidden shadow-md border-2" style={{ borderColor: '#119843' }}>
                   {[
-                    { label: 'Essentiel', socle: socle1Essentiel, type: 'essentiel' as const },
-                    { label: 'Performance', socle: socle2Performance, type: 'performance' as const },
-                    { label: 'Signature', socle: socle3Signature, type: 'signature' as const },
+                    { label: t.socles.essentiel.label, socle: socle1Essentiel, type: 'essentiel' as const },
+                    { label: t.socles.performance.label, socle: socle2Performance, type: 'performance' as const },
+                    { label: t.socles.signature.label, socle: socle3Signature, type: 'signature' as const },
                   ].map(({ label, socle, type }) => {
                     const isActive = currentSocle === type;
                     return (
@@ -1428,13 +1411,13 @@ export function HotelEcosystem() {
                   style={{ background: '#fe9a00', border: '2px solid #fe9a00' }}
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  Ajouter un outil
+                  {t.canvas.addCardBtn}
                 </button>
               </div>
 
               {/* ── Groupe Réinitialiser ── */}
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">Réinitialiser</span>
+                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">{t.canvas.resetBtn}</span>
                 <div className="flex rounded-full overflow-hidden shadow-md border-2" style={{ borderColor: '#aeaeae' }}>
                   <button
                     onClick={resetConnections}
@@ -1468,8 +1451,8 @@ export function HotelEcosystem() {
               <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-50 border-2 border-blue-200 text-blue-700 rounded-lg md:rounded-xl shadow-md">
                 <Move className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
                 <span className="text-xs md:text-sm">
-                  <span className="hidden sm:inline">Cliquez et glissez pour déplacer les cartes</span>
-                  <span className="sm:hidden">Déplacez les cartes</span>
+                  <span className="hidden sm:inline">{t.canvas.modeMove}</span>
+                  <span className="sm:hidden">{t.canvas.modeMoveShort}</span>
                 </span>
               </div>
             )}
@@ -1479,13 +1462,13 @@ export function HotelEcosystem() {
                   <Link2 className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0 text-purple-600" />
                   <span className="text-xs md:text-sm text-purple-700 font-medium">
                     {selectedForLink
-                      ? <><span className="hidden sm:inline">Cliquez sur une autre carte pour créer/supprimer une liaison</span><span className="sm:hidden">Cliquez sur une carte cible</span></>
-                      : <><span className="hidden sm:inline">Mode liaison actif — cliquez sur une carte pour commencer</span><span className="sm:hidden">Cliquez sur une carte</span></>}
+                      ? <><span className="hidden sm:inline">{t.canvas.modeLinkTarget}</span><span className="sm:hidden">{t.canvas.modeLinkTargetShort}</span></>
+                      : <><span className="hidden sm:inline">{t.canvas.modeLinkActive}</span><span className="sm:hidden">{t.canvas.modeLinkShort}</span></>}
                   </span>
                 </div>
                 {/* Le score se met à jour en temps réel */}
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: 'rgba(139,92,246,0.15)', color: '#7c3aed' }}>
-                  Score : {pct}%
+                  {t.canvas.scoreIndicator.replace('{pct}', String(pct))}
                 </span>
               </div>
             )}
@@ -1599,12 +1582,12 @@ export function HotelEcosystem() {
 
                     {/* Socle */}
                     <div>
-                      <p className="text-xs uppercase tracking-widest font-semibold text-slate-400 mb-3">Choisir mon Socle</p>
+                      <p className="text-xs uppercase tracking-widest font-semibold text-slate-400 mb-3">{t.socles.sectionLabel}</p>
                       <div className="space-y-2">
                         {[
-                          { label: 'Essentiel', socle: socle1Essentiel, type: 'essentiel' as const },
-                          { label: 'Performance', socle: socle2Performance, type: 'performance' as const },
-                          { label: 'Signature', socle: socle3Signature, type: 'signature' as const },
+                          { label: t.socles.essentiel.label, socle: socle1Essentiel, type: 'essentiel' as const },
+                          { label: t.socles.performance.label, socle: socle2Performance, type: 'performance' as const },
+                          { label: t.socles.signature.label, socle: socle3Signature, type: 'signature' as const },
                         ].map(({ label, socle, type }) => (
                           <button
                             key={type}
@@ -1637,7 +1620,7 @@ export function HotelEcosystem() {
                           className="w-full py-3 rounded-xl font-semibold text-sm bg-orange-500 text-white shadow-lg"
                         >
                           <Plus className="w-4 h-4 inline mr-2" />
-                          Ajouter un outil
+                          {t.canvas.addCardBtn}
                         </button>
                         <button
                           onClick={() => {
@@ -1647,7 +1630,7 @@ export function HotelEcosystem() {
                           className="w-full py-3 rounded-xl font-semibold text-sm bg-slate-100 text-slate-700"
                         >
                           <Unlink className="w-4 h-4 inline mr-2" />
-                          Réinitialiser liaisons
+                          {t.canvas.resetLinks}
                         </button>
                         <button
                           onClick={() => {
@@ -1657,7 +1640,7 @@ export function HotelEcosystem() {
                           className="w-full py-3 rounded-xl font-semibold text-sm bg-slate-100 text-slate-700"
                         >
                           <RotateCcw className="w-4 h-4 inline mr-2" />
-                          Réinitialiser positions
+                          {t.canvas.resetPositions}
                         </button>
                       </div>
                     </div>
@@ -1673,25 +1656,20 @@ export function HotelEcosystem() {
       {viewMode === 'admin' && (
         <div className="mb-3 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
           <p className="text-xs text-emerald-700 font-medium leading-relaxed">
-            <span className="font-bold">Le Socle {currentSocle === 'essentiel' ? 'Essentiel' : currentSocle === 'performance' ? 'Performance' : 'Signature'}</span> : {SOCLE_DESCRIPTIONS[currentSocle]}
+            {t.socles.currentPrefix} <span className="font-bold">{currentSocle === 'essentiel' ? t.socles.essentiel.label : currentSocle === 'performance' ? t.socles.performance.label : t.socles.signature.label}</span> : {currentSocle === 'essentiel' ? t.socles.essentiel.desc : currentSocle === 'performance' ? t.socles.performance.desc : t.socles.signature.desc}
           </p>
         </div>
       )}
 
       {/* ══════════ COMMENT LIRE CE SCHÉMA ══════════ */}
       {(() => {
-        const stepsData = [
-          { n: '1', title: 'Diagnostiquez', desc: 'Utilisez nos Socles de référence pour situer votre établissement.' },
-          { n: '2', title: 'Analysez', desc: "Un socle est cohérent quand les flux sont tracés. Un outil isolé est une source de perte de temps." },
-          { n: '3', title: 'Optimisez', desc: 'Visez le score de 100% pour garantir une automatisation totale de votre parcours client.' },
-          { n: '4', title: 'Bénéfice pour vous', desc: "Passez la souris sur chaque carte pour comprendre ce qu'elle change dans votre quotidien opérationnel." },
-        ];
+        const stepsData = t.steps.items.map(s => ({ n: s.num, title: s.title, desc: s.desc }));
         return (
           <div className="mb-4 p-3 sm:p-5 bg-white rounded-2xl shadow-lg border-2 border-slate-200">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">Comment utiliser cet outil ?</p>
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">{t.steps.title}</p>
               <span className="sm:hidden flex items-center gap-1 text-[10px] text-amber-500 font-semibold select-none">
-                Défiler <ChevronDown className="w-3 h-3 -rotate-90" />
+                {t.steps.scrollHint} <ChevronDown className="w-3 h-3 -rotate-90" />
               </span>
             </div>
             {/* Mobile: scroll horizontal snap  ·  Desktop: grille 4 colonnes */}
@@ -1737,7 +1715,7 @@ export function HotelEcosystem() {
           style={{ left: tooltip.x + 16, top: tooltip.y - 10, maxWidth: 260 }}
         >
           <div className="bg-slate-900 text-white rounded-xl shadow-2xl p-3 sm:p-4 border-l-4 border-amber-400">
-            <p className="text-[10px] uppercase tracking-widest text-amber-400 mb-1 font-semibold">Bénéfice pour vous</p>
+            <p className="text-[10px] uppercase tracking-widest text-amber-400 mb-1 font-semibold">{t.tooltipHeader}</p>
             <p className="text-xs sm:text-sm font-bold text-white mb-1.5 leading-tight">{tooltip.title}</p>
             <p className="text-xs text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: tooltip.benefit }} />
           </div>
@@ -1790,7 +1768,7 @@ export function HotelEcosystem() {
                       onClick={() => setHealthDetailsExpanded(e => !e)}
                       className="text-[10px] text-white/40 hover:text-white/70 underline mt-1 transition-colors"
                     >
-                      {healthDetailsExpanded ? '− Masquer' : '+ Détails'}
+                      {healthDetailsExpanded ? t.health.hideDetails : t.health.showDetails}
                     </button>
                     {healthDetailsExpanded && (
                       <p className="text-[10px] text-white/50 leading-relaxed mt-2 px-1">{diagnostic.desc}</p>
@@ -1870,14 +1848,14 @@ export function HotelEcosystem() {
                       <div className="p-2.5 rounded-xl" style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.20)' }}>
                         <div className="flex items-center gap-1.5 mb-1.5">
                           <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse flex-shrink-0" />
-                          <p className="text-[9px] font-black text-red-400 uppercase tracking-wide">Outils indispensables absents</p>
+                          <p className="text-[9px] font-black text-red-400 uppercase tracking-wide">{t.health.missingTools}</p>
                         </div>
                         {missingVitalTools.map(toolId => {
                           const names: Record<string,string> = { 'booking-engine':'Moteur de Réservation','channel-manager':'Channel Manager','pms':'PMS','site-internet':'Site Internet','ota':'OTA' };
                           return (
                             <div key={toolId} className="mb-1 p-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)' }}>
                               <p className="text-[10px] text-red-300 font-bold">{names[toolId] || toolId}</p>
-                              <p className="text-[9px] text-red-400/60 leading-snug mt-0.5">Colonne vertébrale de votre rentabilité.</p>
+                              <p className="text-[9px] text-red-400/60 leading-snug mt-0.5">{t.health.missingToolDesc}</p>
                             </div>
                           );
                         })}
@@ -1893,7 +1871,7 @@ export function HotelEcosystem() {
                     className="w-full py-2 rounded-xl text-[11px] font-bold text-white flex items-center justify-center gap-1.5 transition-all hover:brightness-110 active:scale-95"
                     style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.8), rgba(5,150,105,0.9))', border: '1px solid rgba(16,185,129,0.4)', boxShadow: '0 4px 12px rgba(16,185,129,0.2)' }}
                   >
-                    <Plus className="w-3.5 h-3.5" /> Ajouter un outil
+                    <Plus className="w-3.5 h-3.5" /> {t.canvas.addCardBtn}
                   </button>
                 </div>
               </div>
@@ -1926,7 +1904,7 @@ export function HotelEcosystem() {
                 style={{ background: `linear-gradient(135deg, ${diagnostic.barColor}22, transparent)` }}
               >
                 <h2 className="text-lg font-black" style={{ color: diagnostic.barColor }}>
-                  Diagnostic
+                  {t.mobileHealth.title}
                 </h2>
                 <button
                   onClick={() => setMobileHealthModalOpen(false)}
@@ -1989,14 +1967,14 @@ export function HotelEcosystem() {
                       className="w-full mt-3 px-4 py-3 bg-red-600 text-white text-sm font-bold rounded-xl"
                     >
                       <Plus className="w-4 h-4 inline mr-2" />
-                      Compléter mon socle
+                      {t.health.addToolBtn}
                     </button>
                   </div>
                 )}
 
                 {alertPairs.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-xs font-bold text-white/50 uppercase tracking-wide mb-1">⚡ Ruptures de flux</p>
+                    <p className="text-xs font-bold text-white/50 uppercase tracking-wide mb-1">{t.health.fluxBreaks}</p>
                     {alertPairs.map(({ a, b, warning, severity }) => {
                       const isCrit = severity === 'critique';
                       const nameA = allSystems.find(s => s.id === a)?.name || a;
@@ -2233,7 +2211,7 @@ export function HotelEcosystem() {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-3 sm:p-4" style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(15,23,42,0.25)' }}>
           <div className="bg-white p-4 sm:p-6 rounded-xl md:rounded-2xl shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg sm:text-xl font-bold">Ajouter une nouvelle carte</h3>
+              <h3 className="text-lg sm:text-xl font-bold">{t.addModal.title}</h3>
               <button
                 onClick={() => {
                   setShowAddModal(false);
@@ -2246,11 +2224,11 @@ export function HotelEcosystem() {
             </div>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Nom *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.addModal.nameLabel}</label>
               <input
                 type="text"
                 list="card-suggestions"
-                placeholder="Tapez ou sélectionnez..."
+                placeholder={t.addModal.namePlaceholder}
                 value={newCard.name}
                 onChange={(e) => setNewCard(prev => ({ ...prev, name: e.target.value }))}
                 className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
@@ -2263,7 +2241,7 @@ export function HotelEcosystem() {
             </div>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Catégorie</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.addModal.categoryLabel}</label>
               <select
                 value={newCard.category}
                 onChange={(e) => setNewCard(prev => ({ ...prev, category: e.target.value as any }))}
@@ -2276,7 +2254,7 @@ export function HotelEcosystem() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">Icône</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t.addModal.iconLabel}</label>
               <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-48 overflow-y-auto p-2 border border-slate-200 rounded-lg">
                 {Object.keys(iconMap).map((iconKey) => {
                   const IconComponent = iconMap[iconKey];
@@ -2306,7 +2284,7 @@ export function HotelEcosystem() {
                 }}
                 className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors text-sm"
               >
-                Annuler
+                {t.addModal.cancelBtn}
               </button>
               <button
                 onClick={addNewSystem}
@@ -2317,7 +2295,7 @@ export function HotelEcosystem() {
                     : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                 }`}
               >
-                Ajouter
+                {t.addModal.addBtn}
               </button>
             </div>
           </div>
@@ -2329,8 +2307,8 @@ export function HotelEcosystem() {
 
       {/* ══════════ LÉGENDE & VALEUR ══════════ */}
       <div id="legende" className="mt-6 md:mt-8 p-4 sm:p-6 bg-white rounded-xl md:rounded-2xl border-2 border-slate-200 shadow-lg">
-        <h3 className="mb-1 text-slate-800 text-center text-base sm:text-lg font-bold">Légende &amp; Valeur</h3>
-        <p className="text-center text-xs sm:text-sm text-slate-500 mb-4">Code couleur des catégories</p>
+        <h3 className="mb-1 text-slate-800 text-center text-base sm:text-lg font-bold">{t.legend.title}</h3>
+        <p className="text-center text-xs sm:text-sm text-slate-500 mb-4">{t.legend.subtitle}</p>
 
         {/* Color legend */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
@@ -2408,9 +2386,9 @@ export function HotelEcosystem() {
       <div className="mt-4 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl md:rounded-2xl p-5 sm:p-6 md:p-8 shadow-2xl">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-bold text-amber-900 uppercase tracking-widest mb-1">Envie de commencer ?</p>
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 leading-tight">Un audit gratuit de 30 min pour identifier vos priorités.</h3>
-            <p className="text-xs sm:text-sm text-amber-900 mt-1">Sans jargon. Sans engagement. Avec un plan d'action concret en sortie.</p>
+            <p className="text-xs font-bold text-amber-900 uppercase tracking-widest mb-1">{t.cta.eyebrow}</p>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 leading-tight">{t.cta.title}</h3>
+            <p className="text-xs sm:text-sm text-amber-900 mt-1">{t.cta.subtitle}</p>
           </div>
           <a
             href="https://calendar.app.google/cKNAVTh1TFacNkXs6"
@@ -2419,7 +2397,7 @@ export function HotelEcosystem() {
             className="inline-flex items-center justify-center gap-2 flex-shrink-0 px-6 py-3 bg-slate-900 text-amber-400 font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg text-sm whitespace-nowrap"
           >
             <Calendar className="w-4 h-4" />
-            Réserver mon audit gratuit
+            {t.cta.btn}
           </a>
         </div>
       </div>
@@ -2454,7 +2432,7 @@ export function HotelEcosystem() {
           </a>
         </div>
         <p className="text-xs text-slate-500">
-          © 2026 Océane Habonneau – Consultante en Digitalisation Hôtelière – Tous droits réservés
+          {t.footer.copyright}
         </p>
       </div>
     </div>
