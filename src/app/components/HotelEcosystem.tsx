@@ -36,7 +36,9 @@ import {
   Radio,
   Layers,
   AlertCircle,
-  ChevronUp as ChevronUpIcon
+  ChevronUp as ChevronUpIcon,
+  ClipboardList,
+  CalendarDays
 } from 'lucide-react';
 
 interface SystemNode {
@@ -110,6 +112,14 @@ const nodeBenefits: Record<string, { title: string; benefit: string }> = {
   'site-booking': {
     title: 'Site Web / Boutique',
     benefit: 'Vendez cartes cadeaux et expériences directement en ligne. <strong>Nouvelle source de revenus</strong> sans intermédiaire.'
+  },
+  'housekeeping': {
+    title: 'Housekeeping',
+    benefit: 'Synchronisation en temps réel des statuts de chambres avec le PMS. <strong>Réduisez les délais de recouche</strong>, arrêtez les appels téléphoniques et libérez vos chambres plus rapidement.'
+  },
+  'event-management': {
+    title: 'Event Management',
+    benefit: 'Gestion centralisée des événements, salles et devis. <strong>Maximisez le taux d'occupation de vos espaces</strong> et automatisez la facturation groupe.'
   }
 };
 
@@ -214,7 +224,7 @@ const categoryConfig = {
 const iconMap: Record<string, any> = {
   Bed, Users, Star, Home, Calculator, CreditCard, Globe, ShoppingBag,
   MessageCircle, UtensilsCrossed, Calendar, Sparkles, Share2, DollarSign,
-  Building2, TrendingUp
+  Building2, TrendingUp, ClipboardList, CalendarDays
 };
 
 // ══════════ WIZARD TOOLS CATALOG ══════════
@@ -232,6 +242,8 @@ const WIZARD_TOOLS = [
   { id: 'gds', name: 'GDS', icon: 'Globe', category: 'sales' as const },
   { id: 'rms', name: 'RMS', icon: 'TrendingUp', category: 'management' as const },
   { id: 'serrure', name: 'Serrure Connectée', icon: 'Home', category: 'customer' as const },
+  { id: 'housekeeping', name: 'Housekeeping', icon: 'ClipboardList', category: 'management' as const },
+  { id: 'event-management', name: 'Event Management', icon: 'CalendarDays', category: 'management' as const },
 ];
 
 // Paires de connexions logiques possibles selon les outils sélectionnés
@@ -331,6 +343,14 @@ function getLogicalPairs(tools: Set<string>): LogicalPair[] {
       question: 'Le POS exporte-t-il automatiquement ses ventes en comptabilité ?',
       warning: 'Saisie manuelle des recettes F&B : risque de décalage de clôture.',
       severity: 'warning' },
+    { a: 'pms',             b: 'housekeeping',
+      question: 'Le Housekeeping est-il synchronisé avec le PMS ?',
+      warning: 'Statuts de chambres mis à jour manuellement : délais de recouche et erreurs de check-in.',
+      severity: 'warning' },
+    { a: 'pms',             b: 'event-management',
+      question: "Le système d'Event Management est-il connecté au PMS ?",
+      warning: 'Facturation groupe manuelle : risque de pertes et de doublons sur les dossiers événements.',
+      severity: 'warning' },
   ];
 
   // Même logique que le scoring : afficher toute paire dont les deux outils sont présents
@@ -390,6 +410,8 @@ const OPERATIONAL_LINKS: ScoreLink[] = [
   { a: 'pms',            b: 'compta',           points: 10 },
   { a: 'pms',            b: 'serrure',          points: 10 },
   { a: 'pms',            b: 'spa',              points: 10 },
+  { a: 'pms',            b: 'housekeeping',     points: 10 },
+  { a: 'pms',            b: 'event-management', points: 10 },
   { a: 'moteur-resto',   b: 'site-internet',    points: 10 },
   { a: 'site-booking',   b: 'site-internet',    points: 10 },
 ];
@@ -428,6 +450,8 @@ const PAIR_WARN_MAP: Record<string, [string, string]> = {
   'channel-manager,gds':           ["Canaux corporate non alimentés : manque à gagner B2B.", 'info'],
   'gds,pms':                       ["Mises à jour manuelles vers les GDS : disparité et perte de commissions.", 'info'],
   'crm,site-internet':             ["Leads non qualifiés : pas de suivi des prospects web.", 'info'],
+  'housekeeping,pms':              ["Statuts de chambres manuels : délais de recouche et erreurs de check-in.", 'warning'],
+  'event-management,pms':          ["Facturation groupe manuelle : risque de pertes et doublons sur les dossiers.", 'warning'],
 };
 
 // Vérifie si un lien est actif (bidirectionnel)
