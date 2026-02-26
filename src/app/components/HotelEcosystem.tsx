@@ -52,100 +52,10 @@ interface SystemNode {
   connections?: string[];
 }
 
-// 💡 Infobulles bénéfices par système
-const nodeBenefits: Record<string, { title: string; benefit: string }> = {
-  'pms': {
-    title: 'PMS — Property Management System',
-    benefit: 'Le <strong>cœur de votre hôtel</strong>. Centralise les réservations, les profils clients et la facturation pour supprimer les erreurs et les oublis.'
-  },
-  'channel-manager': {
-    title: 'Channel Manager',
-    benefit: 'Mise à jour automatique de vos stocks sur Booking, Expedia, etc. <strong>Fini le surbooking</strong> et les saisies manuelles fastidieuses.'
-  },
-  'pos': {
-    title: 'POS — Point of Sale Restaurant',
-    benefit: 'Envoi direct des notes en chambre et synchronisation des stocks. <strong>Une fluidité totale</strong> entre la salle et la réception.'
-  },
-  'psp': {
-    title: 'PSP — Payment Service Provider',
-    benefit: 'Sécurisation des transactions et prélèvements automatiques. <strong>30 min gagnées par jour</strong> à la clôture et moins de litiges bancaires.'
-  },
-  'crm': {
-    title: 'Expérience Client / CRM',
-    benefit: 'Automatise l\'envoi des emails pré-séjour/post-séjour. <strong>Fidélise vos clients</strong> sans que vous n\'ayez à y penser.'
-  },
-  'exp-client': {
-    title: 'Expérience Client In-House',
-    benefit: 'Personnalisez chaque séjour grâce aux données centralisées. <strong>Augmentez vos avis positifs</strong> et le retour de vos clients fidèles.'
-  },
-  'compta': {
-    title: 'Flux Comptable',
-    benefit: 'Export automatique de vos chiffres vers votre comptabilité. <strong>Zéro papier, zéro erreur, zéro retard.</strong>'
-  },
-  'booking-engine': {
-    title: 'Moteur de Réservation',
-    benefit: 'Captez les réservations directes sans commission OTA. <strong>Augmentez votre RevPAR</strong> en maîtrisant votre distribution.'
-  },
-  'ota': {
-    title: 'OTA — Online Travel Agency',
-    benefit: 'Visibilité maximale sur Booking.com, Expedia & co. <strong>Gérés automatiquement</strong> depuis votre channel manager pour zéro surcharge.'
-  },
-  'site-internet': {
-    title: 'Site Internet',
-    benefit: 'Votre vitrine digitale disponible 24h/24. <strong>Réduit votre dépendance aux OTA</strong> et renforce votre image de marque.'
-  },
-  'spa': {
-    title: 'SPA & Wellness',
-    benefit: 'Gestion des soins et réservations intégrée au PMS. <strong>Upsell automatique</strong> pour augmenter le panier moyen de vos séjours.'
-  },
-  'rms': {
-    title: 'RMS — Revenue Management System',
-    benefit: 'Optimise vos tarifs en temps réel selon la demande. <strong>+10% à +25% de RevPAR</strong> constaté selon les établissements.'
-  },
-  'gds': {
-    title: 'GDS — Global Distribution System',
-    benefit: 'Accès aux agences de voyages et clientèle corporate mondiale. <strong>Canal stratégique</strong> pour les hôtels business et MICE.'
-  },
-  'moteur-resto': {
-    title: 'Moteur Réservation Restaurant',
-    benefit: 'Gestion des couverts en ligne avec synchronisation cuisine. <strong>Réduisez les no-shows</strong> et optimisez votre taux de remplissage.'
-  },
-  'site-booking': {
-    title: 'Site Web / Boutique',
-    benefit: 'Vendez cartes cadeaux et expériences directement en ligne. <strong>Nouvelle source de revenus</strong> sans intermédiaire.'
-  },
-  'housekeeping': {
-    title: 'Housekeeping',
-    benefit: 'Synchronisation en temps réel des statuts de chambres avec le PMS. <strong>Réduisez les délais de recouche</strong>, supprimez les allers-retours radio et libérez vos chambres plus vite.'
-  },
-  'event-management': {
-    title: 'Event Management',
-    benefit: "Gestion centralisée des événements, salles et devis. <strong>Maximisez le taux d'occupation de vos espaces</strong> et automatisez la facturation groupe."
-  }
-};
+// 💡 Infobulles bénéfices par système → maintenant dans translations.ts
+// 💡 Infobulles bénéfices par système → maintenant dans translations.ts
 
-// 📋 Liste des suggestions de cartes (triées alphabétiquement)
-const cardSuggestions = [
-  'Boutique en ligne / Carte cadeaux',
-  'Channel Manager',
-  'Chatbot',
-  'Comptabilité',
-  'CRM',
-  'E-réputation',
-  'Event Management',
-  'GDS',
-  'Housekeeping',
-  'Moteur de réservation',
-  'OTA',
-  'PMS',
-  'POS',
-  'PSP',
-  'Serrure',
-  'Site internet',
-  'Téléphonie',
-  'TV',
-  'Wifi'
-].sort();
+// 📋 Liste des suggestions de cartes → maintenant dans translations.ts
 
 // 🟢 Socle 1 - Essentiel (par défaut)
 const socle1Essentiel: SystemNode[] = [
@@ -255,100 +165,27 @@ interface LogicalPair {
   severity: Severity;
 }
 
-function getLogicalPairs(tools: Set<string>): LogicalPair[] {
+function getLogicalPairs(tools: Set<string>, t: any): LogicalPair[] {
   // Règle identique au scoring : toute paire dont les DEUX outils
   // sont présents est affichée — sans condition sur un tiers.
   // L'utilisateur peut avoir PMS↔Moteur ET CM↔Moteur simultanément,
   // exactement comme dans les VITAL_PATHS du scoring (chemins OR).
 
-  const ALL_PAIRS: LogicalPair[] = [
-    // ── Distribution / critiques ──
-    { a: 'pms',             b: 'channel-manager',
-      question: 'Votre PMS est-il connecté au Channel Manager ?',
-      warning: 'Risque majeur de surbooking et de disparité tarifaire.',
-      severity: 'critique' },
-    { a: 'pms',             b: 'booking-engine',
-      question: 'Votre PMS est-il connecté directement au Moteur de réservation ?',
-      warning: 'Disponibilités non synchronisées : risque de sur-vente et perte de réservations directes.',
-      severity: 'critique' },
-    { a: 'channel-manager', b: 'booking-engine',
-      question: 'Le Channel Manager envoie-t-il les tarifs et dispos au Moteur ?',
-      warning: 'Tarifs directs non synchronisés : risque de perte de ventes directes.',
-      severity: 'critique' },
-    { a: 'channel-manager', b: 'ota',
-      question: 'Les OTA sont-elles connectées via le Channel Manager ?',
-      warning: 'Canaux déconnectés : fermeture forcée des ventes sur Booking/Expedia.',
-      severity: 'critique' },
-    { a: 'pms',             b: 'ota',
-      question: 'Votre PMS est-il synchronisé directement avec les OTA ?',
-      warning: 'Mises à jour manuelles sur les OTA : surbooking et disparité tarifaire.',
-      severity: 'critique' },
-    { a: 'booking-engine',  b: 'psp',
-      question: 'Les paiements en ligne passent-ils par le Moteur vers le PSP ?',
-      warning: 'Pas de garantie bancaire en temps réel : risque de no-shows impayés.',
-      severity: 'critique' },
-    { a: 'pms',             b: 'psp',
-      question: 'Le PSP est-il connecté directement au PMS pour les paiements ?',
-      warning: 'Réconciliation manuelle des paiements : erreurs de caisse et retards.',
-      severity: 'critique' },
-    { a: 'booking-engine',  b: 'site-internet',
-      question: 'Le Moteur de réservation est-il intégré au Site Internet ?',
-      warning: 'Parcours client rompu : perte de conversion immédiate.',
-      severity: 'critique' },
-    { a: 'pms',             b: 'site-internet',
-      question: 'Le Site Internet affiche-t-il les disponibilités du PMS en temps réel ?',
-      warning: 'Disponibilités non synchronisées : risque de sur-vente manuelle.',
-      severity: 'critique' },
-    { a: 'channel-manager', b: 'gds',
-      question: 'Les GDS sont-ils reliés au Channel Manager ?',
-      warning: 'Canaux corporate non alimentés : manque à gagner sur la clientèle B2B.',
-      severity: 'info' },
-    { a: 'pms',             b: 'gds',
-      question: 'Votre PMS est-il connecté directement aux GDS ?',
-      warning: 'Mises à jour manuelles vers les GDS : disparité et perte de commissions.',
-      severity: 'info' },
-    // ── Opérationnels ──
-    { a: 'pms',             b: 'pos',
-      question: 'Le POS envoie-t-il automatiquement les notes en chambre au PMS ?',
-      warning: "Pas de transfert en chambre : oublis de facturation au check-out.",
-      severity: 'warning' },
-    { a: 'pms',             b: 'serrure',
-      question: 'Les serrures connectées sont-elles pilotées par le PMS ?',
-      warning: 'Saisie manuelle des clés : perte de temps staff et attente client.',
-      severity: 'warning' },
-    { a: 'pms',             b: 'spa',
-      question: 'Les réservations SPA sont-elles synchronisées avec le PMS ?',
-      warning: "Plannings non synchronisés : erreurs sur la facture globale.",
-      severity: 'warning' },
-    { a: 'pms',             b: 'crm',
-      question: 'Le CRM est-il alimenté automatiquement par le PMS ?',
-      warning: "Données isolées : impossible de personnaliser l'accueil ou de fidéliser.",
-      severity: 'warning' },
-    { a: 'pms',             b: 'compta',
-      question: 'Les écritures comptables sont-elles exportées automatiquement du PMS ?',
-      warning: "Saisie manuelle du CA : risque d'erreurs et retard de clôture.",
-      severity: 'warning' },
-    { a: 'pms',             b: 'rms',
-      question: 'Le RMS ajuste-t-il les tarifs automatiquement dans le PMS ?',
-      warning: 'Tarification statique : manque à gagner sur le RevPAR.',
-      severity: 'warning' },
-    { a: 'booking-engine',  b: 'crm',
-      question: 'Le Moteur de réservation alimente-t-il le CRM en données clients ?',
-      warning: 'Profils clients incomplets : relances marketing manquées après séjour.',
-      severity: 'warning' },
-    { a: 'pos',             b: 'compta',
-      question: 'Le POS exporte-t-il automatiquement ses ventes en comptabilité ?',
-      warning: 'Saisie manuelle des recettes F&B : risque de décalage de clôture.',
-      severity: 'warning' },
-    { a: 'pms',             b: 'housekeeping',
-      question: 'Le Housekeeping est-il synchronisé avec le PMS ?',
-      warning: 'Statuts de chambres mis à jour manuellement : délais de recouche et erreurs de check-in.',
-      severity: 'warning' },
-    { a: 'pms',             b: 'event-management',
-      question: "Le système d'Event Management est-il connecté au PMS ?",
-      warning: 'Facturation groupe manuelle : risque de pertes et de doublons sur les dossiers événements.',
-      severity: 'warning' },
-  ];
+  // Construire ALL_PAIRS depuis les traductions
+  const ALL_PAIRS: LogicalPair[] = [];
+  
+  // Parcourir toutes les paires disponibles dans les traductions
+  Object.keys(t.logicalPairs).forEach(pairKey => {
+    const [a, b] = pairKey.split('|');
+    const pair = t.logicalPairs[pairKey];
+    ALL_PAIRS.push({
+      a,
+      b,
+      question: pair.question,
+      warning: pair.warning,
+      severity: pair.severity as any
+    });
+  });
 
   // Même logique que le scoring : afficher toute paire dont les deux outils sont présents
   return ALL_PAIRS.filter(p => tools.has(p.a) && tools.has(p.b));
@@ -422,34 +259,7 @@ const STRATEGIC_LINKS: ScoreLink[] = [
 
 // Map des messages d'impact par paire (clé = ids triés join ',')
 // Couvre toutes les paires possibles — indépendamment de l'existence d'un tiers
-const PAIR_WARN_MAP: Record<string, [string, string]> = {
-  // Critiques — flux de distribution
-  'channel-manager,pms':           ['Risque majeur de surbooking et de disparité tarifaire.', 'critique'],
-  'booking-engine,pms':            ['Disponibilités non synchronisées : risque de sur-vente et perte de réservations directes.', 'critique'],
-  'booking-engine,channel-manager':['Tarifs directs non synchronisés : perte de ventes directes.', 'critique'],
-  'channel-manager,ota':           ['Canaux déconnectés : fermeture forcée sur Booking/Expedia.', 'critique'],
-  'ota,pms':                       ['Mises à jour manuelles sur les OTA : risque de surbooking et disparité tarifaire.', 'critique'],
-  'booking-engine,psp':            ['Pas de garantie bancaire : risque de no-shows impayés.', 'critique'],
-  'pms,psp':                       ['Réconciliation manuelle des paiements : erreurs de caisse et retards.', 'critique'],
-  'booking-engine,site-internet':  ['Parcours client rompu : perte de conversion immédiate.', 'critique'],
-  'pms,site-internet':             ['Disponibilités non synchronisées : risque de sur-vente manuelle.', 'critique'],
-  // Opérationnels — warning
-  'pms,pos':                       ["Pas de transfert chambre : oublis de facturation au check-out.", 'warning'],
-  'pms,serrure':                   ["Saisie manuelle des clés : perte de temps staff.", 'warning'],
-  'pms,spa':                       ["Plannings non synchronisés : erreurs sur facture globale.", 'warning'],
-  'crm,pms':                       ["Données isolées : impossible de fidéliser.", 'warning'],
-  'compta,pms':                    ["Saisie manuelle du CA : retard de clôture.", 'warning'],
-  'pms,rms':                       ["Tarification statique : manque à gagner sur le RevPAR.", 'warning'],
-  'booking-engine,crm':            ["Profils clients incomplets : relances marketing manquées.", 'warning'],
-  'channel-manager,rms':           ["Yield management non diffusé : optimisations tarifaires locales.", 'warning'],
-  'compta,pos':                    ["Saisie manuelle des recettes F&B : décalage de clôture.", 'warning'],
-  // Info
-  'channel-manager,gds':           ["Canaux corporate non alimentés : manque à gagner B2B.", 'info'],
-  'gds,pms':                       ["Mises à jour manuelles vers les GDS : disparité et perte de commissions.", 'info'],
-  'crm,site-internet':             ["Leads non qualifiés : pas de suivi des prospects web.", 'info'],
-  'housekeeping,pms':              ["Statuts de chambres manuels : délais de recouche et erreurs de check-in.", 'warning'],
-  'event-management,pms':          ["Facturation groupe manuelle : risque de pertes et doublons sur les dossiers.", 'warning'],
-};
+// PAIR_WARN_MAP maintenant dans translations.ts
 
 // Vérifie si un lien est actif (bidirectionnel)
 function isLinkActive(
@@ -538,7 +348,7 @@ function computeScore(
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
     } else {
-      { const w = PAIR_WARN_MAP[[link.a,link.b].sort().join(',')]; alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: w?.[1] as Severity | undefined }); }
+      { const w = t.pairWarnMap[[link.a,link.b].sort().join(',')]; alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: w?.[1] as Severity | undefined }); }
     }
   }
 
@@ -1089,7 +899,7 @@ export function HotelEcosystem() {
 
               {/* STEP 2 — Connectivité groupée par outil focal */}
               {wizardStep === 2 && (() => {
-                const pairs = getLogicalPairs(selectedTools);
+                const pairs = getLogicalPairs(selectedTools, t);
                 if (pairs.length === 0) return (
                   <div className="text-center py-8 text-slate-400">
                     <p className="text-sm">{t.wizard.noPairs}</p>
@@ -1386,7 +1196,7 @@ export function HotelEcosystem() {
                       : { background: '#fff', color: '#3B82F6' }}
                   >
                     <Move className="w-3.5 h-3.5" />
-                    Déplacement
+                    {t.canvas.modeMove}
                   </button>
                   <button
                     onClick={() => { setMode('link'); setDraggingId(null); }}
@@ -1396,7 +1206,7 @@ export function HotelEcosystem() {
                       : { background: '#fff', color: '#3B82F6' }}
                   >
                     <Link2 className="w-3.5 h-3.5" />
-                    Liaison
+                    {t.canvas.modeLink}
                   </button>
                 </div>
               </div>
@@ -1451,7 +1261,7 @@ export function HotelEcosystem() {
                     style={{ background: '#f5f5f5', color: '#555' }}
                   >
                     <Unlink className="w-3.5 h-3.5" />
-                    Liaisons
+                    {t.canvas.resetLinks}
                   </button>
                   <button
                     onClick={resetPositions}
@@ -1459,7 +1269,7 @@ export function HotelEcosystem() {
                     style={{ background: '#f5f5f5', color: '#555', borderLeft: '1px solid #aeaeae' }}
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
-                    Positions
+                    {t.canvas.resetPositions}
                   </button>
                 </div>
               </div>
@@ -1590,7 +1400,7 @@ export function HotelEcosystem() {
                           }`}
                         >
                           <Move className="w-4 h-4 inline mr-2" />
-                          Déplacement
+                          {t.canvas.modeMove}
                         </button>
                         <button
                           onClick={() => setMode('link')}
@@ -1601,7 +1411,7 @@ export function HotelEcosystem() {
                           }`}
                         >
                           <Link2 className="w-4 h-4 inline mr-2" />
-                          Liaison
+                          {t.canvas.modeLink}
                         </button>
                       </div>
                     </div>
@@ -1877,10 +1687,9 @@ export function HotelEcosystem() {
                           <p className="text-[9px] font-black text-red-400 uppercase tracking-wide">{t.health.missingTools}</p>
                         </div>
                         {missingVitalTools.map(toolId => {
-                          const names: Record<string,string> = { 'booking-engine':'Moteur de Réservation','channel-manager':'Channel Manager','pms':'PMS','site-internet':'Site Internet','ota':'OTA' };
                           return (
                             <div key={toolId} className="mb-1 p-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)' }}>
-                              <p className="text-[10px] text-red-300 font-bold">{names[toolId] || toolId}</p>
+                              <p className="text-[10px] text-red-300 font-bold">{t.wizardTools[toolId] || toolId}</p>
                               <p className="text-[9px] text-red-400/60 leading-snug mt-0.5">{t.health.missingToolDesc}</p>
                             </div>
                           );
@@ -1897,7 +1706,7 @@ export function HotelEcosystem() {
                     className="w-full py-2 rounded-xl text-[11px] font-bold text-white flex items-center justify-center gap-1.5 transition-all hover:brightness-110 active:scale-95"
                     style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.8), rgba(5,150,105,0.9))', border: '1px solid rgba(16,185,129,0.4)', boxShadow: '0 4px 12px rgba(16,185,129,0.2)' }}
                   >
-                    <Plus className="w-3.5 h-3.5" /> Ajouter un outil
+                    <Plus className="w-3.5 h-3.5" /> {t.health.addToolBtn}
                   </button>
                 </div>
               </div>
@@ -1977,11 +1786,7 @@ export function HotelEcosystem() {
                       <div key={toolId} className="flex items-center gap-2 mb-2">
                         <span className="w-2 h-2 rounded-full bg-red-500" />
                         <span className="text-sm text-red-700">
-                          {toolId === 'booking-engine' && 'Moteur de Réservation'}
-                          {toolId === 'channel-manager' && 'Channel Manager'}
-                          {toolId === 'pms' && 'PMS'}
-                          {toolId === 'site-internet' && 'Site Internet'}
-                          {toolId === 'ota' && 'OTA'}
+                          {t.wizardTools[toolId] || toolId}
                         </span>
                       </div>
                     ))}
@@ -2112,7 +1917,7 @@ export function HotelEcosystem() {
                   onTouchStart={viewMode === 'admin' ? (e) => handleMouseDown(system.id, e) : undefined}
                   onClick={viewMode === 'admin' ? (e) => handleCardClick(system.id, e) : undefined}
                   onMouseEnter={(e) => {
-                    const info = nodeBenefits[system.id];
+                    const info = t.nodeBenefits[system.id];
                     if (info) {
                       setTooltip({ visible: true, x: e.clientX, y: e.clientY, title: info.title, benefit: info.benefit });
                     }
@@ -2143,7 +1948,7 @@ export function HotelEcosystem() {
                   >
                     {/* Category label */}
                     <p className="text-[6px] md:text-[8px] uppercase tracking-wider font-semibold text-center leading-none mb-0.5 md:mb-1" style={{ color: config.color, opacity: 0.8 }}>
-                      {config.label.split(' ')[0]}
+                      {t.categories[system.category].split(' ')[0]}
                     </p>
 
                     {/* 🚨 Badge alerte lien vital manquant */}
@@ -2260,7 +2065,7 @@ export function HotelEcosystem() {
                 className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
               />
               <datalist id="card-suggestions">
-                {cardSuggestions.map(suggestion => (
+                {t.cardSuggestions.map(suggestion => (
                   <option key={suggestion} value={suggestion} />
                 ))}
               </datalist>
@@ -2274,7 +2079,7 @@ export function HotelEcosystem() {
                 className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
               >
                 {Object.entries(categoryConfig).map(([key, config]) => (
-                  <option key={key} value={key}>{config.label}</option>
+                  <option key={key} value={key}>{t.categories[key as keyof typeof categoryConfig]}</option>
                 ))}
               </select>
             </div>
@@ -2344,7 +2149,7 @@ export function HotelEcosystem() {
                 className="w-4 h-4 sm:w-5 sm:h-5 rounded-lg shadow-sm flex-shrink-0" 
                 style={{ backgroundColor: config.color }}
               />
-              <span className="text-xs sm:text-sm text-slate-700">{config.label}</span>
+              <span className="text-xs sm:text-sm text-slate-700">{t.categories[key as keyof typeof categoryConfig]}</span>
             </div>
           ))}
         </div>
@@ -2353,58 +2158,40 @@ export function HotelEcosystem() {
       {/* ══════════ MES SERVICES ══════════ */}
       <div id="services" className="mt-8 md:mt-12 p-4 sm:p-6 md:p-8 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl md:rounded-2xl shadow-2xl">
         <div className="text-center mb-6 md:mb-8">
-          <p className="text-xs uppercase tracking-widest text-amber-400 font-semibold mb-1">Ce que je fais pour vous</p>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">Mes Services</h2>
-          <p className="text-sm text-slate-400 mt-2 max-w-lg mx-auto">Des missions clés en main, pensées pour les hôteliers qui veulent de la clarté, pas du jargon.</p>
+          <p className="text-xs uppercase tracking-widest text-amber-400 font-semibold mb-1">{t.servicesSection.subtitle}</p>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">{t.servicesSection.title}</h2>
+          <p className="text-sm text-slate-400 mt-2 max-w-lg mx-auto">{t.servicesSection.subtitle}</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            {
-              icon: <Search className="w-7 h-7" />,
-              name: 'Audit & Stratégie IT',
-              desc: 'Analyse complète de votre stack technologique. Je cartographie vos flux et identifie les blocages.',
-              tags: ['Audit flash', 'Schéma de flux', 'Identification des blocages'],
-              color: '#3b82f6'
-            },
-            {
-              icon: <Wrench className="w-7 h-7" />,
-              name: 'Installation outils métier & Conseil',
-              desc: 'Sélection, déploiement et paramétrage de vos outils métier. Accompagnement des équipes jusqu\'à l\'autonomie complète.',
-              tags: ['Sélection outils', 'Déploiement', 'Formation équipe'],
-              color: '#10b981'
-            },
-            {
-              icon: <Radio className="w-7 h-7" />,
-              name: 'Externalisation de votre pilotage IT',
-              desc: 'Je pilote votre écosystème informatique à temps partagé : prestataires, contrats, veille technologique et support quotidien. La sérénité d\'une DSI sans le coût d\'un poste fixe.',
-              tags: ['Temps partagé', 'Pilotage fournisseurs', 'Support quotidien'],
-              color: '#f59e0b'
-            },
-          ].map(service => (
-            <div
-              key={service.name}
-              className="group relative bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-5 sm:p-6 hover:bg-opacity-10 hover:border-opacity-20 transition-all hover:-translate-y-1 flex flex-col items-center text-center"
-            >
-              {/* Top accent line */}
-              <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: service.color }} />
+          {t.servicesSection.items.map((service, idx) => {
+            const icons = [<Search className="w-7 h-7" />, <Wrench className="w-7 h-7" />, <Radio className="w-7 h-7" />];
+            const colors = ['#3b82f6', '#10b981', '#f59e0b'];
+            return (
+              <div
+                key={service.name}
+                className="group relative bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-5 sm:p-6 hover:bg-opacity-10 hover:border-opacity-20 transition-all hover:-translate-y-1 flex flex-col items-center text-center"
+              >
+                {/* Top accent line */}
+                <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: colors[idx] }} />
 
-              {/* Big centered icon */}
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 flex-shrink-0" style={{ backgroundColor: service.color + '22', color: service.color }}>
-                {service.icon}
-              </div>
+                {/* Big centered icon */}
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 flex-shrink-0" style={{ backgroundColor: colors[idx] + '22', color: colors[idx] }}>
+                  {icons[idx]}
+                </div>
 
-              <h3 className="text-base sm:text-lg font-bold text-black mb-3 leading-tight">{service.name}</h3>
+                <h3 className="text-base sm:text-lg font-bold text-black mb-3 leading-tight">{service.name}</h3>
               <p className="text-sm text-black leading-relaxed mb-5 flex-grow">{service.desc}</p>
               <div className="flex flex-wrap justify-center gap-1.5 mt-auto">
                 {service.tags.map(tag => (
-                  <span key={tag} className="text-xs px-2.5 py-1 rounded-full border font-medium" style={{ color: service.color, borderColor: service.color + '55', backgroundColor: service.color + '18' }}>
+                  <span key={tag} className="text-xs px-2.5 py-1 rounded-full border font-medium" style={{ color: colors[idx], borderColor: colors[idx] + '55', backgroundColor: colors[idx] + '18' }}>
                     {tag}
                   </span>
                 ))}
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
 
@@ -2445,7 +2232,7 @@ export function HotelEcosystem() {
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md font-semibold text-xs sm:text-sm"
           >
             <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            Me contacter
+            {t.footer.contact}
           </a>
           <a
             href="https://calendar.app.google/cKNAVTh1TFacNkXs6"
@@ -2454,7 +2241,7 @@ export function HotelEcosystem() {
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-400 text-slate-900 rounded-xl hover:bg-amber-500 transition-colors shadow-md font-bold text-xs sm:text-sm"
           >
             <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            Prendre RDV
+            {t.footer.appointment}
           </a>
         </div>
         <p className="text-xs text-slate-500">
