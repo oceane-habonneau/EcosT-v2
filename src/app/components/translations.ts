@@ -230,7 +230,7 @@ const fr: Translations = {
     title: 'Calculer mon score d\'automatisation',
     subtitle: 'Répondez à quelques questions pour obtenir un diagnostic personnalisé de votre infrastructure hôtelière.',
     startBtn: 'Lancer mon diagnostic',
-    skipBtn: 'Explorer d\'abord l\'outil',
+    skipBtn: 'Explorer l\'outil manuellement. Expert',
   },
 
   wizard: {
@@ -668,7 +668,7 @@ const en: Translations = {
     title: 'Calculate my automation score',
     subtitle: 'Answer a few questions to get a personalised diagnostic of your hotel infrastructure.',
     startBtn: 'Start my diagnostic',
-    skipBtn: 'Explore the tool first',
+    skipBtn: 'Explore the tool manually. Expert',
   },
 
   wizard: {
