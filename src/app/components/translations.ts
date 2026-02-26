@@ -338,7 +338,7 @@ const fr: Translations = {
       {
         num: '02',
         title: 'Analysez',
-        desc: 'Un socle est cohérent quand les flux sont tracés. <br />Un outil isolé est une source de perte de temps',
+        desc: 'Un socle est cohérent quand les flux sont tracés. Un outil isolé est une source de perte de temps.',
       },
       {
         num: '03',
@@ -403,7 +403,7 @@ const fr: Translations = {
     },
     signature: {
       label: 'Signature',
-      desc: "L'excellence technologique pour une expérience client personnalisée et data-driven.",
+      desc: "L'excellence technologique pour une expérience client personnalisée et axée sur la donnée.",
     },
     currentPrefix: 'Le Socle',
   },
@@ -770,23 +770,23 @@ const en: Translations = {
     items: [
       {
         num: '01',
-        title: 'Inventory your tools',
-        desc: 'Select the software and systems currently in place at your hotel.',
+        title: 'Diagnose',
+        desc: 'Use our Stack to position your establishment',
       },
       {
         num: '02',
-        title: 'Map your connections',
-        desc: 'Indicate which tools communicate with each other. Every missing link is an identified friction point.',
+        title: 'Analyze',
+        desc: 'A stack is consistent when flows are tracked. An isolated tool is a waste of time.',
       },
       {
         num: '03',
-        title: 'Get your score',
-        desc: 'Your automation score reveals the priority flow breaks to fix.',
+        title: 'Optimize',
+        desc: 'Aim for a score of 100% to ensure total automation of your customer journey.',
       },
       {
         num: '04',
-        title: 'Take action',
-        desc: 'Schedule a free audit to turn your diagnostic into a concrete action plan.',
+        title: 'Benefits for you',
+        desc: 'Hover your mouse over each card to understand how it changes your daily operations.',
       },
     ],
   },
