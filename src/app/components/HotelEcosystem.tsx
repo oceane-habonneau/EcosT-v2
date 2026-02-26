@@ -115,11 +115,11 @@ const nodeBenefits: Record<string, { title: string; benefit: string }> = {
   },
   'housekeeping': {
     title: 'Housekeeping',
-    benefit: 'Synchronisation en temps réel des statuts de chambres avec le PMS. <strong>Réduisez les délais de recouche</strong>, arrêtez les appels téléphoniques et libérez vos chambres plus rapidement.'
+    benefit: 'Synchronisation en temps réel des statuts de chambres avec le PMS. <strong>Réduisez les délais de recouche</strong>, supprimez les allers-retours radio et libérez vos chambres plus vite.'
   },
   'event-management': {
     title: 'Event Management',
-    benefit: 'Gestion centralisée des événements, salles et devis. <strong>Maximisez le taux d'occupation de vos espaces</strong> et automatisez la facturation groupe.'
+    benefit: "Gestion centralisée des événements, salles et devis. <strong>Maximisez le taux d'occupation de vos espaces</strong> et automatisez la facturation groupe."
   }
 };
 
