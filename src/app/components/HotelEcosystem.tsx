@@ -113,6 +113,14 @@ const nodeBenefits: Record<string, { title: string; benefit: string }> = {
   'site-booking': {
     title: 'Site Web / Boutique',
     benefit: 'Vendez cartes cadeaux et expériences directement en ligne. <strong>Nouvelle source de revenus</strong> sans intermédiaire.'
+  },
+  'housekeeping': {
+    title: 'Housekeeping',
+    benefit: 'Synchronisation en temps réel des statuts de chambres avec le PMS. <strong>Réduisez les délais de recouche</strong>, supprimez les allers-retours radio et libérez vos chambres plus vite.'
+  },
+  'event-management': {
+    title: 'Event Management',
+    benefit: "Gestion centralisée des événements, salles et devis. <strong>Maximisez le taux d'occupation de vos espaces</strong> et automatisez la facturation groupe."
   }
 };
 
@@ -1126,7 +1134,7 @@ export function HotelEcosystem() {
                               <div>
                                 <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{t.wizard.connectivityLabel}</span>
                                 <p className="text-sm font-bold text-slate-800 leading-tight">
-                                  {focalName} {t.wizard.connectedWith}
+                                  {focalName} {focalName} {t.wizard.connectedWith}
                                 </p>
                               </div>
                             </div>
@@ -1308,7 +1316,7 @@ export function HotelEcosystem() {
               <button onClick={() => { startWizard(); setMobileNavOpen(false); }}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors text-left w-full">
                 <Radio className="w-4 h-4 text-amber-500 flex-shrink-0" />
-                {t.wizardOverlay.startBtn}
+                {t.nav.diagnostic}
               </button>
             </nav>
             <div className="p-4 border-t border-slate-200">
@@ -1368,7 +1376,7 @@ export function HotelEcosystem() {
 
               {/* ── Groupe Mode ── */}
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">{t.canvas.modeMove.split(' ')[0] === 'Cliquez' ? 'Mode' : 'Mode'}</span>
+                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">Mode</span>
                 <div className="flex rounded-full overflow-hidden shadow-md border-2" style={{ borderColor: '#3B82F6' }}>
                   <button
                     onClick={() => { setMode('move'); setSelectedForLink(null); }}
@@ -1395,7 +1403,7 @@ export function HotelEcosystem() {
 
               {/* ── Groupe Socle ── */}
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">{t.socles.sectionLabel}</span>
+                {/* socle section label */}<span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 px-1">{t.socles.sectionLabel}</span>
                 <div className="flex rounded-full overflow-hidden shadow-md border-2" style={{ borderColor: '#119843' }}>
                   {[
                     { label: t.socles.essentiel.label, socle: socle1Essentiel, type: 'essentiel' as const },
@@ -1889,7 +1897,7 @@ export function HotelEcosystem() {
                     className="w-full py-2 rounded-xl text-[11px] font-bold text-white flex items-center justify-center gap-1.5 transition-all hover:brightness-110 active:scale-95"
                     style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.8), rgba(5,150,105,0.9))', border: '1px solid rgba(16,185,129,0.4)', boxShadow: '0 4px 12px rgba(16,185,129,0.2)' }}
                   >
-                    <Plus className="w-3.5 h-3.5" /> {t.canvas.addCardBtn}
+                    <Plus className="w-3.5 h-3.5" /> Ajouter un outil
                   </button>
                 </div>
               </div>
