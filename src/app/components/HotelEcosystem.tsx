@@ -875,7 +875,7 @@ export function HotelEcosystem() {
                   {getWizardTools(t).map(tool => {
                     const Icon = iconMap[tool.icon];
                     const isSelected = selectedTools.has(tool.id);
-                    const config = categoryConfig[tool.category];
+                    const config = categoryConfig[tool.category] || categoryConfig.management;
                     return (
                       <button
                         key={tool.id}
@@ -978,7 +978,8 @@ export function HotelEcosystem() {
                             {focalPairs.map(({ a, b, warning, severity }) => {
                               const pairKey = `${a}|${b}`;
                               const isConnected = selectedConnections.has(pairKey);
-                              const sc = SEV_COLOR[severity];
+                              const safeSeverity = severity || 'warning';
+                              const sc = SEV_COLOR[safeSeverity] || SEV_COLOR.warning;
                               const targetName = SHORT[b] || b;
 
                               return (
@@ -995,7 +996,7 @@ export function HotelEcosystem() {
                                       {/* Badge sévérité discret */}
                                       {!isConnected && (
                                         <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: sc.badge, color: sc.text }}>
-                                          {severity}
+                                          {safeSeverity}
                                         </span>
                                       )}
                                     </div>
@@ -1914,8 +1915,8 @@ export function HotelEcosystem() {
           {/* Nodes */}
           <div className="absolute inset-0" style={{ zIndex: 2 }}>
             {allSystems.map(system => {
-              const config = categoryConfig[system.category];
-              const Icon = iconMap[system.icon];
+              const config = categoryConfig[system.category] || categoryConfig.management;
+              const Icon = iconMap[system.icon] || iconMap.Bed;
               const isPMS = system.id === 'pms';
               const pos = nodePositions[system.id];
               const isDragging = draggingId === system.id;
