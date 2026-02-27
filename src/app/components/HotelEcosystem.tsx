@@ -2009,7 +2009,7 @@ export function HotelEcosystem() {
                           autoFocus
                         />
                       ) : (
-                        {t.wizardTools?.[system.id] || system.name}
+                        <>{t.wizardTools?.[system.id] ?? system.name}</>
                       )}
                     </h3>
 
