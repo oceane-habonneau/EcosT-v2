@@ -135,22 +135,22 @@ const iconMap: Record<string, any> = {
 };
 
 // ══════════ WIZARD TOOLS CATALOG ══════════
-const WIZARD_TOOLS = [
-  { id: 'pms', name: 'PMS', icon: 'Bed', category: 'management' as const },
-  { id: 'channel-manager', name: 'Channel Manager', icon: 'Share2', category: 'sales' as const },
-  { id: 'booking-engine', name: 'Moteur de Réservation', icon: 'Calendar', category: 'booking' as const },
-  { id: 'site-internet', name: 'Site Internet', icon: 'Globe', category: 'sales' as const },
-  { id: 'ota', name: 'OTA', icon: 'Building2', category: 'sales' as const },
-  { id: 'psp', name: 'PSP (Paiement)', icon: 'CreditCard', category: 'customer' as const },
-  { id: 'pos', name: 'POS Restaurant', icon: 'UtensilsCrossed', category: 'restaurant' as const },
-  { id: 'compta', name: 'Comptabilité', icon: 'Calculator', category: 'management' as const },
-  { id: 'crm', name: 'CRM', icon: 'Users', category: 'management' as const },
-  { id: 'spa', name: 'SPA', icon: 'Sparkles', category: 'wellness' as const },
-  { id: 'gds', name: 'GDS', icon: 'Globe', category: 'sales' as const },
-  { id: 'rms', name: 'RMS', icon: 'TrendingUp', category: 'management' as const },
-  { id: 'serrure', name: 'Serrure Connectée', icon: 'Home', category: 'customer' as const },
-  { id: 'housekeeping', name: 'Housekeeping', icon: 'ClipboardList', category: 'management' as const },
-  { id: 'event-management', name: 'Event Management', icon: 'CalendarDays', category: 'management' as const },
+const getWizardTools = (t: any) => [
+  { id: 'pms', name: t.wizardTools['pms'], icon: 'Bed', category: 'management' as const },
+  { id: 'channel-manager', name: t.wizardTools['channel-manager'], icon: 'Share2', category: 'sales' as const },
+  { id: 'booking-engine', name: t.wizardTools['booking-engine'], icon: 'Calendar', category: 'booking' as const },
+  { id: 'site-internet', name: t.wizardTools['site-internet'], icon: 'Globe', category: 'sales' as const },
+  { id: 'ota', name: t.wizardTools['ota'], icon: 'Building2', category: 'sales' as const },
+  { id: 'psp', name: t.wizardTools['psp'], icon: 'CreditCard', category: 'customer' as const },
+  { id: 'pos', name: t.wizardTools['pos'], icon: 'UtensilsCrossed', category: 'restaurant' as const },
+  { id: 'compta', name: t.wizardTools['compta'], icon: 'Calculator', category: 'management' as const },
+  { id: 'crm', name: t.wizardTools['crm'], icon: 'Users', category: 'management' as const },
+  { id: 'spa', name: t.wizardTools['spa'], icon: 'Sparkles', category: 'wellness' as const },
+  { id: 'gds', name: t.wizardTools['gds'], icon: 'Globe', category: 'sales' as const },
+  { id: 'rms', name: t.wizardTools['rms'], icon: 'TrendingUp', category: 'management' as const },
+  { id: 'serrure', name: t.wizardTools['serrure'], icon: 'Home', category: 'customer' as const },
+  { id: 'housekeeping', name: t.wizardTools['housekeeping'], icon: 'ClipboardList', category: 'management' as const },
+  { id: 'event-management', name: t.wizardTools['event-management'], icon: 'CalendarDays', category: 'management' as const },
 ];
 
 // Paires de connexions logiques possibles selon les outils sélectionnés
@@ -330,8 +330,8 @@ function computeScore(
       // Badge d'alerte : au moins un chemin est pertinent mais aucun n'est tracé
       for (const { a, b } of altPath.paths) {
         if (isLinkRelevant(a, b, presentIds)) {
-          const key = [a, b].sort().join(',') as keyof typeof PAIR_WARN_MAP;
-          const w = PAIR_WARN_MAP[[a,b].sort().join(',')];
+          const key = [a, b].sort().join(',');
+          const w = t.pairWarnMap[key];
           alertPairs.push({ a, b, warning: w?.[0], severity: w?.[1] as Severity | undefined });
         }
       }
@@ -363,7 +363,7 @@ function computeScore(
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
     } else {
-      const w = PAIR_WARN_MAP[[link.a, link.b].sort().join(',')];
+      const w = t.pairWarnMap[[link.a, link.b].sort().join(',')];
       alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: (w?.[1] as Severity) ?? 'warning' });
     }
   }
@@ -378,7 +378,7 @@ function computeScore(
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
     } else {
-      const w = PAIR_WARN_MAP[[link.a, link.b].sort().join(',')];
+      const w = t.pairWarnMap[[link.a, link.b].sort().join(',')];
       alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: (w?.[1] as Severity) ?? 'info' });
     }
   }
@@ -622,8 +622,8 @@ export function HotelEcosystem() {
     }
     // Utiliser l'ID canonique si le nom correspond à un outil connu
     // (permet au scoring de reconnaître PMS, POS, etc.)
-    const knownMatch = WIZARD_TOOLS.find(
-      t => t.name.toLowerCase() === newCard.name.trim().toLowerCase()
+    const knownMatch = getWizardTools(t).find(
+      tool => tool.name.toLowerCase() === newCard.name.trim().toLowerCase()
     );
     // Éviter les doublons si l'outil est déjà sur le canvas
     const alreadyPresent = knownMatch && allSystems.some(s => s.id === knownMatch.id);
@@ -736,7 +736,7 @@ export function HotelEcosystem() {
     // 2. Ajouter les cartes sélectionnées
     const toolsList = Array.from(selectedTools);
     toolsList.forEach((toolId, index) => {
-      const tool = WIZARD_TOOLS.find(t => t.id === toolId);
+      const tool = getWizardTools(t).find(wt => wt.id === toolId);
       if (!tool) return;
       
       // Positionner en grille 3 colonnes
@@ -853,7 +853,7 @@ export function HotelEcosystem() {
               {/* STEP 1 — Inventaire */}
               {wizardStep === 1 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {WIZARD_TOOLS.map(tool => {
+                  {getWizardTools(t).map(tool => {
                     const Icon = iconMap[tool.icon];
                     const isSelected = selectedTools.has(tool.id);
                     const config = categoryConfig[tool.category];
@@ -908,9 +908,9 @@ export function HotelEcosystem() {
                   </div>
                 );
 
-                // Noms exacts depuis WIZARD_TOOLS — aucun alias inventé
+                // Noms exacts depuis getWizardTools — aucun alias inventé
                 const SHORT: Record<string, string> = Object.fromEntries(
-                  WIZARD_TOOLS.map(t => [t.id, t.name])
+                  getWizardTools(t).map(wt => [wt.id, wt.name])
                 );
 
                 // Couleur de sévérité
