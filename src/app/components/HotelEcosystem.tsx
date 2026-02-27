@@ -191,12 +191,16 @@ function getLogicalPairs(tools: Set<string>, t: any): LogicalPair[] {
       const [a, b] = pairKey.split('|');
       const pair = t.logicalPairs[pairKey];
       if (pair) {
+        // severity n'est pas dans logicalPairs — on le déduit depuis pairWarnMap
+        const warnKey = [a, b].sort().join(',');
+        const warnEntry = t.pairWarnMap?.[warnKey];
+        const severity = (warnEntry?.[1] as any) ?? 'warning';
         ALL_PAIRS.push({
           a,
           b,
           question: pair.question || '',
-          warning: pair.warning || '',
-          severity: pair.severity as any
+          warning: pair.warning || warnEntry?.[0] || '',
+          severity,
         });
       }
     });
@@ -964,7 +968,7 @@ export function HotelEcosystem() {
                               <div>
                                 <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{t.wizard.connectivityLabel}</span>
                                 <p className="text-sm font-bold text-slate-800 leading-tight">
-                                  {focalName} {focalName} {t.wizard.connectedWith}
+                                  {focalName} {t.wizard.connectedWith}
                                 </p>
                               </div>
                             </div>
