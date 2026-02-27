@@ -295,7 +295,8 @@ function isAlternativePathRelevant(
 
 function computeScore(
   connections: Record<string, string[]>,
-  allSystems: { id: string }[]
+  allSystems: { id: string }[],
+  t: any
 ): {
   score: number;
   maxScore: number;
@@ -782,7 +783,7 @@ export function HotelEcosystem() {
   };
 
   // ── Score calculé en temps réel — recalculé à chaque render ──
-  const { pct, maxScore, alertPairs, missingVitalTools, penalty } = computeScore(connections, allSystems);
+  const { pct, maxScore, alertPairs, missingVitalTools, penalty } = computeScore(connections, allSystems, t);
   const diagnostic = getDiagnostic(pct, missingVitalTools.length > 0, t.diagnostic);
   // Set rapide pour lookup O(1)
   const alertNodeIds = new Set(alertPairs.flatMap(p => [p.a, p.b]));
