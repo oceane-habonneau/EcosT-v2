@@ -135,23 +135,31 @@ const iconMap: Record<string, any> = {
 };
 
 // ══════════ WIZARD TOOLS CATALOG ══════════
-const getWizardTools = (t: any) => [
-  { id: 'pms', name: t.wizardTools['pms'], icon: 'Bed', category: 'management' as const },
-  { id: 'channel-manager', name: t.wizardTools['channel-manager'], icon: 'Share2', category: 'sales' as const },
-  { id: 'booking-engine', name: t.wizardTools['booking-engine'], icon: 'Calendar', category: 'booking' as const },
-  { id: 'site-internet', name: t.wizardTools['site-internet'], icon: 'Globe', category: 'sales' as const },
-  { id: 'ota', name: t.wizardTools['ota'], icon: 'Building2', category: 'sales' as const },
-  { id: 'psp', name: t.wizardTools['psp'], icon: 'CreditCard', category: 'customer' as const },
-  { id: 'pos', name: t.wizardTools['pos'], icon: 'UtensilsCrossed', category: 'restaurant' as const },
-  { id: 'compta', name: t.wizardTools['compta'], icon: 'Calculator', category: 'management' as const },
-  { id: 'crm', name: t.wizardTools['crm'], icon: 'Users', category: 'management' as const },
-  { id: 'spa', name: t.wizardTools['spa'], icon: 'Sparkles', category: 'wellness' as const },
-  { id: 'gds', name: t.wizardTools['gds'], icon: 'Globe', category: 'sales' as const },
-  { id: 'rms', name: t.wizardTools['rms'], icon: 'TrendingUp', category: 'management' as const },
-  { id: 'serrure', name: t.wizardTools['serrure'], icon: 'Home', category: 'customer' as const },
-  { id: 'housekeeping', name: t.wizardTools['housekeeping'], icon: 'ClipboardList', category: 'management' as const },
-  { id: 'event-management', name: t.wizardTools['event-management'], icon: 'CalendarDays', category: 'management' as const },
-];
+const getWizardTools = (t: any) => {
+  if (!t?.wizardTools) return [];
+  try {
+    return [
+      { id: 'pms', name: t.wizardTools?.['pms'] || 'PMS', icon: 'Bed', category: 'management' as const },
+      { id: 'channel-manager', name: t.wizardTools?.['channel-manager'] || 'Channel Manager', icon: 'Share2', category: 'sales' as const },
+      { id: 'booking-engine', name: t.wizardTools?.['booking-engine'] || 'Moteur de Réservation', icon: 'Calendar', category: 'booking' as const },
+      { id: 'site-internet', name: t.wizardTools?.['site-internet'] || 'Site Internet', icon: 'Globe', category: 'sales' as const },
+      { id: 'ota', name: t.wizardTools?.['ota'] || 'OTA', icon: 'Building2', category: 'sales' as const },
+      { id: 'psp', name: t.wizardTools?.['psp'] || 'PSP', icon: 'CreditCard', category: 'customer' as const },
+      { id: 'pos', name: t.wizardTools?.['pos'] || 'POS Restaurant', icon: 'UtensilsCrossed', category: 'restaurant' as const },
+      { id: 'compta', name: t.wizardTools?.['compta'] || 'Comptabilité', icon: 'Calculator', category: 'management' as const },
+      { id: 'crm', name: t.wizardTools?.['crm'] || 'CRM', icon: 'Users', category: 'management' as const },
+      { id: 'spa', name: t.wizardTools?.['spa'] || 'SPA', icon: 'Sparkles', category: 'wellness' as const },
+      { id: 'gds', name: t.wizardTools?.['gds'] || 'GDS', icon: 'Globe', category: 'sales' as const },
+      { id: 'rms', name: t.wizardTools?.['rms'] || 'RMS', icon: 'TrendingUp', category: 'management' as const },
+      { id: 'serrure', name: t.wizardTools?.['serrure'] || 'Serrure Connectée', icon: 'Home', category: 'customer' as const },
+      { id: 'housekeeping', name: t.wizardTools?.['housekeeping'] || 'Housekeeping', icon: 'ClipboardList', category: 'management' as const },
+      { id: 'event-management', name: t.wizardTools?.['event-management'] || 'Event Management', icon: 'CalendarDays', category: 'management' as const },
+    ];
+  } catch (e) {
+    console.error('Error loading wizard tools:', e);
+    return [];
+  }
+};
 
 // Paires de connexions logiques possibles selon les outils sélectionnés
 // Sévérité d'une rupture de flux
@@ -174,18 +182,28 @@ function getLogicalPairs(tools: Set<string>, t: any): LogicalPair[] {
   // Construire ALL_PAIRS depuis les traductions
   const ALL_PAIRS: LogicalPair[] = [];
   
+  // Safety check
+  if (!t?.logicalPairs) return [];
+  
   // Parcourir toutes les paires disponibles dans les traductions
-  Object.keys(t.logicalPairs).forEach(pairKey => {
-    const [a, b] = pairKey.split('|');
-    const pair = t.logicalPairs[pairKey];
-    ALL_PAIRS.push({
-      a,
-      b,
-      question: pair.question,
-      warning: pair.warning,
-      severity: pair.severity as any
+  try {
+    Object.keys(t.logicalPairs).forEach(pairKey => {
+      const [a, b] = pairKey.split('|');
+      const pair = t.logicalPairs[pairKey];
+      if (pair) {
+        ALL_PAIRS.push({
+          a,
+          b,
+          question: pair.question || '',
+          warning: pair.warning || '',
+          severity: pair.severity as any
+        });
+      }
     });
-  });
+  } catch (e) {
+    console.error('Error building logical pairs:', e);
+    return [];
+  }
 
   // Même logique que le scoring : afficher toute paire dont les deux outils sont présents
   return ALL_PAIRS.filter(p => tools.has(p.a) && tools.has(p.b));
@@ -331,7 +349,7 @@ function computeScore(
       for (const { a, b } of altPath.paths) {
         if (isLinkRelevant(a, b, presentIds)) {
           const key = [a, b].sort().join(',');
-          const w = t.pairWarnMap[key];
+          const w = t?.pairWarnMap?.[key];
           alertPairs.push({ a, b, warning: w?.[0], severity: w?.[1] as Severity | undefined });
         }
       }
@@ -349,7 +367,7 @@ function computeScore(
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
     } else {
-      { const w = t.pairWarnMap[[link.a,link.b].sort().join(',')]; alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: w?.[1] as Severity | undefined }); }
+      { const w = t?.pairWarnMap?.[[link.a,link.b].sort().join(',')]; alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: w?.[1] as Severity | undefined }); }
     }
   }
 
@@ -363,7 +381,7 @@ function computeScore(
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
     } else {
-      const w = t.pairWarnMap[[link.a, link.b].sort().join(',')];
+      const w = t?.pairWarnMap?.[[link.a, link.b].sort().join(',')];
       alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: (w?.[1] as Severity) ?? 'warning' });
     }
   }
@@ -378,7 +396,7 @@ function computeScore(
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
     } else {
-      const w = t.pairWarnMap[[link.a, link.b].sort().join(',')];
+      const w = t?.pairWarnMap?.[[link.a, link.b].sort().join(',')];
       alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: (w?.[1] as Severity) ?? 'info' });
     }
   }
@@ -622,9 +640,9 @@ export function HotelEcosystem() {
     }
     // Utiliser l'ID canonique si le nom correspond à un outil connu
     // (permet au scoring de reconnaître PMS, POS, etc.)
-    const knownMatch = getWizardTools(t).find(
-      tool => tool.name.toLowerCase() === newCard.name.trim().toLowerCase()
-    );
+    const knownMatch = t ? getWizardTools(t).find(
+      tool => tool?.name?.toLowerCase() === newCard.name.trim().toLowerCase()
+    ) : null;
     // Éviter les doublons si l'outil est déjà sur le canvas
     const alreadyPresent = knownMatch && allSystems.some(s => s.id === knownMatch.id);
     const newId = (knownMatch && !alreadyPresent) ? knownMatch.id : `new-${Date.now()}`;
@@ -735,8 +753,9 @@ export function HotelEcosystem() {
 
     // 2. Ajouter les cartes sélectionnées
     const toolsList = Array.from(selectedTools);
+    if (!t) return; // Safety check
     toolsList.forEach((toolId, index) => {
-      const tool = getWizardTools(t).find(wt => wt.id === toolId);
+      const tool = getWizardTools(t).find(wt => wt?.id === toolId);
       if (!tool) return;
       
       // Positionner en grille 3 colonnes
@@ -1690,7 +1709,7 @@ export function HotelEcosystem() {
                         {missingVitalTools.map(toolId => {
                           return (
                             <div key={toolId} className="mb-1 p-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)' }}>
-                              <p className="text-[10px] text-red-300 font-bold">{t.wizardTools[toolId] || toolId}</p>
+                              <p className="text-[10px] text-red-300 font-bold">{t?.wizardTools?.[toolId] || toolId}</p>
                               <p className="text-[9px] text-red-400/60 leading-snug mt-0.5">{t.health.missingToolDesc}</p>
                             </div>
                           );
@@ -1787,7 +1806,7 @@ export function HotelEcosystem() {
                       <div key={toolId} className="flex items-center gap-2 mb-2">
                         <span className="w-2 h-2 rounded-full bg-red-500" />
                         <span className="text-sm text-red-700">
-                          {t.wizardTools[toolId] || toolId}
+                          {t?.wizardTools?.[toolId] || toolId}
                         </span>
                       </div>
                     ))}
