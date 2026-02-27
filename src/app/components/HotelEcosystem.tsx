@@ -964,7 +964,7 @@ export function HotelEcosystem() {
                               <div>
                                 <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{t.wizard.connectivityLabel}</span>
                                 <p className="text-sm font-bold text-slate-800 leading-tight">
-                                  {focalName} {focalName} {t.wizard.connectedWith}
+                                  {focalName} {t.wizard.connectedWith}
                                 </p>
                               </div>
                             </div>
@@ -2009,7 +2009,7 @@ export function HotelEcosystem() {
                           autoFocus
                         />
                       ) : (
-                        <>{t.wizardTools?.[system.id] ?? system.name}</>
+                        system.name
                       )}
                     </h3>
 
