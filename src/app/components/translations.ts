@@ -248,8 +248,11 @@ export interface Translations {
 
   // ── Messages pour outils manquants par catégorie ──
   missingToolMessages: {
-    managementDistribution: string;
-    guestSalesWellness: string;
+    indispensablePP: string;      // PMS, CM, OTA
+    indispensablePlus: string;     // Site, BE, Wifi
+    indispensable: string;         // CRM, Compta, SPA, POS, BE Resto
+    conseillePlus: string;         // HK, PSP, E-Reput, RMS, Serrure, WebApp
+    bonus: string;                 // GDS, Chatbot, GiftShop, Event, TV
   };
 }
 
@@ -312,27 +315,27 @@ const fr: Translations = {
   diagnostic: {
     critical: {
       label: '🚨 Alerte Survie',
-      desc: 'Socle vital incomplet. Distribution paralysée.',
+      desc: 'Système en Silos. PMS ou Channel Manager absent.',
     },
     weak: {
-      label: '⚠️ Connectivité Partielle',
-      desc: 'Liaisons indispensables manquantes. Risque de pertes opérationnelles.',
+      label: '⚠️ Performance bridée',
+      desc: 'Liaisons Indispensables ++ manquantes (PMS+CM ou PMS+BE non reliés).',
     },
     fragile: {
-      label: '⚠️ Connectivité Partielle',
-      desc: 'Liaisons indispensables manquantes. Risque de pertes opérationnelles.',
+      label: '⚠️ Performance bridée',
+      desc: 'Liaisons Indispensables ++ manquantes (PMS+CM ou PMS+BE non reliés).',
     },
     solid: {
-      label: '✅ Optimisation Requise',
-      desc: 'Écosystème robuste mais silos de données (CRM/Compta).',
+      label: '✅ En route vers l\"Excellence',
+      desc: 'CRM non relié OU Compta non reliée.',
     },
     good: {
-      label: '💪 Très bon écosystème',
-      desc: 'Votre infrastructure est bien connectée. Quelques optimisations stratégiques peuvent encore améliorer votre RevPAR.',
+      label: '💪 En route vers l\"Excellence',
+      desc: 'CRM non relié OU Compta non reliée.',
     },
     excellent: {
-      label: '🚀 Écosystème Haute-Couture',
-      desc: 'Infrastructure de haut niveau, entièrement automatisée. Vous opérez comme un hôtel de chaîne avec l\"agilité d\"un indépendant.',
+      label: '🚀 Écosystème de Champion',
+      desc: 'Flux 100% fluides. Réservé aux champions.',
     },
   },
 
@@ -726,7 +729,7 @@ const fr: Translations = {
       cmGdsDistribution: "Distribution : Vos canaux ne sont pas alimentés. Gestion manuelle des stocks obligatoire.",
     },
     indispensableLinks: {
-      pmsPosRestaurant: "Flux Restauration : Saisie manuelle des factures et risques d\"oublis au check-out.",
+      pmsPosRestaurant: "Flux F&B : Les consommations restaurant ne remontent pas sur la facture du client en chambre.",
       pmsSpaSpa: "Flux SPA : Les consommations SPA ne remontent pas sur la facture du client en chambre.",
       siteMoteurRestoDirect: "Vente Directe : Votre site ne commercialise pas l\"ensemble de vos services (Resto, SPA, Cadeaux).",
       siteExpClientDirect: "Vente Directe : Votre site ne commercialise pas l\"ensemble de vos services (Resto, SPA, Cadeaux).",
@@ -746,8 +749,11 @@ const fr: Translations = {
   },
 
   missingToolMessages: {
-    managementDistribution: "Composant vital manquant. Votre distribution est paralysée sans cet outil indispensable.",
-    guestSalesWellness: "Angle mort stratégique. L\"absence de cet outil empêche la fidélisation et limite vos revenus annexes.",
+    indispensablePP: "Composant vital manquant. Votre distribution est paralysée ou nécessite une gestion manuelle à haut risque.",
+    indispensablePlus: "Levier de vente directe absent. Vous dépendez trop des intermédiaires, réduisant votre marge nette.",
+    indispensable: "Angle mort stratégique. L\"absence de cet outil empêche la fidélisation ou alourdit votre gestion.",
+    conseillePlus: "Optimisation suggérée pour fluidifier vos opérations et augmenter votre revenu.",
+    bonus: "Outil bonus pour affiner l\"expérience client ou votre confort opérationnel.",
   },
 };
 
@@ -809,27 +815,27 @@ const en: Translations = {
   diagnostic: {
     critical: {
       label: '🚨 Survival Alert',
-      desc: 'Vital foundation incomplete. Distribution paralyzed.',
+      desc: 'System in Silos. PMS or Channel Manager missing.',
     },
     weak: {
-      label: '⚠️ Partial Connectivity',
-      desc: 'Essential connections missing. Risk of operational losses.',
+      label: '⚠️ Performance Constrained',
+      desc: 'Essential++ connections missing (PMS+CM or PMS+BE not linked).',
     },
     fragile: {
-      label: '⚠️ Partial Connectivity',
-      desc: 'Essential connections missing. Risk of operational losses.',
+      label: '⚠️ Performance Constrained',
+      desc: 'Essential++ connections missing (PMS+CM or PMS+BE not linked).',
     },
     solid: {
-      label: '✅ Optimization Required',
-      desc: 'Robust ecosystem but data silos (CRM/Accounting).',
+      label: '✅ On Path to Excellence',
+      desc: 'CRM not connected OR Accounting not connected.',
     },
     good: {
-      label: '💪 Strong ecosystem',
-      desc: 'Your infrastructure is well connected. A few strategic optimizations can further improve your RevPAR.',
+      label: '💪 On Path to Excellence',
+      desc: 'CRM not connected OR Accounting not connected.',
     },
     excellent: {
-      label: '🚀 Haute-Couture Ecosystem',
-      desc: 'Top-tier, fully automated infrastructure. You operate like a chain hotel with the agility of an independent.',
+      label: '🚀 Champion Ecosystem',
+      desc: '100% fluid flows. Reserved for champions.',
     },
   },
 
@@ -1223,7 +1229,7 @@ const en: Translations = {
       cmGdsDistribution: "Distribution: Your channels are not fed. Manual inventory management required.",
     },
     indispensableLinks: {
-      pmsPosRestaurant: "Restaurant Flow: Manual invoice entry and risk of forgotten charges at check-out.",
+      pmsPosRestaurant: "F&B Flow: Restaurant charges do not appear on the guest's room bill.",
       pmsSpaSpa: "SPA Flow: SPA charges do not appear on the guest's room bill.",
       siteMoteurRestoDirect: "Direct Sales: Your website does not sell all your services (Restaurant, SPA, Gift Cards).",
       siteExpClientDirect: "Direct Sales: Your website does not sell all your services (Restaurant, SPA, Gift Cards).",
@@ -1243,8 +1249,11 @@ const en: Translations = {
   },
 
   missingToolMessages: {
-    managementDistribution: "Vital component missing. Your distribution is paralyzed without this essential tool.",
-    guestSalesWellness: "Strategic blind spot. The absence of this tool prevents loyalty and limits ancillary revenue.",
+    indispensablePP: "Vital component missing. Your distribution is paralyzed or requires high-risk manual management.",
+    indispensablePlus: "Direct sales lever missing. You depend too much on intermediaries, reducing your net margin.",
+    indispensable: "Strategic blind spot. The absence of this tool prevents loyalty or burdens your operations.",
+    conseillePlus: "Suggested optimization to streamline your operations and increase revenue.",
+    bonus: "Bonus tool to refine guest experience or operational comfort.",
   },
 };
 
