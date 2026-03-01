@@ -315,27 +315,27 @@ const fr: Translations = {
   diagnostic: {
     critical: {
       label: '🚨 Alerte Survie',
-      desc: 'Système en Silos. PMS ou Channel Manager absent.',
+      desc: 'Le socle vital est incomplet. Votre gestion repose sur des saisies manuelles à haut risque d'erreurs et de pertes de revenus.',
     },
     weak: {
       label: '⚠️ Performance bridée',
-      desc: 'Liaisons Indispensables ++ manquantes (PMS+CM ou PMS+BE non reliés).',
+      desc: 'L'ossature est présente mais les liaisons critiques manquent pour automatiser votre quotidien.',
     },
     fragile: {
       label: '⚠️ Performance bridée',
-      desc: 'Liaisons Indispensables ++ manquantes (PMS+CM ou PMS+BE non reliés).',
+      desc: 'L'ossature est présente mais les liaisons critiques manquent pour automatiser votre quotidien.',
     },
     solid: {
       label: '✅ En route vers l\"Excellence',
-      desc: 'CRM non relié OU Compta non reliée.',
+      desc: 'Écosystème robuste. Quelques optimisations de flux sont nécessaires pour supprimer les derniers silos de données.',
     },
     good: {
       label: '💪 En route vers l\"Excellence',
-      desc: 'CRM non relié OU Compta non reliée.',
+      desc: 'Écosystème robuste. Quelques optimisations de flux sont nécessaires pour supprimer les derniers silos de données.',
     },
     excellent: {
       label: '🚀 Écosystème de Champion',
-      desc: 'Flux 100% fluides. Réservé aux champions.',
+      desc: 'Félicitations ! Vos flux sont totalement automatisés. Votre technologie est un levier de croissance.',
     },
   },
 
