@@ -298,15 +298,15 @@ const INDISPENSABLE_LINKS: ScoreLink[] = [
 // ── Liaisons Conseillé + (2-3 pts / 0 malus) ──
 const ADVISED_LINKS: ScoreLink[] = [
   { a: 'pms', b: 'crm',          points: 2, malus: 0, severity: 'warning',
-    msg: "Data Client : Vos profils sont isolés. Impossible de personnaliser l'accueil ou de fidéliser." },
+    msg: "Data Client : Vos profils sont isolés. Impossible de personnaliser l\'accueil ou de fidéliser." },
   { a: 'pms', b: 'housekeeping', points: 3, malus: 0, severity: 'warning',
     msg: 'Opérations : Retards de communication entre la réception et les étages (statut des chambres).' },
   { a: 'pms', b: 'serrure',      points: 2, malus: 0, severity: 'info',
-    msg: "Autonomie : La création des clés/codes n'est pas synchronisée avec l'arrivée du client." },
+    msg: "Autonomie : La création des clés/codes n\'est pas synchronisée avec l'arrivée du client." },
   { a: 'pms', b: 'exp-client',   points: 2, malus: 0, severity: 'info',
-    msg: "Expérience : Le client n'a pas accès à ses informations de séjour en temps réel." },
+    msg: "Expérience : Le client n\'a pas accès à ses informations de séjour en temps réel." },
   { a: 'pms', b: 'tv',           points: 2, malus: 0, severity: 'info',
-    msg: 'Confort : Le message de bienvenue ou le check-out sur TV n'est pas activé.' },
+    msg: 'Confort : Le message de bienvenue ou le check-out sur TV n\'est pas activé.' },
 ];
 
 // ── Liaisons Comptabilité (2 pts / 0 malus) ──
