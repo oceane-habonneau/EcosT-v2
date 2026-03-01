@@ -506,6 +506,11 @@ function computeScore(
   if (hasIndispPPBreak)   cappedPct = Math.min(cappedPct, 65);
   if (missingCrmOrCompta) cappedPct = Math.min(cappedPct, 85);
 
+  // Safety check: ensure pct is always a valid number
+  if (isNaN(cappedPct) || cappedPct === null || cappedPct === undefined) {
+    cappedPct = 0;
+  }
+
   return { score: rawScore, maxScore, pct: cappedPct, alertPairs, missingVitalTools, penalty };
 }
 function getDiagnostic(pct: number, hasMissingVitalTools: boolean, d: typeof translations['fr']['diagnostic']): {
@@ -514,33 +519,39 @@ function getDiagnostic(pct: number, hasMissingVitalTools: boolean, d: typeof tra
   color: string;
   barColor: string;
 } {
-  if (hasMissingVitalTools) return {
-    label: d.critical.label,
-    desc: d.critical.desc,
+  // Safety check
+  if (!d || typeof pct !== 'number' || isNaN(pct)) {
+    console.warn('getDiagnostic: invalid inputs', { pct, hasMissingVitalTools, d });
+    return {
+      label: '⚠️ Erreur',
+      desc: 'Impossible de calculer le diagnostic.',
+      color: 'text-gray-500',
+      barColor: '#6b7280',
+    };
+  }
+
+  // PDF V1.5 Thresholds
+  if (hasMissingVitalTools || pct <= 40) return {
+    label: d.critical?.label || '🚨 Critique',
+    desc: d.critical?.desc || '',
     color: 'text-red-700',
     barColor: '#dc2626',
   };
-  if (pct <= 35) return {
-    label: d.fragile.label,
-    desc: d.fragile.desc,
-    color: 'text-red-600',
-    barColor: '#ef4444',
-  };
-  if (pct <= 70) return {
-    label: d.weak.label,
-    desc: d.weak.desc,
+  if (pct <= 65) return {
+    label: d.weak?.label || '⚠️ Faible',
+    desc: d.weak?.desc || '',
     color: 'text-orange-500',
     barColor: '#f97316',
   };
-  if (pct <= 95) return {
-    label: d.solid.label,
-    desc: d.solid.desc,
+  if (pct <= 85) return {
+    label: d.solid?.label || '✅ Solide',
+    desc: d.solid?.desc || '',
     color: 'text-emerald-600',
     barColor: '#10b981',
   };
   return {
-    label: d.excellent.label,
-    desc: d.excellent.desc,
+    label: d.excellent?.label || '🚀 Excellent',
+    desc: d.excellent?.desc || '',
     color: 'text-emerald-700',
     barColor: '#059669',
   };
