@@ -312,32 +312,32 @@ const fr: Translations = {
     sevInfo: 'info',
   },
 
-  diagnostic: {
-    critical: {
-      label: '🚨 Alerte Survie',
-      desc: 'Le socle vital est incomplet. Votre gestion repose sur des saisies manuelles à haut risque d'erreurs et de pertes de revenus.',
+diagnostic: {
+      critical: {
+        label: "Alerte Survie : Système en Silos",
+        desc: "Le socle vital est incomplet. Votre gestion repose sur des saisies manuelles à haut risque d'erreurs et de pertes de revenus.",
+      },
+      weak: {
+        label: "Performance Bridée : Flux Interrompus",
+        desc: "L'ossature est présente mais les liaisons critiques manquent pour automatiser votre quotidien.",
+      },
+      fragile: {
+        label: "Performance Bridée : Flux Interrompus",
+        desc: "L'ossature est présente mais les liaisons critiques manquent pour automatiser votre quotidien.",
+      },
+      solid: {
+        label: "En route vers l'Excellence",
+        desc: "Écosystème robuste. Quelques optimisations de flux sont nécessaires pour supprimer les derniers silos de données.",
+      },
+      good: {
+        label: "En route vers l'Excellence",
+        desc: "Écosystème robuste. Quelques optimisations de flux sont nécessaires pour supprimer les derniers silos de données.",
+      },
+      excellent: {
+        label: "Écosystème de Champion : 100% Fluide",
+        desc: "Félicitations ! Vos flux sont totalement automatisés. Votre technologie est un véritable levier de croissance.",
+      },
     },
-    weak: {
-      label: '⚠️ Performance bridée',
-      desc: 'L'ossature est présente mais les liaisons critiques manquent pour automatiser votre quotidien.',
-    },
-    fragile: {
-      label: '⚠️ Performance bridée',
-      desc: 'L'ossature est présente mais les liaisons critiques manquent pour automatiser votre quotidien.',
-    },
-    solid: {
-      label: '✅ En route vers l\"Excellence',
-      desc: 'Écosystème robuste. Quelques optimisations de flux sont nécessaires pour supprimer les derniers silos de données.',
-    },
-    good: {
-      label: '💪 En route vers l\"Excellence',
-      desc: 'Écosystème robuste. Quelques optimisations de flux sont nécessaires pour supprimer les derniers silos de données.',
-    },
-    excellent: {
-      label: '🚀 Écosystème de Champion',
-      desc: 'Félicitations ! Vos flux sont totalement automatisés. Votre technologie est un levier de croissance.',
-    },
-  },
 
   canvas: {
     modeMove: 'Cliquez et glissez pour déplacer les cartes',
@@ -812,32 +812,34 @@ const en: Translations = {
     sevInfo: 'info',
   },
 
-  diagnostic: {
-    critical: {
-      label: '🚨 Survival Alert',
-      desc: 'System in Silos. PMS or Channel Manager missing.',
+diagnostic: {
+      critical: {
+        label: "Survival Alert: Siloed System",
+        desc: "The vital core is incomplete. Your management relies on manual tasks with a high risk of errors and lost revenue.",
+      },
+      // Orange Level (weak/fragile)
+      weak: {
+        label: "Constrained Performance: Broken Flows",
+        desc: "The framework is there, but critical links are missing to fully automate your daily operations.",
+      },
+      fragile: {
+        label: "Constrained Performance: Broken Flows",
+        desc: "The framework is there, but critical links are missing to fully automate your daily operations.",
+      },
+      // Blue Level (solid/good)
+      solid: {
+        label: "Towards Excellence",
+        desc: "Robust ecosystem. A few flow optimizations are needed to eliminate the last data silos.",
+      },
+      good: {
+        label: "Towards Excellence",
+        desc: "Robust ecosystem. A few flow optimizations are needed to eliminate the last data silos.",
+      },
+      excellent: {
+        label: "Champion Ecosystem: 100% Fluid",
+        desc: "Congratulations! Your flows are fully automated. Your technology is a true growth engine.",
+      },
     },
-    weak: {
-      label: '⚠️ Performance Constrained',
-      desc: 'Essential++ connections missing (PMS+CM or PMS+BE not linked).',
-    },
-    fragile: {
-      label: '⚠️ Performance Constrained',
-      desc: 'Essential++ connections missing (PMS+CM or PMS+BE not linked).',
-    },
-    solid: {
-      label: '✅ On Path to Excellence',
-      desc: 'CRM not connected OR Accounting not connected.',
-    },
-    good: {
-      label: '💪 On Path to Excellence',
-      desc: 'CRM not connected OR Accounting not connected.',
-    },
-    excellent: {
-      label: '🚀 Champion Ecosystem',
-      desc: '100% fluid flows. Reserved for champions.',
-    },
-  },
 
   canvas: {
     modeMove: 'Click and drag to move cards',
