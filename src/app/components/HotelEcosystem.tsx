@@ -244,80 +244,90 @@ const PRESENCE_POINTS: Record<string, number> = {
 const PRESENCE_DEFAULT = 3; // fallback pour tout outil non listé
 
 // ── Liaisons OR : BE, PSP, RMS ──
-const VITAL_OR_PATHS: AlternativePath[] = [
-  {
-    label: 'BE ↔ PMS ou CM', points: 5, malus: -5, severity: 'critique',
-    msg: 'Flux Réservation : Vos réservations directes ne remontent pas automatiquement vers votre gestion.',
-    paths: [
-      { a: 'pms',             b: 'booking-engine' },
-      { a: 'channel-manager', b: 'booking-engine' },
-    ],
-  },
-  {
-    label: 'PSP ↔ PMS ou BE', points: 4, malus: -4, severity: 'warning',
-    msg: "Paiement : Risque d'impayés ou de saisie manuelle. Pas de garantie bancaire automatique.",
-    paths: [
-      { a: 'pms',            b: 'psp' },
-      { a: 'booking-engine', b: 'psp' },
-    ],
-  },
-  {
-    label: 'RMS ↔ PMS ou CM', points: 2, malus: -2, severity: 'warning',
-    msg: 'Yield : Vos décisions tarifaires ne sont pas diffusées en temps réel sur vos canaux.',
-    paths: [
-      { a: 'pms',             b: 'rms' },
-      { a: 'channel-manager', b: 'rms' },
-    ],
-  },
-];
+function getVitalOrPaths(t: any): AlternativePath[] {
+  return [
+    {
+      label: 'BE ↔ PMS ou CM', points: 5, malus: -5, severity: 'critique',
+      msg: t.diagnosticRules.vitalOrPaths.beReservation,
+      paths: [
+        { a: 'pms',             b: 'booking-engine' },
+        { a: 'channel-manager', b: 'booking-engine' },
+      ],
+    },
+    {
+      label: 'PSP ↔ PMS ou BE', points: 4, malus: -4, severity: 'warning',
+      msg: t.diagnosticRules.vitalOrPaths.pspPayment,
+      paths: [
+        { a: 'pms',            b: 'psp' },
+        { a: 'booking-engine', b: 'psp' },
+      ],
+    },
+    {
+      label: 'RMS ↔ PMS ou CM', points: 2, malus: -2, severity: 'warning',
+      msg: t.diagnosticRules.vitalOrPaths.rmsYield,
+      paths: [
+        { a: 'pms',             b: 'rms' },
+        { a: 'channel-manager', b: 'rms' },
+      ],
+    },
+  ];
+}
 
 // ── Liaisons Indispensable ++ simples (5 pts / -5 malus) ──
-const VITAL_LINKS: ScoreLink[] = [
-  { a: 'pms',             b: 'channel-manager', points: 5, malus: -5, severity: 'critique',
-    msg: 'Liaison PMS/CM : Risque critique de surréservation. Vos stocks ne sont pas synchronisés.' },
-  { a: 'site-internet',   b: 'booking-engine',  points: 5, malus: -5, severity: 'critique',
-    msg: 'Tunnel de Vente : Rupture du parcours client. Votre site ne permet pas de réserver.' },
-  { a: 'channel-manager', b: 'ota',             points: 5, malus: -5, severity: 'critique',
-    msg: 'Distribution : Vos canaux ne sont pas alimentés. Gestion manuelle des stocks obligatoire.' },
-  { a: 'channel-manager', b: 'gds',             points: 5, malus: -5, severity: 'critique',
-    msg: 'Distribution : Vos canaux ne sont pas alimentés. Gestion manuelle des stocks obligatoire.' },
-];
+function getVitalLinks(t: any): ScoreLink[] {
+  return [
+    { a: 'pms',             b: 'channel-manager', points: 5, malus: -5, severity: 'critique',
+      msg: t.diagnosticRules.vitalLinks.pmsCmStock },
+    { a: 'site-internet',   b: 'booking-engine',  points: 5, malus: -5, severity: 'critique',
+      msg: t.diagnosticRules.vitalLinks.siteBeBooking },
+    { a: 'channel-manager', b: 'ota',             points: 5, malus: -5, severity: 'critique',
+      msg: t.diagnosticRules.vitalLinks.cmOtaDistribution },
+    { a: 'channel-manager', b: 'gds',             points: 5, malus: -5, severity: 'critique',
+      msg: t.diagnosticRules.vitalLinks.cmGdsDistribution },
+  ];
+}
 
 // ── Liaisons Indispensable (3 pts / 0 malus) ──
-const INDISPENSABLE_LINKS: ScoreLink[] = [
-  { a: 'pms',          b: 'pos',          points: 3, malus: 0, severity: 'warning',
-    msg: 'Flux F&B : Les consommations restaurant ne remontent pas sur la facture du client en chambre.' },
-  { a: 'pms',          b: 'spa',          points: 3, malus: 0, severity: 'warning',
-    msg: 'Flux SPA : Les consommations SPA ne remontent pas sur la facture du client en chambre.' },
-  { a: 'site-internet',b: 'moteur-resto', points: 3, malus: 0, severity: 'warning',
-    msg: "Vente Directe : Votre site ne commercialise pas l'ensemble de vos services (Resto, SPA, Cadeaux)." },
-  { a: 'site-internet',b: 'exp-client',   points: 3, malus: 0, severity: 'warning',
-    msg: "Vente Directe : Votre site ne commercialise pas l'ensemble de vos services (Resto, SPA, Cadeaux)." },
-];
+function getIndispensableLinks(t: any): ScoreLink[] {
+  return [
+    { a: 'pms',          b: 'pos',          points: 3, malus: 0, severity: 'warning',
+      msg: t.diagnosticRules.indispensableLinks.pmsPosRestaurant },
+    { a: 'pms',          b: 'spa',          points: 3, malus: 0, severity: 'warning',
+      msg: t.diagnosticRules.indispensableLinks.pmsSpaSpa },
+    { a: 'site-internet',b: 'moteur-resto', points: 3, malus: 0, severity: 'warning',
+      msg: t.diagnosticRules.indispensableLinks.siteMoteurRestoDirect },
+    { a: 'site-internet',b: 'exp-client',   points: 3, malus: 0, severity: 'warning',
+      msg: t.diagnosticRules.indispensableLinks.siteExpClientDirect },
+  ];
+}
 
 // ── Liaisons Conseillé + (2-3 pts / 0 malus) ──
-const ADVISED_LINKS: ScoreLink[] = [
-  { a: 'pms', b: 'crm',          points: 2, malus: 0, severity: 'warning',
-    msg: "Data Client : Vos profils sont isolés. Impossible de personnaliser l\'accueil ou de fidéliser." },
-  { a: 'pms', b: 'housekeeping', points: 3, malus: 0, severity: 'warning',
-    msg: 'Opérations : Retards de communication entre la réception et les étages (statut des chambres).' },
-  { a: 'pms', b: 'serrure',      points: 2, malus: 0, severity: 'info',
-    msg: "Autonomie : La création des clés/codes n\'est pas synchronisée avec l'arrivée du client." },
-  { a: 'pms', b: 'exp-client',   points: 2, malus: 0, severity: 'info',
-    msg: "Expérience : Le client n\'a pas accès à ses informations de séjour en temps réel." },
-  { a: 'pms', b: 'tv',           points: 2, malus: 0, severity: 'info',
-    msg: 'Confort : Le message de bienvenue ou le check-out sur TV n\'est pas activé.' },
-];
+function getAdvisedLinks(t: any): ScoreLink[] {
+  return [
+    { a: 'pms', b: 'crm',          points: 2, malus: 0, severity: 'warning',
+      msg: t.diagnosticRules.advisedLinks.pmsCrmData },
+    { a: 'pms', b: 'housekeeping', points: 3, malus: 0, severity: 'warning',
+      msg: t.diagnosticRules.advisedLinks.pmsHousekeepingOps },
+    { a: 'pms', b: 'serrure',      points: 2, malus: 0, severity: 'info',
+      msg: t.diagnosticRules.advisedLinks.pmsSerrureAutonomy },
+    { a: 'pms', b: 'exp-client',   points: 2, malus: 0, severity: 'info',
+      msg: t.diagnosticRules.advisedLinks.pmsExpClientExperience },
+    { a: 'pms', b: 'tv',           points: 2, malus: 0, severity: 'info',
+      msg: t.diagnosticRules.advisedLinks.pmsTvComfort },
+  ];
+}
 
 // ── Liaisons Comptabilité (2 pts / 0 malus) ──
-const COMPTA_LINKS: ScoreLink[] = [
-  { a: 'compta', b: 'pms', points: 2, malus: 0, severity: 'warning',
-    msg: "Comptabilité : Saisie manuelle du CA. Risque d'erreurs et perte de temps en fin de mois." },
-  { a: 'compta', b: 'pos', points: 2, malus: 0, severity: 'warning',
-    msg: "Comptabilité : Saisie manuelle du CA. Risque d'erreurs et perte de temps en fin de mois." },
-  { a: 'compta', b: 'spa', points: 2, malus: 0, severity: 'warning',
-    msg: "Comptabilité : Saisie manuelle du CA. Risque d'erreurs et perte de temps en fin de mois." },
-];
+function getComptaLinks(t: any): ScoreLink[] {
+  return [
+    { a: 'compta', b: 'pms', points: 2, malus: 0, severity: 'warning',
+      msg: t.diagnosticRules.comptaLinks.comptaPmsAccounting },
+    { a: 'compta', b: 'pos', points: 2, malus: 0, severity: 'warning',
+      msg: t.diagnosticRules.comptaLinks.comptaPosAccounting },
+    { a: 'compta', b: 'spa', points: 2, malus: 0, severity: 'warning',
+      msg: t.diagnosticRules.comptaLinks.comptaSpaAccounting },
+  ];
+}
 
 // ── Helpers ──
 function isLinkActive(a: string, b: string, connections: Record<string, string[]>): boolean {
@@ -385,6 +395,7 @@ function computeScore(
 
   // 2️⃣ Liaisons OR (BE, PSP, RMS)
   // Malus appliqué uniquement si l'outil focal est PRÉSENT mais non relié à aucune cible autorisée
+  const VITAL_OR_PATHS = getVitalOrPaths(t);
   for (const altPath of VITAL_OR_PATHS) {
     if (!isAlternativePathRelevant(altPath, presentIds)) continue;
     maxScore += altPath.points;
@@ -408,6 +419,7 @@ function computeScore(
 
   // 3️⃣ Liaisons Indispensable ++
   const seen = new Set<string>();
+  const VITAL_LINKS = getVitalLinks(t);
   for (const link of VITAL_LINKS) {
     const key = [link.a, link.b].sort().join('|');
     if (seen.has(key) || !isLinkRelevant(link.a, link.b, presentIds)) continue;
@@ -421,6 +433,7 @@ function computeScore(
   }
 
   // 4️⃣ Liaisons Indispensable (3 pts)
+  const INDISPENSABLE_LINKS = getIndispensableLinks(t);
   for (const link of INDISPENSABLE_LINKS) {
     const key = [link.a, link.b].sort().join('|');
     if (seen.has(key) || !isLinkRelevant(link.a, link.b, presentIds)) continue;
@@ -434,6 +447,7 @@ function computeScore(
   }
 
   // 5️⃣ Liaisons Conseillé +
+  const ADVISED_LINKS = getAdvisedLinks(t);
   for (const link of ADVISED_LINKS) {
     const key = [link.a, link.b].sort().join('|');
     if (seen.has(key) || !isLinkRelevant(link.a, link.b, presentIds)) continue;
@@ -447,6 +461,7 @@ function computeScore(
   }
 
   // 6️⃣ Liaisons Comptabilité
+  const COMPTA_LINKS = getComptaLinks(t);
   for (const link of COMPTA_LINKS) {
     const key = [link.a, link.b].sort().join('|');
     if (seen.has(key) || !isLinkRelevant(link.a, link.b, presentIds)) continue;
