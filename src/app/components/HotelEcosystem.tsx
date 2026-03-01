@@ -218,7 +218,6 @@ type AlternativePath = { paths: Array<{ a: string; b: string }>; points: number;
 const ABSENCE_PENALTIES: Record<string, { malus: number; severity: Severity }> = {
   'pms':             { malus: -5, severity: 'critique' },
   'channel-manager': { malus: -5, severity: 'critique' },
-  'ota':             { malus: -5, severity: 'critique' },
   'site-internet':   { malus: -4, severity: 'critique' },
   'booking-engine':  { malus: -4, severity: 'critique' },
 };
@@ -228,7 +227,6 @@ const PRESENCE_POINTS: Record<string, number> = {
   // Indispensable ++ → +6
   'pms':              6,
   'channel-manager':  6,
-  'ota':              6,
   // Indispensable + → +5
   'site-internet':    5,
   'booking-engine':   5,
@@ -239,6 +237,8 @@ const PRESENCE_POINTS: Record<string, number> = {
   'spa':              4,
   'pos':              4,
   'moteur-resto':     4,
+  // Conseillé + → +3 (inclut OTA)
+  'ota':              3,
   // Tout le reste → +3 (HK, PSP, E-Reput, RMS, Serrure, GDS, etc.)
 };
 const PRESENCE_DEFAULT = 3; // fallback pour tout outil non listé
