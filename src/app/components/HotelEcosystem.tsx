@@ -210,89 +210,124 @@ function getLogicalPairs(tools: Set<string>, t: any): LogicalPair[] {
 }
 
 // ══════════ SCORING MATRIX V3 — Intelligence Métier ══════════
-type ScoreLink = { a: string; b: string; points: number };
-type AlternativePath = { paths: Array<{ a: string; b: string }>; points: number; label: string };
+// ══════════ SCORING V1.5 ══════════
+type ScoreLink = { a: string; b: string; points: number; malus: number; severity: Severity; msg: string };
+type AlternativePath = { paths: Array<{ a: string; b: string }>; points: number; malus: number; severity: Severity; label: string; msg: string };
 
-// Malus d'absence pour outils vitaux
-const ABSENCE_PENALTIES: Record<string, number> = {
-  'booking-engine': -30,
-  'channel-manager': -20,
-  'pms': -30,
-  'site-internet': -20,
-  'ota': -10,
+// ── Malus d'absence (PDF V1.5) ──
+const ABSENCE_PENALTIES: Record<string, { malus: number; severity: Severity }> = {
+  'pms':             { malus: -5, severity: 'critique' },
+  'channel-manager': { malus: -5, severity: 'critique' },
+  'ota':             { malus: -5, severity: 'critique' },
+  'site-internet':   { malus: -4, severity: 'critique' },
+  'booking-engine':  { malus: -4, severity: 'critique' },
 };
 
-// Flux vitaux avec chemins alternatifs (logique OR)
-const VITAL_PATHS: AlternativePath[] = [
+// ── Points de présence par outil (PDF V1.5 §1) ──
+const PRESENCE_POINTS: Record<string, number> = {
+  // Indispensable ++ → +6
+  'pms':              6,
+  'channel-manager':  6,
+  'ota':              6,
+  // Indispensable + → +5
+  'site-internet':    5,
+  'booking-engine':   5,
+  // Wifi n'a pas d'ID card — ignoré
+  // Indispensable → +4
+  'crm':              4,
+  'compta':           4,
+  'spa':              4,
+  'pos':              4,
+  'moteur-resto':     4,
+  // Tout le reste → +3 (HK, PSP, E-Reput, RMS, Serrure, GDS, etc.)
+};
+const PRESENCE_DEFAULT = 3; // fallback pour tout outil non listé
+
+// ── Liaisons OR : BE, PSP, RMS ──
+const VITAL_OR_PATHS: AlternativePath[] = [
   {
-    label: 'Flux Résa Directe',
-    points: 20,
+    label: 'BE ↔ PMS ou CM', points: 5, malus: -5, severity: 'critique',
+    msg: 'Flux Réservation : Vos réservations directes ne remontent pas automatiquement vers votre gestion.',
     paths: [
-      { a: 'pms', b: 'booking-engine' },
+      { a: 'pms',             b: 'booking-engine' },
       { a: 'channel-manager', b: 'booking-engine' },
     ],
   },
   {
-    label: 'Flux Paiement',
-    points: 20,
+    label: 'PSP ↔ PMS ou BE', points: 4, malus: -4, severity: 'warning',
+    msg: "Paiement : Risque d'impayés ou de saisie manuelle. Pas de garantie bancaire automatique.",
     paths: [
+      { a: 'pms',            b: 'psp' },
       { a: 'booking-engine', b: 'psp' },
-      { a: 'pms', b: 'psp' },
     ],
   },
   {
-    label: 'Flux Visibilité',
-    points: 20,
+    label: 'RMS ↔ PMS ou CM', points: 2, malus: -2, severity: 'warning',
+    msg: 'Yield : Vos décisions tarifaires ne sont pas diffusées en temps réel sur vos canaux.',
     paths: [
-      { a: 'site-internet', b: 'booking-engine' },
-      { a: 'site-internet', b: 'pms' },
+      { a: 'pms',             b: 'rms' },
+      { a: 'channel-manager', b: 'rms' },
     ],
   },
 ];
 
-// Liens vitaux simples (pas de chemins alternatifs)
+// ── Liaisons Indispensable ++ simples (5 pts / -5 malus) ──
 const VITAL_LINKS: ScoreLink[] = [
-  { a: 'pms',             b: 'channel-manager',  points: 20 },
-  { a: 'channel-manager', b: 'ota',              points: 20 },
-  { a: 'channel-manager', b: 'gds',              points: 20 },
+  { a: 'pms',             b: 'channel-manager', points: 5, malus: -5, severity: 'critique',
+    msg: 'Liaison PMS/CM : Risque critique de surréservation. Vos stocks ne sont pas synchronisés.' },
+  { a: 'site-internet',   b: 'booking-engine',  points: 5, malus: -5, severity: 'critique',
+    msg: 'Tunnel de Vente : Rupture du parcours client. Votre site ne permet pas de réserver.' },
+  { a: 'channel-manager', b: 'ota',             points: 5, malus: -5, severity: 'critique',
+    msg: 'Distribution : Vos canaux ne sont pas alimentés. Gestion manuelle des stocks obligatoire.' },
+  { a: 'channel-manager', b: 'gds',             points: 5, malus: -5, severity: 'critique',
+    msg: 'Distribution : Vos canaux ne sont pas alimentés. Gestion manuelle des stocks obligatoire.' },
 ];
 
-const OPERATIONAL_LINKS: ScoreLink[] = [
-  { a: 'pms',            b: 'pos',              points: 10 },
-  { a: 'pms',            b: 'compta',           points: 10 },
-  { a: 'pms',            b: 'serrure',          points: 10 },
-  { a: 'pms',            b: 'spa',              points: 10 },
-  { a: 'pms',            b: 'housekeeping',     points: 10 },
-  { a: 'pms',            b: 'event-management', points: 10 },
-  { a: 'moteur-resto',   b: 'site-internet',    points: 10 },
-  { a: 'site-booking',   b: 'site-internet',    points: 10 },
+// ── Liaisons Indispensable (3 pts / 0 malus) ──
+const INDISPENSABLE_LINKS: ScoreLink[] = [
+  { a: 'pms',          b: 'pos',          points: 3, malus: 0, severity: 'warning',
+    msg: 'Flux F&B : Les consommations restaurant ne remontent pas sur la facture du client en chambre.' },
+  { a: 'pms',          b: 'spa',          points: 3, malus: 0, severity: 'warning',
+    msg: 'Flux SPA : Les consommations SPA ne remontent pas sur la facture du client en chambre.' },
+  { a: 'site-internet',b: 'moteur-resto', points: 3, malus: 0, severity: 'warning',
+    msg: "Vente Directe : Votre site ne commercialise pas l'ensemble de vos services (Resto, SPA, Cadeaux)." },
+  { a: 'site-internet',b: 'exp-client',   points: 3, malus: 0, severity: 'warning',
+    msg: "Vente Directe : Votre site ne commercialise pas l'ensemble de vos services (Resto, SPA, Cadeaux)." },
 ];
 
-const STRATEGIC_LINKS: ScoreLink[] = [
-  { a: 'pms', b: 'crm',        points: 5 },
-  { a: 'pms', b: 'rms',        points: 5 },
-  { a: 'pms', b: 'exp-client', points: 5 },
-  { a: 'pms', b: 'tv',         points: 5 },
+// ── Liaisons Conseillé + (2-3 pts / 0 malus) ──
+const ADVISED_LINKS: ScoreLink[] = [
+  { a: 'pms', b: 'crm',          points: 2, malus: 0, severity: 'warning',
+    msg: "Data Client : Vos profils sont isolés. Impossible de personnaliser l'accueil ou de fidéliser." },
+  { a: 'pms', b: 'housekeeping', points: 3, malus: 0, severity: 'warning',
+    msg: 'Opérations : Retards de communication entre la réception et les étages (statut des chambres).' },
+  { a: 'pms', b: 'serrure',      points: 2, malus: 0, severity: 'info',
+    msg: "Autonomie : La création des clés/codes n'est pas synchronisée avec l'arrivée du client." },
+  { a: 'pms', b: 'exp-client',   points: 2, malus: 0, severity: 'info',
+    msg: "Expérience : Le client n'a pas accès à ses informations de séjour en temps réel." },
+  { a: 'pms', b: 'tv',           points: 2, malus: 0, severity: 'info',
+    msg: 'Confort : Le message de bienvenue ou le check-out sur TV n'est pas activé.' },
 ];
 
-// Map des messages d'impact par paire (clé = ids triés join ',')
-// Couvre toutes les paires possibles — indépendamment de l'existence d'un tiers
-// PAIR_WARN_MAP maintenant dans translations.ts
+// ── Liaisons Comptabilité (2 pts / 0 malus) ──
+const COMPTA_LINKS: ScoreLink[] = [
+  { a: 'compta', b: 'pms', points: 2, malus: 0, severity: 'warning',
+    msg: "Comptabilité : Saisie manuelle du CA. Risque d'erreurs et perte de temps en fin de mois." },
+  { a: 'compta', b: 'pos', points: 2, malus: 0, severity: 'warning',
+    msg: "Comptabilité : Saisie manuelle du CA. Risque d'erreurs et perte de temps en fin de mois." },
+  { a: 'compta', b: 'spa', points: 2, malus: 0, severity: 'warning',
+    msg: "Comptabilité : Saisie manuelle du CA. Risque d'erreurs et perte de temps en fin de mois." },
+];
 
-// Vérifie si un lien est actif (bidirectionnel)
-function isLinkActive(
-  a: string, b: string,
-  connections: Record<string, string[]>
-): boolean {
+// ── Helpers ──
+function isLinkActive(a: string, b: string, connections: Record<string, string[]>): boolean {
   return (connections[a]?.includes(b)) || (connections[b]?.includes(a));
 }
 
-// Vérifie si un lien est "pertinent" = les deux cartes sont sur le canvas
 function isLinkRelevant(a: string, b: string, presentIds: Set<string>): boolean {
   return presentIds.has(a) && presentIds.has(b);
 }
 
-// Vérifie si AU MOINS UN chemin d'une alternative est tracé
 function isAlternativePathActive(
   altPath: AlternativePath,
   connections: Record<string, string[]>,
@@ -303,11 +338,7 @@ function isAlternativePathActive(
   );
 }
 
-// Vérifie si AU MOINS UN chemin d'une alternative est PERTINENT (cartes présentes)
-function isAlternativePathRelevant(
-  altPath: AlternativePath,
-  presentIds: Set<string>
-): boolean {
+function isAlternativePathRelevant(altPath: AlternativePath, presentIds: Set<string>): boolean {
   return altPath.paths.some(({ a, b }) => isLinkRelevant(a, b, presentIds));
 }
 
@@ -330,84 +361,138 @@ function computeScore(
   const alertPairs: { a: string; b: string; warning?: string; severity?: Severity }[] = [];
   const missingVitalTools: string[] = [];
 
-  // 1️⃣ Calculer les malus d'absence
-  for (const [toolId, malusPoints] of Object.entries(ABSENCE_PENALTIES)) {
+  // 0️⃣ Points de présence (chaque carte posée rapporte des points)
+  for (const sys of allSystems) {
+    const pts = PRESENCE_POINTS[sys.id] ?? PRESENCE_DEFAULT;
+    score   += pts;
+    maxScore += pts;
+  }
+
+  // 1️⃣ Malus d'absence
+  for (const [toolId, { malus }] of Object.entries(ABSENCE_PENALTIES)) {
     if (!presentIds.has(toolId)) {
-      penalty += malusPoints;
+      penalty += malus;
       missingVitalTools.push(toolId);
     }
   }
 
-  // 2️⃣ Flux vitaux avec chemins alternatifs
-  for (const altPath of VITAL_PATHS) {
+  // Helper pour push une alerte en consultant pairWarnMap d'abord
+  const pushAlert = (a: string, b: string, fallbackMsg: string, fallbackSev: Severity) => {
+    const warnKey = [a, b].sort().join(',');
+    const w = t?.pairWarnMap?.[warnKey];
+    alertPairs.push({ a, b, warning: w?.[0] ?? fallbackMsg, severity: (w?.[1] as Severity) ?? fallbackSev });
+  };
+
+  // 2️⃣ Liaisons OR (BE, PSP, RMS)
+  // Malus appliqué uniquement si l'outil focal est PRÉSENT mais non relié à aucune cible autorisée
+  for (const altPath of VITAL_OR_PATHS) {
     if (!isAlternativePathRelevant(altPath, presentIds)) continue;
     maxScore += altPath.points;
     if (isAlternativePathActive(altPath, connections, presentIds)) {
       score += altPath.points;
     } else {
-      // Badge d'alerte : au moins un chemin est pertinent mais aucun n'est tracé
+      // Identifier l'outil focal (celui qui apparaît dans toutes les paires)
+      const allNodes = altPath.paths.flatMap(p => [p.a, p.b]);
+      const focalId = allNodes.find(id =>
+        altPath.paths.every(p => p.a === id || p.b === id)
+      );
+      // Appliquer malus si l'outil focal est présent
+      if (focalId && presentIds.has(focalId) && altPath.malus < 0) {
+        penalty += altPath.malus;
+      }
       for (const { a, b } of altPath.paths) {
-        if (isLinkRelevant(a, b, presentIds)) {
-          const key = [a, b].sort().join(',');
-          const w = t?.pairWarnMap?.[key];
-          alertPairs.push({ a, b, warning: w?.[0], severity: w?.[1] as Severity | undefined });
-        }
+        if (isLinkRelevant(a, b, presentIds)) pushAlert(a, b, altPath.msg, altPath.severity);
       }
     }
   }
 
-  // 3️⃣ Liens vitaux simples
+  // 3️⃣ Liaisons Indispensable ++
   const seen = new Set<string>();
   for (const link of VITAL_LINKS) {
     const key = [link.a, link.b].sort().join('|');
-    if (seen.has(key)) continue;
-    if (!isLinkRelevant(link.a, link.b, presentIds)) continue;
+    if (seen.has(key) || !isLinkRelevant(link.a, link.b, presentIds)) continue;
     seen.add(key);
     maxScore += link.points;
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
     } else {
-      { const w = t?.pairWarnMap?.[[link.a,link.b].sort().join(',')]; alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: w?.[1] as Severity | undefined }); }
+      pushAlert(link.a, link.b, link.msg, link.severity);
     }
   }
 
-  // 4️⃣ Liens opérationnels
-  for (const link of OPERATIONAL_LINKS) {
+  // 4️⃣ Liaisons Indispensable (3 pts)
+  for (const link of INDISPENSABLE_LINKS) {
     const key = [link.a, link.b].sort().join('|');
-    if (seen.has(key)) continue;
-    if (!isLinkRelevant(link.a, link.b, presentIds)) continue;
+    if (seen.has(key) || !isLinkRelevant(link.a, link.b, presentIds)) continue;
     seen.add(key);
     maxScore += link.points;
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
     } else {
-      const w = t?.pairWarnMap?.[[link.a, link.b].sort().join(',')];
-      alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: (w?.[1] as Severity) ?? 'warning' });
+      pushAlert(link.a, link.b, link.msg, link.severity);
     }
   }
 
-  // 5️⃣ Liens stratégiques
-  for (const link of STRATEGIC_LINKS) {
+  // 5️⃣ Liaisons Conseillé +
+  for (const link of ADVISED_LINKS) {
     const key = [link.a, link.b].sort().join('|');
-    if (seen.has(key)) continue;
-    if (!isLinkRelevant(link.a, link.b, presentIds)) continue;
+    if (seen.has(key) || !isLinkRelevant(link.a, link.b, presentIds)) continue;
     seen.add(key);
     maxScore += link.points;
     if (isLinkActive(link.a, link.b, connections)) {
       score += link.points;
     } else {
-      const w = t?.pairWarnMap?.[[link.a, link.b].sort().join(',')];
-      alertPairs.push({ a: link.a, b: link.b, warning: w?.[0], severity: (w?.[1] as Severity) ?? 'info' });
+      pushAlert(link.a, link.b, link.msg, link.severity);
     }
   }
 
-  // 6️⃣ Score final avec malus (ne peut pas descendre sous 0)
-  const finalScore = Math.max(0, score + penalty);
-  const pct = maxScore === 0 ? 0 : Math.round((finalScore / maxScore) * 100);
+  // 6️⃣ Liaisons Comptabilité
+  for (const link of COMPTA_LINKS) {
+    const key = [link.a, link.b].sort().join('|');
+    if (seen.has(key) || !isLinkRelevant(link.a, link.b, presentIds)) continue;
+    seen.add(key);
+    maxScore += link.points;
+    if (isLinkActive(link.a, link.b, connections)) {
+      score += link.points;
+    } else {
+      pushAlert(link.a, link.b, link.msg, link.severity);
+    }
+  }
 
-  return { score: finalScore, maxScore, pct, alertPairs, missingVitalTools, penalty };
+  // 7️⃣ Score brut
+  const rawScore = Math.max(0, score + penalty);
+  const rawPct   = maxScore === 0 ? 0 : Math.round((rawScore / maxScore) * 100);
+
+  // 8️⃣ Verrous de score (plafonds PDF V1.5)
+  // Cap 40 : PMS ou CM absent
+  const missingPmsOrCm = !presentIds.has('pms') || !presentIds.has('channel-manager');
+  // Cap 65 : au moins une liaison Indisp++ manquante entre deux outils présents
+  const indispPPIds = new Set(
+    VITAL_LINKS.filter(l => l.severity === 'critique').map(l => [l.a, l.b].sort().join('|'))
+  );
+  const vitOrCritiqueKeys = VITAL_OR_PATHS
+    .filter(vo => vo.severity === 'critique')
+    .flatMap(vo => vo.paths.map(p => [p.a, p.b].sort().join('|')));
+  [...vitOrCritiqueKeys].forEach(k => indispPPIds.add(k));
+
+  const hasIndispPPBreak = alertPairs.some(p => {
+    const k = [p.a, p.b].sort().join('|');
+    return p.severity === 'critique' && indispPPIds.has(k);
+  });
+  // Cap 85 : CRM ou Compta présents mais non reliés au PMS
+  const missingCrmOrCompta =
+    (presentIds.has('crm')    && !isLinkActive('pms', 'crm',    connections)) ||
+    (presentIds.has('compta') && !isLinkActive('compta', 'pms', connections) &&
+                                   !isLinkActive('compta', 'pos', connections) &&
+                                   !isLinkActive('compta', 'spa', connections));
+
+  let cappedPct = rawPct;
+  if (missingPmsOrCm)     cappedPct = Math.min(cappedPct, 40);
+  if (hasIndispPPBreak)   cappedPct = Math.min(cappedPct, 65);
+  if (missingCrmOrCompta) cappedPct = Math.min(cappedPct, 85);
+
+  return { score: rawScore, maxScore, pct: cappedPct, alertPairs, missingVitalTools, penalty };
 }
-
 function getDiagnostic(pct: number, hasMissingVitalTools: boolean, d: typeof translations['fr']['diagnostic']): {
   label: string;
   desc: string;
