@@ -248,7 +248,8 @@ function getVitalOrPaths(t: any): AlternativePath[] {
   return [
     {
       label: 'BE ↔ PMS ou CM', points: 5, malus: -5, severity: 'critique',
-      msg: t.diagnosticRules.vitalOrPaths.beReservation,
+      msg: t?.diagnosticRules?.vitalOrPaths?.beReservation
+        ?? 'Flux Réservation : Vos réservations directes ne remontent pas automatiquement vers votre gestion.',
       paths: [
         { a: 'pms',             b: 'booking-engine' },
         { a: 'channel-manager', b: 'booking-engine' },
@@ -256,7 +257,8 @@ function getVitalOrPaths(t: any): AlternativePath[] {
     },
     {
       label: 'PSP ↔ PMS ou BE', points: 4, malus: -4, severity: 'warning',
-      msg: t.diagnosticRules.vitalOrPaths.pspPayment,
+      msg: t?.diagnosticRules?.vitalOrPaths?.pspPayment
+        ?? "Paiement : Risque d'impayés ou de saisie manuelle. Pas de garantie bancaire automatique.",
       paths: [
         { a: 'pms',            b: 'psp' },
         { a: 'booking-engine', b: 'psp' },
@@ -264,7 +266,8 @@ function getVitalOrPaths(t: any): AlternativePath[] {
     },
     {
       label: 'RMS ↔ PMS ou CM', points: 2, malus: -2, severity: 'warning',
-      msg: t.diagnosticRules.vitalOrPaths.rmsYield,
+      msg: t?.diagnosticRules?.vitalOrPaths?.rmsYield
+        ?? 'Yield : Vos décisions tarifaires ne sont pas diffusées en temps réel sur vos canaux.',
       paths: [
         { a: 'pms',             b: 'rms' },
         { a: 'channel-manager', b: 'rms' },
@@ -277,13 +280,17 @@ function getVitalOrPaths(t: any): AlternativePath[] {
 function getVitalLinks(t: any): ScoreLink[] {
   return [
     { a: 'pms',             b: 'channel-manager', points: 5, malus: -5, severity: 'critique',
-      msg: t.diagnosticRules.vitalLinks.pmsCmStock },
+      msg: t?.diagnosticRules?.vitalLinks?.pmsCmStock
+        ?? 'Flux Distribution : Risque critique de surréservation. Vos stocks ne sont pas synchronisés.' },
     { a: 'site-internet',   b: 'booking-engine',  points: 5, malus: -5, severity: 'critique',
-      msg: t.diagnosticRules.vitalLinks.siteBeBooking },
+      msg: t?.diagnosticRules?.vitalLinks?.siteBeBooking
+        ?? 'Tunnel de Vente : Rupture du parcours client. Votre site ne permet pas de réserver.' },
     { a: 'channel-manager', b: 'ota',             points: 5, malus: -5, severity: 'critique',
-      msg: t.diagnosticRules.vitalLinks.cmOtaDistribution },
+      msg: t?.diagnosticRules?.vitalLinks?.cmOtaDistribution
+        ?? 'Distribution : Vos canaux ne sont pas alimentés. Gestion manuelle des stocks obligatoire.' },
     { a: 'channel-manager', b: 'gds',             points: 5, malus: -5, severity: 'critique',
-      msg: t.diagnosticRules.vitalLinks.cmGdsDistribution },
+      msg: t?.diagnosticRules?.vitalLinks?.cmGdsDistribution
+        ?? 'Distribution : Vos canaux ne sont pas alimentés. Gestion manuelle des stocks obligatoire.' },
   ];
 }
 
@@ -291,13 +298,17 @@ function getVitalLinks(t: any): ScoreLink[] {
 function getIndispensableLinks(t: any): ScoreLink[] {
   return [
     { a: 'pms',          b: 'pos',          points: 3, malus: 0, severity: 'warning',
-      msg: t.diagnosticRules.indispensableLinks.pmsPosRestaurant },
+      msg: t?.diagnosticRules?.indispensableLinks?.pmsPosRestaurant
+        ?? 'Flux F&B : Les consommations restaurant ne remontent pas sur la facture du client en chambre.' },
     { a: 'pms',          b: 'spa',          points: 3, malus: 0, severity: 'warning',
-      msg: t.diagnosticRules.indispensableLinks.pmsSpaSpa },
+      msg: t?.diagnosticRules?.indispensableLinks?.pmsSpaSpa
+        ?? 'Flux SPA : Les consommations SPA ne remontent pas sur la facture du client en chambre.' },
     { a: 'site-internet',b: 'moteur-resto', points: 3, malus: 0, severity: 'warning',
-      msg: t.diagnosticRules.indispensableLinks.siteMoteurRestoDirect },
+      msg: t?.diagnosticRules?.indispensableLinks?.siteMoteurRestoDirect
+        ?? "Vente Directe : Votre site ne commercialise pas l'ensemble de vos services (Resto, SPA, Cadeaux)." },
     { a: 'site-internet',b: 'exp-client',   points: 3, malus: 0, severity: 'warning',
-      msg: t.diagnosticRules.indispensableLinks.siteExpClientDirect },
+      msg: t?.diagnosticRules?.indispensableLinks?.siteExpClientDirect
+        ?? "Vente Directe : Votre site ne commercialise pas l'ensemble de vos services (Resto, SPA, Cadeaux)." },
   ];
 }
 
@@ -305,15 +316,20 @@ function getIndispensableLinks(t: any): ScoreLink[] {
 function getAdvisedLinks(t: any): ScoreLink[] {
   return [
     { a: 'pms', b: 'crm',          points: 2, malus: 0, severity: 'warning',
-      msg: t.diagnosticRules.advisedLinks.pmsCrmData },
+      msg: t?.diagnosticRules?.advisedLinks?.pmsCrmData
+        ?? "Data Client : Vos profils sont isolés. Impossible de personnaliser l'accueil ou de fidéliser." },
     { a: 'pms', b: 'housekeeping', points: 3, malus: 0, severity: 'warning',
-      msg: t.diagnosticRules.advisedLinks.pmsHousekeepingOps },
+      msg: t?.diagnosticRules?.advisedLinks?.pmsHousekeepingOps
+        ?? 'Opérations : Retards de communication entre la réception et les étages (statut des chambres).' },
     { a: 'pms', b: 'serrure',      points: 2, malus: 0, severity: 'info',
-      msg: t.diagnosticRules.advisedLinks.pmsSerrureAutonomy },
+      msg: t?.diagnosticRules?.advisedLinks?.pmsSerrureAutonomy
+        ?? "Autonomie : La création des clés/codes n'est pas synchronisée avec l'arrivée du client." },
     { a: 'pms', b: 'exp-client',   points: 2, malus: 0, severity: 'info',
-      msg: t.diagnosticRules.advisedLinks.pmsExpClientExperience },
+      msg: t?.diagnosticRules?.advisedLinks?.pmsExpClientExperience
+        ?? "Expérience : Le client n'a pas accès à ses informations de séjour en temps réel." },
     { a: 'pms', b: 'tv',           points: 2, malus: 0, severity: 'info',
-      msg: t.diagnosticRules.advisedLinks.pmsTvComfort },
+      msg: t?.diagnosticRules?.advisedLinks?.pmsTvComfort
+        ?? "Confort : Le message de bienvenue ou le check-out sur TV n'est pas activé." },
   ];
 }
 
@@ -321,11 +337,14 @@ function getAdvisedLinks(t: any): ScoreLink[] {
 function getComptaLinks(t: any): ScoreLink[] {
   return [
     { a: 'compta', b: 'pms', points: 2, malus: 0, severity: 'warning',
-      msg: t.diagnosticRules.comptaLinks.comptaPmsAccounting },
+      msg: t?.diagnosticRules?.comptaLinks?.comptaPmsAccounting
+        ?? "Comptabilité : Saisie manuelle du CA. Risque d'erreurs et perte de temps en fin de mois." },
     { a: 'compta', b: 'pos', points: 2, malus: 0, severity: 'warning',
-      msg: t.diagnosticRules.comptaLinks.comptaPosAccounting },
+      msg: t?.diagnosticRules?.comptaLinks?.comptaPosAccounting
+        ?? "Comptabilité : Saisie manuelle du CA. Risque d'erreurs et perte de temps en fin de mois." },
     { a: 'compta', b: 'spa', points: 2, malus: 0, severity: 'warning',
-      msg: t.diagnosticRules.comptaLinks.comptaSpaAccounting },
+      msg: t?.diagnosticRules?.comptaLinks?.comptaSpaAccounting
+        ?? "Comptabilité : Saisie manuelle du CA. Risque d'erreurs et perte de temps en fin de mois." },
   ];
 }
 
@@ -513,7 +532,7 @@ function computeScore(
 
   return { score: rawScore, maxScore, pct: cappedPct, alertPairs, missingVitalTools, penalty };
 }
-function getDiagnostic(pct: number, hasMissingVitalTools: boolean, d: typeof translations['fr']['diagnostic']): {
+function getDiagnostic(pct: number, d: typeof translations['fr']['diagnostic']): {
   label: string;
   desc: string;
   color: string;
@@ -521,7 +540,7 @@ function getDiagnostic(pct: number, hasMissingVitalTools: boolean, d: typeof tra
 } {
   // Safety check
   if (!d || typeof pct !== 'number' || isNaN(pct)) {
-    console.warn('getDiagnostic: invalid inputs', { pct, hasMissingVitalTools, d });
+    console.warn('getDiagnostic: invalid inputs', { pct, d });
     return {
       label: '⚠️ Erreur',
       desc: 'Impossible de calculer le diagnostic.',
@@ -530,27 +549,31 @@ function getDiagnostic(pct: number, hasMissingVitalTools: boolean, d: typeof tra
     };
   }
 
-  // PDF V1.5 Thresholds
-  if (hasMissingVitalTools || pct <= 40) return {
-    label: d.critical?.label || '🚨 Critique',
+  // PDF V1.5 — 4 paliers stricts
+  // Les verrous de computeScore ont DÉJÀ capé pct si PMS/CM absent (→ ≤40) ou liaison critique manquante (→ ≤65).
+  // hasMissingVitalTools ne doit plus forcer rouge ici — c'est le pct capé qui fait foi.
+  if (pct <= 40) return {
+    label: d.critical?.label || '🚨 Alerte Survie : Système en Silos',
     desc: d.critical?.desc || '',
     color: 'text-red-700',
     barColor: '#dc2626',
   };
   if (pct <= 65) return {
-    label: d.weak?.label || '⚠️ Faible',
+    label: d.weak?.label || '⚠️ Performance bridée',
     desc: d.weak?.desc || '',
     color: 'text-orange-500',
     barColor: '#f97316',
   };
   if (pct <= 85) return {
-    label: d.solid?.label || '✅ Solide',
-    desc: d.solid?.desc || '',
-    color: 'text-emerald-600',
-    barColor: '#10b981',
+    // PDF : 66-85 = Bleu "En route vers l'Excellence"
+    label: d.good?.label || '💪 En route vers l\'Excellence',
+    desc: d.good?.desc || '',
+    color: 'text-blue-600',
+    barColor: '#2563eb',
   };
   return {
-    label: d.excellent?.label || '🚀 Excellent',
+    // PDF : 86-100 = Vert "Écosystème de Champion"
+    label: d.excellent?.label || '🚀 Écosystème de Champion',
     desc: d.excellent?.desc || '',
     color: 'text-emerald-700',
     barColor: '#059669',
@@ -890,11 +913,17 @@ export function HotelEcosystem() {
     });
 
     // 3. Tracer les connexions
+    // IMPORTANT : isLinkActive vérifie connections[a]?.includes(b) OU connections[b]?.includes(a).
+    // On initialise les deux côtés avant de pousser pour qu'aucune liaison ne soit silencieusement ignorée.
     selectedConnections.forEach(pairKey => {
       const [a, b] = pairKey.split('|');
-      if (newConnections[a] && !newConnections[a].includes(b)) {
-        newConnections[a].push(b);
-      }
+      if (!a || !b) return;
+      // Garantir que les deux clés existent (un outil hors wizard peut être absent)
+      if (!newConnections[a]) newConnections[a] = [];
+      if (!newConnections[b]) newConnections[b] = [];
+      // Écrire dans les deux sens → isLinkActive trouve toujours la liaison
+      if (!newConnections[a].includes(b)) newConnections[a].push(b);
+      if (!newConnections[b].includes(a)) newConnections[b].push(a);
     });
 
     // 4. Appliquer au state
@@ -914,7 +943,7 @@ export function HotelEcosystem() {
 
   // ── Score calculé en temps réel — recalculé à chaque render ──
   const { pct, maxScore, alertPairs, missingVitalTools, penalty } = computeScore(connections, allSystems, t);
-  const diagnostic = getDiagnostic(pct, missingVitalTools.length > 0, t.diagnostic);
+  const diagnostic = getDiagnostic(pct, t.diagnostic);
   // Set rapide pour lookup O(1)
   const alertNodeIds = new Set(alertPairs.flatMap(p => [p.a, p.b]));
 
