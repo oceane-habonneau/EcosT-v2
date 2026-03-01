@@ -207,7 +207,52 @@ export interface Translations {
 
   // ── Catégories ──
   categories: Record<string, string>;
+
+  // ── Messages de diagnostic pour les liaisons (calculateScore) ──
+  diagnosticRules: {
+    // Liaisons OR (VITAL_OR_PATHS)
+    vitalOrPaths: {
+      beReservation: string;
+      pspPayment: string;
+      rmsYield: string;
+    };
+    // Liaisons VITAL_LINKS
+    vitalLinks: {
+      pmsCmStock: string;
+      siteBeBooking: string;
+      cmOtaDistribution: string;
+      cmGdsDistribution: string;
+    };
+    // Liaisons INDISPENSABLE_LINKS
+    indispensableLinks: {
+      pmsPosRestaurant: string;
+      pmsSpaSpa: string;
+      siteMoteurRestoDirect: string;
+      siteExpClientDirect: string;
+    };
+    // Liaisons ADVISED_LINKS
+    advisedLinks: {
+      pmsCrmData: string;
+      pmsHousekeepingOps: string;
+      pmsSerrureAutonomy: string;
+      pmsExpClientExperience: string;
+      pmsTvComfort: string;
+    };
+    // Liaisons COMPTA_LINKS
+    comptaLinks: {
+      comptaPmsAccounting: string;
+      comptaPosAccounting: string;
+      comptaSpaAccounting: string;
+    };
+  };
+
+  // ── Messages pour outils manquants par catégorie ──
+  missingToolMessages: {
+    managementDistribution: string;
+    guestSalesWellness: string;
+  };
 }
+
 
 // ══════════════════════════════════════════════════════════════════════
 // FRANÇAIS (référence)
@@ -266,20 +311,20 @@ const fr: Translations = {
 
   diagnostic: {
     critical: {
-      label: '🚨 Écosystème en péril',
-      desc: 'Des outils vitaux manquent ou ne sont pas connectés. Chaque jour sans action représente des pertes directes en réservations et en efficacité opérationnelle.',
+      label: '🚨 Alerte Survie',
+      desc: 'Socle vital incomplet. Distribution paralysée.',
     },
     weak: {
-      label: '⚠️ Écosystème fragile',
-      desc: 'La base est là, mais des connexions critiques manquent. Le risque de surbooking, d\'erreurs de facturation ou de pertes de revenus directs est élevé.',
+      label: '⚠️ Connectivité Partielle',
+      desc: 'Liaisons indispensables manquantes. Risque de pertes opérationnelles.',
     },
     fragile: {
-      label: '⚠️ Écosystème en péril',
-      desc: 'Plusieurs flux essentiels sont rompus. Votre équipe compense manuellement ce que vos outils devraient faire automatiquement.',
+      label: '⚠️ Connectivité Partielle',
+      desc: 'Liaisons indispensables manquantes. Risque de pertes opérationnelles.',
     },
     solid: {
-      label: '✅ Écosystème solide',
-      desc: 'Écosystème sain. Vous avez une base solide pour automatiser votre stratégie.',
+      label: '✅ Optimisation Requise',
+      desc: 'Écosystème robuste mais silos de données (CRM/Compta).',
     },
     good: {
       label: '💪 Très bon écosystème',
@@ -287,7 +332,7 @@ const fr: Translations = {
     },
     excellent: {
       label: '🚀 Écosystème Haute-Couture',
-      desc: 'Infrastructure de haut niveau, entièrement automatisée. Vous opérez comme un hôtel de chaîne avec l\'agilité d\'un indépendant.',
+      desc: 'Infrastructure de haut niveau, entièrement automatisée. Vous opérez comme un hôtel de chaîne avec l\"agilité d\"un indépendant.',
     },
   },
 
@@ -667,6 +712,43 @@ const fr: Translations = {
     restaurant: 'Restaurant',
     wellness: 'Bien-être',
   },
+
+  diagnosticRules: {
+    vitalOrPaths: {
+      beReservation: "Flux Réservation : Vos réservations directes ne remontent pas automatiquement vers votre gestion.",
+      pspPayment: "Paiement : Risque d\"impayés ou de saisie manuelle. Pas de garantie bancaire automatique.",
+      rmsYield: "Yield : Vos décisions tarifaires ne sont pas diffusées en temps réel sur vos canaux.",
+    },
+    vitalLinks: {
+      pmsCmStock: "Liaison PMS/CM : Risque critique de surréservation. Vos stocks ne sont pas synchronisés.",
+      siteBeBooking: "Tunnel de Vente : Rupture du parcours client. Votre site ne permet pas de réserver.",
+      cmOtaDistribution: "Distribution : Vos canaux ne sont pas alimentés. Gestion manuelle des stocks obligatoire.",
+      cmGdsDistribution: "Distribution : Vos canaux ne sont pas alimentés. Gestion manuelle des stocks obligatoire.",
+    },
+    indispensableLinks: {
+      pmsPosRestaurant: "Flux Restauration : Saisie manuelle des factures et risques d\"oublis au check-out.",
+      pmsSpaSpa: "Flux SPA : Les consommations SPA ne remontent pas sur la facture du client en chambre.",
+      siteMoteurRestoDirect: "Vente Directe : Votre site ne commercialise pas l\"ensemble de vos services (Resto, SPA, Cadeaux).",
+      siteExpClientDirect: "Vente Directe : Votre site ne commercialise pas l\"ensemble de vos services (Resto, SPA, Cadeaux).",
+    },
+    advisedLinks: {
+      pmsCrmData: "Data Client : Vos profils sont isolés. Impossible de personnaliser l\"accueil ou de fidéliser.",
+      pmsHousekeepingOps: "Opérations : Retards de communication entre la réception et les étages (statut des chambres).",
+      pmsSerrureAutonomy: "Autonomie : La création des clés/codes n\"est pas synchronisée avec l\"arrivée du client.",
+      pmsExpClientExperience: "Expérience : Le client n\"a pas accès à ses informations de séjour en temps réel.",
+      pmsTvComfort: "Confort : Le message de bienvenue ou le check-out sur TV n\"est pas activé.",
+    },
+    comptaLinks: {
+      comptaPmsAccounting: "Comptabilité : Saisie manuelle du CA. Risque d\"erreurs et perte de temps en fin de mois.",
+      comptaPosAccounting: "Comptabilité : Saisie manuelle du CA. Risque d\"erreurs et perte de temps en fin de mois.",
+      comptaSpaAccounting: "Comptabilité : Saisie manuelle du CA. Risque d\"erreurs et perte de temps en fin de mois.",
+    },
+  },
+
+  missingToolMessages: {
+    managementDistribution: "Composant vital manquant. Votre distribution est paralysée sans cet outil indispensable.",
+    guestSalesWellness: "Angle mort stratégique. L\"absence de cet outil empêche la fidélisation et limite vos revenus annexes.",
+  },
 };
 
 // ══════════════════════════════════════════════════════════════════════
@@ -726,24 +808,24 @@ const en: Translations = {
 
   diagnostic: {
     critical: {
-      label: '🚨 Ecosystem at risk',
-      desc: 'Vital tools are missing or disconnected. Every day without action means direct losses in bookings and operational efficiency.',
+      label: '🚨 Survival Alert',
+      desc: 'Vital foundation incomplete. Distribution paralyzed.',
     },
     weak: {
-      label: '⚠️ Fragile ecosystem',
-      desc: 'The foundation is there, but critical connections are missing. The risk of overbooking, billing errors or direct revenue loss is high.',
+      label: '⚠️ Partial Connectivity',
+      desc: 'Essential connections missing. Risk of operational losses.',
     },
     fragile: {
-      label: '⚠️ Ecosystem at risk',
-      desc: 'Several essential flows are broken. Your team is manually compensating for what your tools should do automatically.',
+      label: '⚠️ Partial Connectivity',
+      desc: 'Essential connections missing. Risk of operational losses.',
     },
     solid: {
-      label: '✅ Solid ecosystem',
-      desc: 'Healthy ecosystem. You have a solid base to automate your strategy.',
+      label: '✅ Optimization Required',
+      desc: 'Robust ecosystem but data silos (CRM/Accounting).',
     },
     good: {
       label: '💪 Strong ecosystem',
-      desc: 'Your infrastructure is well connected. A few strategic optimisations can further improve your RevPAR.',
+      desc: 'Your infrastructure is well connected. A few strategic optimizations can further improve your RevPAR.',
     },
     excellent: {
       label: '🚀 Haute-Couture Ecosystem',
@@ -1126,6 +1208,43 @@ const en: Translations = {
     customer: 'Guest',
     restaurant: 'Restaurant',
     wellness: 'Wellness',
+  },
+
+  diagnosticRules: {
+    vitalOrPaths: {
+      beReservation: "Booking Flow: Your direct reservations do not automatically sync to your management system.",
+      pspPayment: "Payment: Risk of unpaid bookings or manual entry. No automatic bank guarantee.",
+      rmsYield: "Yield: Your pricing decisions are not distributed in real-time across your channels.",
+    },
+    vitalLinks: {
+      pmsCmStock: "PMS/CM Link: Critical risk of overbooking. Your inventory is not synchronized.",
+      siteBeBooking: "Sales Funnel: Broken customer journey. Your website cannot accept bookings.",
+      cmOtaDistribution: "Distribution: Your channels are not fed. Manual inventory management required.",
+      cmGdsDistribution: "Distribution: Your channels are not fed. Manual inventory management required.",
+    },
+    indispensableLinks: {
+      pmsPosRestaurant: "Restaurant Flow: Manual invoice entry and risk of forgotten charges at check-out.",
+      pmsSpaSpa: "SPA Flow: SPA charges do not appear on the guest's room bill.",
+      siteMoteurRestoDirect: "Direct Sales: Your website does not sell all your services (Restaurant, SPA, Gift Cards).",
+      siteExpClientDirect: "Direct Sales: Your website does not sell all your services (Restaurant, SPA, Gift Cards).",
+    },
+    advisedLinks: {
+      pmsCrmData: "Guest Data: Your profiles are isolated. Cannot personalize service or build loyalty.",
+      pmsHousekeepingOps: "Operations: Delayed communication between front desk and housekeeping (room status).",
+      pmsSerrureAutonomy: "Autonomy: Key/code creation is not synchronized with guest arrival.",
+      pmsExpClientExperience: "Experience: Guest does not have real-time access to stay information.",
+      pmsTvComfort: "Comfort: Welcome message or TV check-out is not activated.",
+    },
+    comptaLinks: {
+      comptaPmsAccounting: "Accounting: Manual revenue entry. Risk of errors and wasted time at month-end.",
+      comptaPosAccounting: "Accounting: Manual revenue entry. Risk of errors and wasted time at month-end.",
+      comptaSpaAccounting: "Accounting: Manual revenue entry. Risk of errors and wasted time at month-end.",
+    },
+  },
+
+  missingToolMessages: {
+    managementDistribution: "Vital component missing. Your distribution is paralyzed without this essential tool.",
+    guestSalesWellness: "Strategic blind spot. The absence of this tool prevents loyalty and limits ancillary revenue.",
   },
 };
 
