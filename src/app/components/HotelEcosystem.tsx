@@ -1036,6 +1036,8 @@ export function HotelEcosystem() {
     }, 200);
   };
 
+  return (
+    <>
       {showWizardModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -2359,5 +2361,6 @@ export function HotelEcosystem() {
         </p>
       </div>
     </div>
+    </>
   );
 }
