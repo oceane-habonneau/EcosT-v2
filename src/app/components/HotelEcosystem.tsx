@@ -1036,45 +1036,127 @@ export function HotelEcosystem() {
     }, 200);
   };
 
-            {/* Footer */}
-            <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between gap-3 flex-shrink-0">
-              {wizardStep === 1 && (
-                <>
-                  <button
-                    onClick={() => setShowWizardModal(false)}
-                    className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
-                  >
-                    {t.wizard.closeBtn}
-                  </button>
-                  <button
-                    onClick={() => setWizardStep(2)}
-                    disabled={selectedTools.size === 0}
-                    className="px-6 py-2 bg-slate-800 text-white text-sm font-bold rounded-xl hover:bg-slate-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {t.wizard.nextBtn}
-                  </button>
-                </>
-              )}
-              {wizardStep === 2 && (
-                <>
-                  <button
-                    onClick={() => setWizardStep(1)}
-                    className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
-                  >
-                    {t.wizard.backBtn}
-                  </button>
-                  <button
-                    onClick={finishWizard}
-                    className="px-6 py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-sm font-black rounded-xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-lg"
-                  >
-                    {t.wizard.generateBtn}
-                  </button>
-                </>
-              )}
+      {showWizardModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+            
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">
+                  {wizardStep === 1 ? t.wizard.step1Label : t.wizard.step2Label}
+                </h3>
+                <p className="text-sm text-slate-500">
+                  {wizardStep === 1 ? t.wizard.step1Sub : t.wizard.step2Sub}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowWizardModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
             </div>
-          </div>
-        </div>
-      )}
+
+            {/* Body scrollable */}
+            <div className="flex-1 overflow-y-auto p-6">
+              
+              {/* STEP 1 — Inventaire */}
+              {wizardStep === 1 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {getWizardTools(t).map(tool => {
+                    const Icon = iconMap[tool.icon];
+                    const isSelected = selectedTools.has(tool.id);
+                    const config = categoryConfig[tool.category] || categoryConfig.management;
+                    return (
+                      <button
+                        key={tool.id}
+                        onClick={() => toggleTool(tool.id)}
+                        className={`
+                          relative p-4 rounded-xl border-2 transition-all hover:scale-105 active:scale-100
+                          ${isSelected 
+                            ? 'border-amber-400 bg-amber-50 shadow-lg shadow-amber-200' 
+                            : 'border-slate-200 bg-white hover:border-slate-300'}
+                        `}
+                      >
+                        {/* Checkbox */}
+                        <div className={`
+                          absolute top-2 right-2 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors
+                          ${isSelected ? 'bg-amber-400 border-amber-500' : 'bg-white border-slate-300'}
+                        `}>
+                          {isSelected && (
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                        
+                        {/* Icon */}
+                        <div 
+                          className="w-12 h-12 rounded-lg mx-auto mb-2 flex items-center justify-center"
+                          style={{ backgroundColor: config.color + '22' }}
+                        >
+                          <Icon className="w-6 h-6" style={{ color: config.color }} />
+                        </div>
+                        
+                        {/* Name */}
+                        <p className="text-xs font-semibold text-slate-700 text-center leading-tight">
+                          {tool.name}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* STEP 2 — Connectivité groupée par outil focal */}
+              {wizardStep === 2 && (() => {
+                const pairs = getLogicalPairs(selectedTools, t);
+                if (pairs.length === 0) return (
+                  <div className="text-center py-8 text-slate-400">
+                    <p className="text-sm">{t.wizard.noPairs}</p>
+                    <p className="text-xs mt-1">{t.wizard.noPairsSub}</p>
+                  </div>
+                );
+
+                // Noms exacts depuis getWizardTools — aucun alias inventé
+                const SHORT: Record<string, string> = Object.fromEntries(
+                  getWizardTools(t).map(wt => [wt.id, wt.name])
+                );
+
+                // Couleur de sévérité
+                const SEV_COLOR: Record<string, { dot: string; badge: string; text: string }> = {
+                  critique: { dot: '#ef4444', badge: 'rgba(239,68,68,0.1)', text: '#dc2626' },
+                  warning:  { dot: '#f59e0b', badge: 'rgba(245,158,11,0.1)', text: '#d97706' },
+                  info:     { dot: '#3b82f6', badge: 'rgba(59,130,246,0.1)', text: '#2563eb' },
+                };
+
+                // Grouper les paires par outil focal (a)
+                const groups: Record<string, typeof pairs> = {};
+                const order: string[] = [];
+                pairs.forEach(p => {
+                  if (!groups[p.a]) { groups[p.a] = []; order.push(p.a); }
+                  groups[p.a].push(p);
+                });
+
+                return (
+                  <div className="space-y-3">
+                    {order.map(focal => {
+                      const focalPairs = groups[focal];
+                      const focalName = SHORT[focal] || focal;
+                      const allConnected = focalPairs.every(p => selectedConnections.has(`${p.a}|${p.b}`));
+                      const someConnected = focalPairs.some(p => selectedConnections.has(`${p.a}|${p.b}`));
+
+                      return (
+                        <div key={focal} className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+                          {/* ── Titre du groupe ── */}
+                          <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100" style={{ background: allConnected ? 'rgba(16,185,129,0.06)' : someConnected ? 'rgba(245,158,11,0.05)' : 'rgba(248,250,252,1)' }}>
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: allConnected ? '#10b981' : someConnected ? '#f59e0b' : '#cbd5e1' }} />
+                              <div>
+                                <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{t.wizard.connectivityLabel}</span>
+                                <p className="text-sm font-bold text-slate-800 leading-tight">
+                                  {focalName} {t.wizard.connectedWith}
 
       {/* ══════════ HEADER COMMERCIAL ══════════ */}
       <div className="mb-3 md:mb-6">
