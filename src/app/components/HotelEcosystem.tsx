@@ -1037,7 +1037,7 @@ export function HotelEcosystem() {
   };
 
   return (
-    <>
+    <div className="max-w-[1400px] mx-auto p-3 sm:p-4 md:p-8">
       {showWizardModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -1159,6 +1159,109 @@ export function HotelEcosystem() {
                                 <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{t.wizard.connectivityLabel}</span>
                                 <p className="text-sm font-bold text-slate-800 leading-tight">
                                   {focalName} {t.wizard.connectedWith}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: allConnected ? 'rgba(16,185,129,0.12)' : 'rgba(148,163,184,0.15)', color: allConnected ? '#059669' : '#94a3b8' }}>
+                              {focalPairs.filter(p => selectedConnections.has(`${p.a}|${p.b}`)).length}/{focalPairs.length}
+                            </span>
+                          </div>
+
+                          {/* ── Sous-lignes : une par cible ── */}
+                          <div className="divide-y divide-slate-100">
+                            {focalPairs.map(({ a, b, warning, severity }) => {
+                              const pairKey = `${a}|${b}`;
+                              const isConnected = selectedConnections.has(pairKey);
+                              const safeSeverity = severity || 'warning';
+                              const sc = SEV_COLOR[safeSeverity] || SEV_COLOR.warning;
+                              const targetName = SHORT[b] || b;
+
+                              return (
+                                <div key={pairKey} className="flex items-center gap-3 px-4 py-2.5 transition-colors" style={{ background: isConnected ? 'rgba(16,185,129,0.04)' : 'transparent' }}>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      {/* Indicateur sévérité */}
+                                      {isConnected
+                                        ? <svg className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#10b981' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                        : <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: sc.dot }} />
+                                      }
+                                      {/* Nom de l'outil cible — sans "au" */}
+                                      <span className="text-sm font-bold text-slate-800">{targetName}</span>
+                                      {/* Badge sévérité discret */}
+                                      {!isConnected && (
+                                        <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: sc.badge, color: sc.text }}>
+                                          {safeSeverity}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {/* Impact — uniquement si pas connecté */}
+                                    {!isConnected && (
+                                      <p className="text-[11px] leading-snug mt-0.5 pl-5" style={{ color: '#94a3b8' }}>{warning}</p>
+                                    )}
+                                  </div>
+
+                                  {/* Toggle */}
+                                  <button
+                                    onClick={() => toggleConnection(pairKey)}
+                                    className="relative flex-shrink-0 rounded-full transition-colors duration-300"
+                                    style={{ width: 44, height: 24, background: isConnected ? '#10b981' : '#cbd5e1' }}
+                                  >
+                                    <span
+                                      className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"
+                                      style={{ transform: isConnected ? 'translateX(20px)' : 'translateX(0px)' }}
+                                    />
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between gap-3 flex-shrink-0">
+              {wizardStep === 1 && (
+                <>
+                  <button
+                    onClick={() => setShowWizardModal(false)}
+                    className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
+                  >
+                    {t.wizard.closeBtn}
+                  </button>
+                  <button
+                    onClick={() => setWizardStep(2)}
+                    disabled={selectedTools.size === 0}
+                    className="px-6 py-2 bg-slate-800 text-white text-sm font-bold rounded-xl hover:bg-slate-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {t.wizard.nextBtn}
+                  </button>
+                </>
+              )}
+              {wizardStep === 2 && (
+                <>
+                  <button
+                    onClick={() => setWizardStep(1)}
+                    className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
+                  >
+                    {t.wizard.backBtn}
+                  </button>
+                  <button
+                    onClick={finishWizard}
+                    className="px-6 py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-sm font-black rounded-xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-lg"
+                  >
+                    {t.wizard.generateBtn}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ══════════ HEADER COMMERCIAL ══════════ */}
       <div className="mb-3 md:mb-6">
@@ -2361,6 +2464,5 @@ export function HotelEcosystem() {
         </p>
       </div>
     </div>
-    </>
   );
 }
