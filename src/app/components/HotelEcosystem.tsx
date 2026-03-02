@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { translations, type Lang } from './translations';
+import { useAnalytics } from './useAnalytics';
 import { 
   Users, 
   Star, 
@@ -615,6 +616,8 @@ export function HotelEcosystem() {
 
   // 📱 États pour le mobile
   const [lang, setLang] = useState<Lang>('fr');
+    // Initialiser le hook analytics
+  const { trackDiagnostic, getUserAgent } = useAnalytics();
   const t = translations[lang];
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isStackMenuOpen, setIsStackMenuOpen] = useState(false);
@@ -878,21 +881,76 @@ export function HotelEcosystem() {
       return next;
     });
   };
+// ── Helper : Générer les points positifs pour analytics ──
+  const getPositiveMessages = (
+    connections: Record<string, string[]>,
+    systems: { id: string }[]
+  ): string[] => {
+    const positives: string[] = [];
+    const presentIds = new Set(systems.map(s => s.id));
 
-  const finishWizard = () => {
-    // 1. Nettoyer le canvas
+    // Vérifier les liaisons VITAL
+    const vitalLinks = [
+      { a: 'pms', b: 'channel-manager', msg: 'PMS ↔ CM connecté (+5pts)' },
+      { a: 'site-internet', b: 'booking-engine', msg: 'Site ↔ BE connecté (+5pts)' },
+      { a: 'channel-manager', b: 'ota', msg: 'CM ↔ OTA connecté (+5pts)' },
+      { a: 'channel-manager', b: 'gds', msg: 'CM ↔ GDS connecté (+5pts)' },
+    ];
+
+    vitalLinks.forEach(link => {
+      if (presentIds.has(link.a) && presentIds.has(link.b)) {
+        const isConnected = connections[link.a]?.includes(link.b) || connections[link.b]?.includes(link.a);
+        if (isConnected) {
+          positives.push(link.msg);
+        }
+      }
+    });
+
+    // Logic OR paths
+    const orPaths = [
+      {
+        label: 'BE ↔ PMS ou CM',
+        paths: [
+          { a: 'pms', b: 'booking-engine' },
+          { a: 'channel-manager', b: 'booking-engine' }
+        ],
+        msg: 'BE ↔ (PMS|CM) Logic OR OK (+5pts)'
+      },
+      {
+        label: 'PSP ↔ PMS ou BE',
+        paths: [
+          { a: 'pms', b: 'psp' },
+          { a: 'booking-engine', b: 'psp' }
+        ],
+        msg: 'PSP ↔ (PMS|BE) Logic OR OK (+4pts)'
+      },
+    ];
+
+    orPaths.forEach(orPath => {
+      const hasAnyConnection = orPath.paths.some(p => {
+        if (!presentIds.has(p.a) || !presentIds.has(p.b)) return false;
+        return connections[p.a]?.includes(p.b) || connections[p.b]?.includes(p.a);
+      });
+      if (hasAnyConnection) {
+        positives.push(orPath.msg);
+      }
+    });
+
+    return positives;
+  };
+  const finishWizard = async () => {
+    // 1. Initialisation locale des données
     const newSystems: SystemNode[] = [];
     const newPositions: Record<string, { x: number; y: number }> = {};
     const newConnections: Record<string, string[]> = {};
 
-    // 2. Ajouter les cartes sélectionnées
+    // 2. Préparation des outils sélectionnés
     const toolsList = Array.from(selectedTools);
-    if (!t) return; // Safety check
+    if (!t) return;
     toolsList.forEach((toolId, index) => {
       const tool = getWizardTools(t).find(wt => wt?.id === toolId);
       if (!tool) return;
       
-      // Positionner en grille 3 colonnes
       const col = index % 3;
       const row = Math.floor(index / 3);
       const x = 25 + col * 25;
@@ -912,262 +970,71 @@ export function HotelEcosystem() {
       newConnections[toolId] = [];
     });
 
-    // 3. Tracer les connexions
-    // IMPORTANT : isLinkActive vérifie connections[a]?.includes(b) OU connections[b]?.includes(a).
-    // On initialise les deux côtés avant de pousser pour qu'aucune liaison ne soit silencieusement ignorée.
+    // 3. Liaison des connexions (Points Vitaux et Logic OR)
     selectedConnections.forEach(pairKey => {
       const [a, b] = pairKey.split('|');
-      if (!a || !b) return;
-      // Garantir que les deux clés existent (un outil hors wizard peut être absent)
-      if (!newConnections[a]) newConnections[a] = [];
-      if (!newConnections[b]) newConnections[b] = [];
-      // Écrire dans les deux sens → isLinkActive trouve toujours la liaison
-      if (!newConnections[a].includes(b)) newConnections[a].push(b);
-      if (!newConnections[b].includes(a)) newConnections[b].push(a);
+      if (newConnections[a] && !newConnections[a].includes(b)) {
+        newConnections[a].push(b);
+      }
+      if (newConnections[b] && !newConnections[b].includes(a)) {
+        newConnections[b].push(a);
+      }
     });
 
-    // 4. Appliquer au state
+    // 4. Calcul du score final pour l'analytics
+    const scoreResult = computeScore(newConnections, newSystems, t);
+    const diagnosticResult = getDiagnostic(scoreResult.pct, t.diagnostic);
+
+    // 5. Envoi des données vers Firebase
+    try {
+      await trackDiagnostic({
+        tools: newSystems.map(s => s.name),
+        toolsCount: newSystems.length,
+        connections: Array.from(selectedConnections).map(key => {
+          const [from, to] = key.split('|');
+          return { from, to };
+        }),
+        connectionsCount: selectedConnections.size,
+        score: {
+          final: scoreResult.pct,
+          raw: Math.max(0, scoreResult.maxScore - scoreResult.penalty),
+          max: scoreResult.maxScore,
+          penalty: scoreResult.penalty
+        },
+        diagnostic: {
+          level: diagnosticResult.id, 
+          label: diagnosticResult.label,
+          hasMissingVitals: scoreResult.missingVitalTools.length > 0
+        },
+        alerts: scoreResult.alertPairs.map(p => ({
+          pair: `${p.a}|${p.b}`,
+          severity: p.severity || 'warning',
+          message: p.message || p.warning || 'Flux manquant'
+        })),
+        alertsCount: scoreResult.alertPairs.length,
+        positives: getPositiveMessages(newConnections, newSystems), // <--- INSTRUCTION CLAUDE OK
+        source: 'wizard',
+        language: lang,
+        userAgent: getUserAgent()
+      });
+      console.log('✅ Diagnostic validé et envoyé');
+    } catch (error) {
+      console.error('❌ Erreur Analytics:', error);
+    }
+
+    // 6. Mise à jour de l'interface React
     setAllSystems(newSystems);
     setNodePositions(newPositions);
     setConnections(newConnections);
     setShowWizardModal(false);
     setScorePanelOpen(true);
-    // Mettre en mode admin+link pour permettre corrections immédiates
     setViewMode('admin');
     setMode('link');
-    // Scroller vers le canvas
+    
     setTimeout(() => {
       document.getElementById('ecosystem')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 200);
   };
-
-  // ── Score calculé en temps réel — recalculé à chaque render ──
-  const { pct, maxScore, alertPairs, missingVitalTools, penalty } = computeScore(connections, allSystems, t);
-  const diagnostic = getDiagnostic(pct, t.diagnostic);
-  // Set rapide pour lookup O(1)
-  const alertNodeIds = new Set(alertPairs.flatMap(p => [p.a, p.b]));
-
-  // Ouvrir automatiquement le panel score quand il y a des alertes ou score < 100%
-  useEffect(() => {
-    if (pct < 100 && pct > 0) setScorePanelOpen(true);
-  }, [pct]);
-
-  return (
-    <div className="max-w-[1400px] mx-auto p-3 sm:p-4 md:p-8">
-
-      {/* ══════════ WIZARD OVERLAY D'ACCUEIL ══════════ */}
-      {showWizardOverlay && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
-          <div className="text-center px-6 py-8 max-w-md">
-            <div className="mb-8">
-              <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 leading-tight">
-                {t.wizardOverlay.title}
-              </h2>
-              <p className="text-base text-slate-200 leading-relaxed">
-                {t.wizardOverlay.subtitle}
-              </p>
-            </div>
-            <button
-              onClick={startWizard}
-              className="w-full px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-lg font-black rounded-2xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-2xl hover:shadow-amber-500/50 hover:scale-105 active:scale-100 mb-4"
-            >
-              🚀 {t.wizardOverlay.startBtn}
-            </button>
-            <button
-              onClick={skipWizard}
-              className="text-sm text-slate-300 hover:text-white underline underline-offset-4 transition-colors"
-            >
-              {t.wizardOverlay.skipBtn}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ══════════ WIZARD MODAL (2 STEPS) ══════════ */}
-      {showWizardModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-            
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
-              <div>
-                <h3 className="text-xl font-bold text-slate-800">
-                  {wizardStep === 1 ? t.wizard.step1Label : t.wizard.step2Label}
-                </h3>
-                <p className="text-sm text-slate-500">
-                  {wizardStep === 1 ? t.wizard.step1Sub : t.wizard.step2Sub}
-                </p>
-              </div>
-              <button
-                onClick={() => setShowWizardModal(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
-              >
-                <X className="w-5 h-5 text-slate-400" />
-              </button>
-            </div>
-
-            {/* Body scrollable */}
-            <div className="flex-1 overflow-y-auto p-6">
-              
-              {/* STEP 1 — Inventaire */}
-              {wizardStep === 1 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {getWizardTools(t).map(tool => {
-                    const Icon = iconMap[tool.icon];
-                    const isSelected = selectedTools.has(tool.id);
-                    const config = categoryConfig[tool.category] || categoryConfig.management;
-                    return (
-                      <button
-                        key={tool.id}
-                        onClick={() => toggleTool(tool.id)}
-                        className={`
-                          relative p-4 rounded-xl border-2 transition-all hover:scale-105 active:scale-100
-                          ${isSelected 
-                            ? 'border-amber-400 bg-amber-50 shadow-lg shadow-amber-200' 
-                            : 'border-slate-200 bg-white hover:border-slate-300'}
-                        `}
-                      >
-                        {/* Checkbox */}
-                        <div className={`
-                          absolute top-2 right-2 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors
-                          ${isSelected ? 'bg-amber-400 border-amber-500' : 'bg-white border-slate-300'}
-                        `}>
-                          {isSelected && (
-                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
-                          )}
-                        </div>
-                        
-                        {/* Icon */}
-                        <div 
-                          className="w-12 h-12 rounded-lg mx-auto mb-2 flex items-center justify-center"
-                          style={{ backgroundColor: config.color + '22' }}
-                        >
-                          <Icon className="w-6 h-6" style={{ color: config.color }} />
-                        </div>
-                        
-                        {/* Name */}
-                        <p className="text-xs font-semibold text-slate-700 text-center leading-tight">
-                          {tool.name}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* STEP 2 — Connectivité groupée par outil focal */}
-              {wizardStep === 2 && (() => {
-                const pairs = getLogicalPairs(selectedTools, t);
-                if (pairs.length === 0) return (
-                  <div className="text-center py-8 text-slate-400">
-                    <p className="text-sm">{t.wizard.noPairs}</p>
-                    <p className="text-xs mt-1">{t.wizard.noPairsSub}</p>
-                  </div>
-                );
-
-                // Noms exacts depuis getWizardTools — aucun alias inventé
-                const SHORT: Record<string, string> = Object.fromEntries(
-                  getWizardTools(t).map(wt => [wt.id, wt.name])
-                );
-
-                // Couleur de sévérité
-                const SEV_COLOR: Record<string, { dot: string; badge: string; text: string }> = {
-                  critique: { dot: '#ef4444', badge: 'rgba(239,68,68,0.1)', text: '#dc2626' },
-                  warning:  { dot: '#f59e0b', badge: 'rgba(245,158,11,0.1)', text: '#d97706' },
-                  info:     { dot: '#3b82f6', badge: 'rgba(59,130,246,0.1)', text: '#2563eb' },
-                };
-
-                // Grouper les paires par outil focal (a)
-                const groups: Record<string, typeof pairs> = {};
-                const order: string[] = [];
-                pairs.forEach(p => {
-                  if (!groups[p.a]) { groups[p.a] = []; order.push(p.a); }
-                  groups[p.a].push(p);
-                });
-
-                return (
-                  <div className="space-y-3">
-                    {order.map(focal => {
-                      const focalPairs = groups[focal];
-                      const focalName = SHORT[focal] || focal;
-                      const allConnected = focalPairs.every(p => selectedConnections.has(`${p.a}|${p.b}`));
-                      const someConnected = focalPairs.some(p => selectedConnections.has(`${p.a}|${p.b}`));
-
-                      return (
-                        <div key={focal} className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-sm">
-                          {/* ── Titre du groupe ── */}
-                          <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100" style={{ background: allConnected ? 'rgba(16,185,129,0.06)' : someConnected ? 'rgba(245,158,11,0.05)' : 'rgba(248,250,252,1)' }}>
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: allConnected ? '#10b981' : someConnected ? '#f59e0b' : '#cbd5e1' }} />
-                              <div>
-                                <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{t.wizard.connectivityLabel}</span>
-                                <p className="text-sm font-bold text-slate-800 leading-tight">
-                                  {focalName} {t.wizard.connectedWith}
-                                </p>
-                              </div>
-                            </div>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: allConnected ? 'rgba(16,185,129,0.12)' : 'rgba(148,163,184,0.15)', color: allConnected ? '#059669' : '#94a3b8' }}>
-                              {focalPairs.filter(p => selectedConnections.has(`${p.a}|${p.b}`)).length}/{focalPairs.length}
-                            </span>
-                          </div>
-
-                          {/* ── Sous-lignes : une par cible ── */}
-                          <div className="divide-y divide-slate-100">
-                            {focalPairs.map(({ a, b, warning, severity }) => {
-                              const pairKey = `${a}|${b}`;
-                              const isConnected = selectedConnections.has(pairKey);
-                              const safeSeverity = severity || 'warning';
-                              const sc = SEV_COLOR[safeSeverity] || SEV_COLOR.warning;
-                              const targetName = SHORT[b] || b;
-
-                              return (
-                                <div key={pairKey} className="flex items-center gap-3 px-4 py-2.5 transition-colors" style={{ background: isConnected ? 'rgba(16,185,129,0.04)' : 'transparent' }}>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      {/* Indicateur sévérité */}
-                                      {isConnected
-                                        ? <svg className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#10b981' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                        : <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: sc.dot }} />
-                                      }
-                                      {/* Nom de l'outil cible — sans "au" */}
-                                      <span className="text-sm font-bold text-slate-800">{targetName}</span>
-                                      {/* Badge sévérité discret */}
-                                      {!isConnected && (
-                                        <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: sc.badge, color: sc.text }}>
-                                          {safeSeverity}
-                                        </span>
-                                      )}
-                                    </div>
-                                    {/* Impact — uniquement si pas connecté */}
-                                    {!isConnected && (
-                                      <p className="text-[11px] leading-snug mt-0.5 pl-5" style={{ color: '#94a3b8' }}>{warning}</p>
-                                    )}
-                                  </div>
-
-                                  {/* Toggle */}
-                                  <button
-                                    onClick={() => toggleConnection(pairKey)}
-                                    className="relative flex-shrink-0 rounded-full transition-colors duration-300"
-                                    style={{ width: 44, height: 24, background: isConnected ? '#10b981' : '#cbd5e1' }}
-                                  >
-                                    <span
-                                      className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"
-                                      style={{ transform: isConnected ? 'translateX(20px)' : 'translateX(0px)' }}
-                                    />
-                                  </button>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
-            </div>
 
             {/* Footer */}
             <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between gap-3 flex-shrink-0">
