@@ -7,44 +7,31 @@ import { db } from './Firebase.config';
 
 // ── Types ──
 export interface DiagnosticData {
-  // Outils sélectionnés
   tools: string[];
   toolsCount: number;
-  
-  // Connexions établies
   connections: Array<{ from: string; to: string }>;
   connectionsCount: number;
-  
-  // Score et calcul
   score: {
-    final: number;      // Score après plafonds (pct)
-    raw: number;        // Score brut avant plafonds
-    max: number;        // Score maximum possible
-    penalty: number;    // Malus appliqués
+    final: number;
+    raw: number;
+    max: number;
+    penalty: number;
   };
-  
-  // Diagnostic
   diagnostic: {
-    level: string;      // 'critical', 'weak', 'solid', 'excellent'
-    label: string;      // "🚨 Alerte Survie", "✅ En route vers l'Excellence", etc.
-    hasMissingVitals: boolean;  // Si outils vitaux manquants (PMS, CM)
+    level: string;
+    label: string;
+    hasMissingVitals: boolean;
   };
-  
-  // Alertes (ruptures de flux)
   alerts: Array<{
-    pair: string;       // "pms|pos"
-    severity: string;   // 'critique', 'warning', 'info'
-    message: string;    // Message de diagnostic
+    pair: string;
+    severity: string;
+    message: string;
   }>;
   alertsCount: number;
-  
-  // Points positifs (connexions établies)
   positives: string[];
-  
-  // Métadonnées
-  source: 'wizard' | 'manual';  // Origine du diagnostic
-  language: 'fr' | 'en';        // Langue utilisée
-  userAgent?: string;           // Navigateur (optionnel)
+  source: 'wizard' | 'manual';
+  language: 'fr' | 'en';
+  userAgent?: string;
 }
 
 // ── Hook personnalisé ──
@@ -54,24 +41,38 @@ export function useAnalytics() {
    * Collection : 'diagnostics'
    */
   const trackDiagnostic = async (data: DiagnosticData): Promise<void> => {
+    // 🛡️ DÉTECTION MODE TEST / LOCALHOST
+    const isLocalhost = typeof window !== 'undefined' && 
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    
+    const isTestMode = typeof window !== 'undefined' && 
+      new URLSearchParams(window.location.search).has('test');
+
+    if (isLocalhost || isTestMode) {
+      console.log(
+        '%c🧪 MODE TEST ACTIVÉ : Diagnostic calculé mais non envoyé à Firebase', 
+        'color: #fbbf24; font-weight: bold; background: #334155; padding: 2px 5px; rounded: 4px;'
+      );
+      return; // On stoppe l'exécution ici
+    }
+
     try {
-      // Ajouter le timestamp serveur Firebase
+      // Préparation de la donnée avec Timestamps
       const diagnosticWithTimestamp = {
         ...data,
-        timestamp: serverTimestamp(),  // Timestamp géré par Firebase (UTC)
-        createdAt: new Date().toISOString(),  // ISO string pour affichage
+        timestamp: serverTimestamp(),
+        createdAt: new Date().toISOString(),
       };
 
-      // Enregistrer dans Firestore
+      // Envoi réel à Firestore
       const docRef = await addDoc(
         collection(db, 'diagnostics'),
         diagnosticWithTimestamp
       );
 
-      console.log('✅ Diagnostic tracked:', docRef.id);
+      console.log('✅ Diagnostic tracked in Firebase:', docRef.id);
     } catch (error) {
       console.error('❌ Analytics tracking error:', error);
-      // Ne pas bloquer l'expérience utilisateur si le tracking échoue
     }
   };
 
