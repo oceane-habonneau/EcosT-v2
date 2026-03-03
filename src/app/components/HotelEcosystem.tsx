@@ -1036,6 +1036,11 @@ export function HotelEcosystem() {
     }, 200);
   };
 
+  // ── Score calculé en temps réel à chaque render ──
+  const { pct, maxScore, alertPairs, missingVitalTools, penalty } = computeScore(connections, allSystems, t);
+  const diagnostic = getDiagnostic(pct, t.diagnostic);
+  const alertNodeIds = new Set(alertPairs.flatMap(p => [p.a, p.b]));
+
   return (
     <div className="max-w-[1400px] mx-auto p-3 sm:p-4 md:p-8">
       {showWizardModal && (
