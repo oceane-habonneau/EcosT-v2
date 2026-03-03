@@ -616,9 +616,9 @@ export function HotelEcosystem() {
 
   // 📱 États pour le mobile
   const [lang, setLang] = useState<Lang>('fr');
-    // Initialiser le hook analytics
-  const { trackDiagnostic, getUserAgent } = useAnalytics();
   const t = translations[lang];
+  const { trackDiagnostic, getUserAgent } = useAnalytics();
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isStackMenuOpen, setIsStackMenuOpen] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
@@ -881,76 +881,54 @@ export function HotelEcosystem() {
       return next;
     });
   };
-// ── Helper : Générer les points positifs pour analytics ──
+
+  // ── Messages positifs pour analytics (connexions établies) ──
   const getPositiveMessages = (
-    connections: Record<string, string[]>,
+    conns: Record<string, string[]>,
     systems: { id: string }[]
   ): string[] => {
     const positives: string[] = [];
     const presentIds = new Set(systems.map(s => s.id));
-
-    // Vérifier les liaisons VITAL
     const vitalLinks = [
       { a: 'pms', b: 'channel-manager', msg: 'PMS ↔ CM connecté (+5pts)' },
       { a: 'site-internet', b: 'booking-engine', msg: 'Site ↔ BE connecté (+5pts)' },
       { a: 'channel-manager', b: 'ota', msg: 'CM ↔ OTA connecté (+5pts)' },
       { a: 'channel-manager', b: 'gds', msg: 'CM ↔ GDS connecté (+5pts)' },
     ];
-
     vitalLinks.forEach(link => {
       if (presentIds.has(link.a) && presentIds.has(link.b)) {
-        const isConnected = connections[link.a]?.includes(link.b) || connections[link.b]?.includes(link.a);
-        if (isConnected) {
+        if (conns[link.a]?.includes(link.b) || conns[link.b]?.includes(link.a))
           positives.push(link.msg);
-        }
       }
     });
-
-    // Logic OR paths
     const orPaths = [
-      {
-        label: 'BE ↔ PMS ou CM',
-        paths: [
-          { a: 'pms', b: 'booking-engine' },
-          { a: 'channel-manager', b: 'booking-engine' }
-        ],
-        msg: 'BE ↔ (PMS|CM) Logic OR OK (+5pts)'
-      },
-      {
-        label: 'PSP ↔ PMS ou BE',
-        paths: [
-          { a: 'pms', b: 'psp' },
-          { a: 'booking-engine', b: 'psp' }
-        ],
-        msg: 'PSP ↔ (PMS|BE) Logic OR OK (+4pts)'
-      },
+      { paths: [{ a: 'pms', b: 'booking-engine' }, { a: 'channel-manager', b: 'booking-engine' }], msg: 'BE ↔ (PMS|CM) OK (+5pts)' },
+      { paths: [{ a: 'pms', b: 'psp' }, { a: 'booking-engine', b: 'psp' }], msg: 'PSP ↔ (PMS|BE) OK (+4pts)' },
     ];
-
     orPaths.forEach(orPath => {
-      const hasAnyConnection = orPath.paths.some(p => {
-        if (!presentIds.has(p.a) || !presentIds.has(p.b)) return false;
-        return connections[p.a]?.includes(p.b) || connections[p.b]?.includes(p.a);
-      });
-      if (hasAnyConnection) {
-        positives.push(orPath.msg);
-      }
+      const ok = orPath.paths.some(p =>
+        presentIds.has(p.a) && presentIds.has(p.b) &&
+        (conns[p.a]?.includes(p.b) || conns[p.b]?.includes(p.a))
+      );
+      if (ok) positives.push(orPath.msg);
     });
-
     return positives;
   };
+
   const finishWizard = async () => {
-    // 1. Initialisation locale des données
+    // 1. Nettoyer le canvas
     const newSystems: SystemNode[] = [];
     const newPositions: Record<string, { x: number; y: number }> = {};
     const newConnections: Record<string, string[]> = {};
 
-    // 2. Préparation des outils sélectionnés
+    // 2. Ajouter les cartes sélectionnées
     const toolsList = Array.from(selectedTools);
-    if (!t) return;
+    if (!t) return; // Safety check
     toolsList.forEach((toolId, index) => {
       const tool = getWizardTools(t).find(wt => wt?.id === toolId);
       if (!tool) return;
       
+      // Positionner en grille 3 colonnes
       const col = index % 3;
       const row = Math.floor(index / 3);
       const x = 25 + col * 25;
@@ -970,22 +948,25 @@ export function HotelEcosystem() {
       newConnections[toolId] = [];
     });
 
-    // 3. Liaison des connexions (Points Vitaux et Logic OR)
+    // 3. Tracer les connexions
+    // IMPORTANT : isLinkActive vérifie connections[a]?.includes(b) OU connections[b]?.includes(a).
+    // On initialise les deux côtés avant de pousser pour qu'aucune liaison ne soit silencieusement ignorée.
     selectedConnections.forEach(pairKey => {
       const [a, b] = pairKey.split('|');
-      if (newConnections[a] && !newConnections[a].includes(b)) {
-        newConnections[a].push(b);
-      }
-      if (newConnections[b] && !newConnections[b].includes(a)) {
-        newConnections[b].push(a);
-      }
+      if (!a || !b) return;
+      // Garantir que les deux clés existent (un outil hors wizard peut être absent)
+      if (!newConnections[a]) newConnections[a] = [];
+      if (!newConnections[b]) newConnections[b] = [];
+      // Écrire dans les deux sens → isLinkActive trouve toujours la liaison
+      if (!newConnections[a].includes(b)) newConnections[a].push(b);
+      if (!newConnections[b].includes(a)) newConnections[b].push(a);
     });
 
-    // 4. Calcul du score final pour l'analytics
+    // 4. Calcul du score pour analytics
     const scoreResult = computeScore(newConnections, newSystems, t);
     const diagnosticResult = getDiagnostic(scoreResult.pct, t.diagnostic);
 
-    // 5. Envoi des données vers Firebase
+    // 5. Envoi Firebase (non-bloquant)
     try {
       await trackDiagnostic({
         tools: newSystems.map(s => s.name),
@@ -999,50 +980,87 @@ export function HotelEcosystem() {
           final: scoreResult.pct,
           raw: Math.max(0, scoreResult.maxScore - scoreResult.penalty),
           max: scoreResult.maxScore,
-          penalty: scoreResult.penalty
+          penalty: scoreResult.penalty,
         },
         diagnostic: {
-          level: diagnosticResult.id, 
+          level: (diagnosticResult as any).id ?? '',
           label: diagnosticResult.label,
-          hasMissingVitals: scoreResult.missingVitalTools.length > 0
+          hasMissingVitals: scoreResult.missingVitalTools.length > 0,
         },
         alerts: scoreResult.alertPairs.map(p => ({
           pair: `${p.a}|${p.b}`,
           severity: p.severity || 'warning',
-          message: p.message || p.warning || 'Flux manquant'
+          message: p.warning || 'Flux manquant',
         })),
         alertsCount: scoreResult.alertPairs.length,
-        positives: getPositiveMessages(newConnections, newSystems), // <--- INSTRUCTION CLAUDE OK
+        positives: getPositiveMessages(newConnections, newSystems),
         source: 'wizard',
         language: lang,
-        userAgent: getUserAgent()
+        userAgent: getUserAgent(),
       });
       console.log('✅ Diagnostic validé et envoyé');
     } catch (error) {
       console.error('❌ Erreur Analytics:', error);
     }
 
-    // 6. Mise à jour de l'interface React
+    // 6. Appliquer au state
     setAllSystems(newSystems);
     setNodePositions(newPositions);
     setConnections(newConnections);
     setShowWizardModal(false);
     setScorePanelOpen(true);
+    // Mettre en mode admin+link pour permettre corrections immédiates
     setViewMode('admin');
     setMode('link');
-    
+    // Scroller vers le canvas
     setTimeout(() => {
       document.getElementById('ecosystem')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 200);
   };
 
-  // ── Score calculé en temps réel à chaque render ──
+  // ── Score calculé en temps réel — recalculé à chaque render ──
   const { pct, maxScore, alertPairs, missingVitalTools, penalty } = computeScore(connections, allSystems, t);
   const diagnostic = getDiagnostic(pct, t.diagnostic);
+  // Set rapide pour lookup O(1)
   const alertNodeIds = new Set(alertPairs.flatMap(p => [p.a, p.b]));
+
+  // Ouvrir automatiquement le panel score quand il y a des alertes ou score < 100%
+  useEffect(() => {
+    if (pct < 100 && pct > 0) setScorePanelOpen(true);
+  }, [pct]);
 
   return (
     <div className="max-w-[1400px] mx-auto p-3 sm:p-4 md:p-8">
+
+      {/* ══════════ WIZARD OVERLAY D'ACCUEIL ══════════ */}
+      {showWizardOverlay && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
+          <div className="text-center px-6 py-8 max-w-md">
+            <div className="mb-8">
+              <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 leading-tight">
+                {t.wizardOverlay.title}
+              </h2>
+              <p className="text-base text-slate-200 leading-relaxed">
+                {t.wizardOverlay.subtitle}
+              </p>
+            </div>
+            <button
+              onClick={startWizard}
+              className="w-full px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-lg font-black rounded-2xl hover:from-amber-500 hover:to-amber-600 transition-all shadow-2xl hover:shadow-amber-500/50 hover:scale-105 active:scale-100 mb-4"
+            >
+              🚀 {t.wizardOverlay.startBtn}
+            </button>
+            <button
+              onClick={skipWizard}
+              className="text-sm text-slate-300 hover:text-white underline underline-offset-4 transition-colors"
+            >
+              {t.wizardOverlay.skipBtn}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════ WIZARD MODAL (2 STEPS) ══════════ */}
       {showWizardModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
