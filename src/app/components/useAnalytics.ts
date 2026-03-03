@@ -1,9 +1,21 @@
 // ══════════════════════════════════════════════════════════════════════
 // useAnalytics.ts — Custom Hook for Analytics Tracking
 // ══════════════════════════════════════════════════════════════════════
+// NOTE: firebase.config.ts non trouvé au build.
+// Les fonctions Firestore sont stubées — remplacer par le vrai import
+// une fois firebase.config.ts créé dans le même dossier :
+//   import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+//   import { db } from './firebase.config';
+// ──────────────────────────────────────────────────────────────────────
 
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from './firebase.config';
+// Stubs Firestore (no-op tant que firebase.config est absent)
+const serverTimestamp = () => new Date().toISOString();
+const collection = (_db: unknown, _name: string) => ({ _db, _name });
+const addDoc = async (_ref: unknown, _data: unknown): Promise<{ id: string }> => {
+  // TODO: connecter à Firestore quand firebase.config.ts sera disponible
+  return { id: `local-${Date.now()}` };
+};
+const db = null;
 
 // ── Types ──
 export interface DiagnosticData {
