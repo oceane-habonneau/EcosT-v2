@@ -433,7 +433,7 @@ diagnostic: {
   },
 
   footer: {
-    copyright: '© 2026 Océane Habonneau – Consultante en Digitalisation Hôtelière – Tous droits réservés',
+    copyright: '© 2026 Océane Habonneau – Architecte HotelTech – Tous droits réservés',
     contact: 'Me contacter',
     appointment: 'Prendre RDV',
   },
@@ -935,7 +935,7 @@ diagnostic: {
   },
 
   footer: {
-    copyright: '© 2026 Océane Habonneau – Hotel Digitalisation Consultant – All rights reserved',
+    copyright: '© 2026 Océane Habonneau – HotelTech Architect – All rights reserved',
     contact: 'Contact me',
     appointment: 'Book appointment',
   },
