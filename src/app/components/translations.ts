@@ -51,7 +51,7 @@ export interface Translations {
   hero: {
     tagline: string;
     subtitle: string;
-    brandSub: string; // "Flux & Automatisations"
+    brandSub: string; // "Une Tech invisible pour une exploitation fluide."
   };
 
   // ── Wizard overlay d'accueil ──
@@ -273,7 +273,7 @@ const fr: Translations = {
   hero: {
     tagline: 'Scannez la rentabilité de votre environnement technologique',
     subtitle: 'Identifiez en 2 minutes les ruptures de flux qui saturent vos équipes et freinent vos réservations directes.',
-    brandSub: 'Flux & Automatisations',
+    brandSub: 'Une Tech invisible pour une exploitation fluide.',
   },
 
   wizardOverlay: {
@@ -773,7 +773,7 @@ const en: Translations = {
   hero: {
     tagline: 'Scan the profitability of your tech stack',
     subtitle: 'Identify in 2 minutes the broken flows that overload your teams and hold back your direct bookings.',
-    brandSub: 'Flows & Automations',
+    brandSub: 'Invisible technology for smooth operation.',
   },
 
   wizardOverlay: {
