@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture de Flux — Océane Habonneau</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: #FAFAFA;
+    min-height: 100vh;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 44px 40px 36px;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 44px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid #EAEAEA;
+    animation: fadeUp 0.5s ease both;
+  }
+  .header-left .eyebrow {
+    font-size: 10px; font-weight: 600; letter-spacing: 3px;
+    color: #ABABAB; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .header-left h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(26px, 3.5vw, 38px);
+    font-weight: 500; color: #111;
+    letter-spacing: -0.02em; line-height: 1.1;
+  }
+  .header-right { text-align: right; }
+  .header-right .name { font-size: 13px; font-weight: 500; color: #333; letter-spacing: -0.01em; }
+  .header-right .role { font-size: 11px; color: #ABABAB; margin-top: 3px; letter-spacing: 0.02em; }
+
+  /* GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    margin-bottom: 36px;
+    align-items: start;
+  }
+
+  /* CARD */
+  .card {
+    background: #FFFFFF;
+    border: 1px solid #EAEAEA;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03), 0 10px 30px rgba(0,0,0,0.03);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05), 0 20px 50px rgba(0,0,0,0.07);
+    transform: translateY(-3px);
+  }
+
+  .card-stripe { height: 3px; flex-shrink: 0; }
+  .card-body { padding: 26px 26px 22px; flex: 1; display: flex; flex-direction: column; gap: 20px; }
+
+  /* Top row */
+  .card-top { display: flex; justify-content: space-between; align-items: center; }
+  .card-num {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  }
+  .focus-badge {
+    font-size: 9px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 100px; border: 1px solid;
+  }
+
+  /* Name block */
+  .card-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 21px; font-weight: 500; color: #111;
+    letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 7px;
+  }
+  .card-tagline { font-size: 12px; color: #ABABAB; line-height: 1.5; font-weight: 400; }
+
+  /* Metrics */
+  .metrics { display: flex; gap: 10px; }
+  .metric-box {
+    flex: 1; border-radius: 12px; padding: 16px 18px; border: 1px solid;
+  }
+  .metric-label {
+    font-size: 9px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .metric-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; font-weight: 500; color: #111;
+    letter-spacing: -0.02em; line-height: 1;
+  }
+
+  /* Divider */
+  .divider { height: 1px; background: #F0F0F0; }
+
+  /* Stack */
+  .stack-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+    color: #CACACA; margin-bottom: 14px;
+  }
+  .stack-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+  .stack-tag {
+    display: inline-flex; align-items: center;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.01em;
+    padding: 5px 11px; border-radius: 6px; border: 1px solid;
+    white-space: nowrap;
+  }
+
+  /* CTA */
+  .cta-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.03em;
+    text-decoration: none; margin-top: auto;
+    transition: gap 0.2s ease, opacity 0.2s ease;
+  }
+  .cta-link:hover { gap: 10px; opacity: 0.7; }
+  .cta-link svg { flex-shrink: 0; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid #EAEAEA;
+    padding-top: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    animation: fadeUp 0.6s ease 0.44s both;
+  }
+  .footer-items { display: flex; align-items: center; flex-wrap: wrap; }
+  .footer-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 28px;
+    border-right: 1px solid #EAEAEA;
+  }
+  .footer-item:first-child { padding-left: 0; }
+  .footer-item:last-child { border-right: none; }
+  .footer-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: #CACACA;
+  }
+  .footer-value { font-size: 13px; font-weight: 500; color: #333; letter-spacing: -0.01em; }
+  .footer-note { font-size: 10px; color: #CACACA; letter-spacing: 0.05em; font-style: italic; }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .anim-0 { animation: fadeUp 0.6s ease 0.05s both; }
+  .anim-1 { animation: fadeUp 0.6s ease 0.18s both; }
+  .anim-2 { animation: fadeUp 0.6s ease 0.31s both; }
+
+  /* PRINT */
+  @media print {
+    body { background: #FFFFFF; }
+    .page { padding: 24px 28px; }
+    .card { break-inside: avoid; box-shadow: none; border: 1px solid #EAEAEA !important; }
+    .card:hover { transform: none; }
+    header { animation: none; }
+    .anim-0, .anim-1, .anim-2, .footer-anim { animation: none; opacity: 1; transform: none; }
+    @page { size: A4 landscape; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+      <p class="eyebrow">Proposition Commerciale</p>
+      <h1>Architecture de Flux</h1>
+    </div>
+    <div class="header-right">
+      <p class="name">Océane Habonneau</p>
+      <p class="role">Conseil &amp; Intégration Hôtelière</p>
+    </div>
+  </header>
+
+  <!-- GRID -->
+  <div class="grid">
+
+    <!-- CARD 01 -->
+    <div class="card anim-0">
+      <div class="card-stripe" style="background:#C9A96E;"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="card-num" style="color:#C9A96E;">01</span>
+          <span class="focus-badge" style="color:#C9A96E; background:#FBF5EB; border-color:#E8D5B0;">Expérience &amp; Intimité</span>
+        </div>
+        <div>
+          <h2 class="card-name">L'Écrin Boutique</h2>
+          <p class="card-tagline">Hôtels 4-5★ · 20–50 chambres · Service sur-mesure</p>
+        </div>
+        <div class="metrics">
+          <div class="metric-box" style="background:#FBF5EB; border-color:#E8D5B0;">
+            <p class="metric-label" style="color:#C9A96E;">Durée</p>
+            <p class="metric-value">47h</p>
+          </div>
+          <div class="metric-box" style="background:#FBF5EB; border-color:#E8D5B0;">
+            <p class="metric-label" style="color:#C9A96E;">Budget HT</p>
+            <p class="metric-value">7 050 €</p>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <p class="stack-label">Stack Logicielle</p>
+          <div class="stack-tags">
+            <span class="stack-tag" style="color:#C9A96E; background:#FBF5EB; border-color:#E8D5B0;">Mews PMS/POS</span>
+            <span class="stack-tag" style="color:#C9A96E; background:#FBF5EB; border-color:#E8D5B0;">Stripe PSP</span>
+            <span class="stack-tag" style="color:#C9A96E; background:#FBF5EB; border-color:#E8D5B0;">Namastay BE</span>
+            <span class="stack-tag" style="color:#C9A96E; background:#FBF5EB; border-color:#E8D5B0;">D-edge CM</span>
+            <span class="stack-tag" style="color:#C9A96E; background:#FBF5EB; border-color:#E8D5B0;">Bowo CRM</span>
+            <span class="stack-tag" style="color:#C9A96E; background:#FBF5EB; border-color:#E8D5B0;">Zenchef Restaurant</span>
+            <span class="stack-tag" style="color:#C9A96E; background:#FBF5EB; border-color:#E8D5B0;">AssaAbloy Serrure</span>
+            <span class="stack-tag" style="color:#C9A96E; background:#FBF5EB; border-color:#E8D5B0;">1Check HK</span>
+            <span class="stack-tag" style="color:#C9A96E; background:#FBF5EB; border-color:#E8D5B0;">Pennylane Compta</span>
+          </div>
+        </div>
+        <a href="https://oceane-habonneau.github.io/EcosT-v2/?test#ecosystem" target="_blank" class="cta-link" style="color:#C9A96E;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Visualiser l'architecture
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- CARD 02 -->
+    <div class="card anim-1">
+      <div class="card-stripe" style="background:#3B7DD8;"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="card-num" style="color:#3B7DD8;">02</span>
+          <span class="focus-badge" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">Puissance &amp; Multi-activités</span>
+        </div>
+        <div>
+          <h2 class="card-name">Le Resort Connecté</h2>
+          <p class="card-tagline">Domaines · Spa · Restaurants · Séminaires</p>
+        </div>
+        <div class="metrics">
+          <div class="metric-box" style="background:#EEF5FF; border-color:#C3DAFB;">
+            <p class="metric-label" style="color:#3B7DD8;">Durée</p>
+            <p class="metric-value">81h</p>
+          </div>
+          <div class="metric-box" style="background:#EEF5FF; border-color:#C3DAFB;">
+            <p class="metric-label" style="color:#3B7DD8;">Budget HT</p>
+            <p class="metric-value">12 150 €</p>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <p class="stack-label">Stack Logicielle</p>
+          <div class="stack-tags">
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">Mews PMS</span>
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">Stripe PSP</span>
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">Namastay BE</span>
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">D-edge CM</span>
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">Lightspeed POS</span>
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">Pure Spa</span>
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">Bowo CRM</span>
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">Backyou EMS</span>
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">Ubiliz Boutique</span>
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">Zenchef Restaurant</span>
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">AssaAbloy Serrure</span>
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">1Check HK</span>
+            <span class="stack-tag" style="color:#3B7DD8; background:#EEF5FF; border-color:#C3DAFB;">Pennylane Compta</span>
+          </div>
+        </div>
+        <a href="https://oceane-habonneau.github.io/EcosT-v2/?test#ecosystem" target="_blank" class="cta-link" style="color:#3B7DD8;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Visualiser l'architecture
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- CARD 03 -->
+    <div class="card anim-2">
+      <div class="card-stripe" style="background:#2E8B6E;"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="card-num" style="color:#2E8B6E;">03</span>
+          <span class="focus-badge" style="color:#2E8B6E; background:#EDFAF4; border-color:#A8DFC9;">Autonomie &amp; Tech</span>
+        </div>
+        <div>
+          <h2 class="card-name">Appart-Hôtel &amp; Nomad</h2>
+          <p class="card-tagline">Résidences modernes · Digital natives · Self-service</p>
+        </div>
+        <div class="metrics">
+          <div class="metric-box" style="background:#EDFAF4; border-color:#A8DFC9;">
+            <p class="metric-label" style="color:#2E8B6E;">Durée</p>
+            <p class="metric-value">32h</p>
+          </div>
+          <div class="metric-box" style="background:#EDFAF4; border-color:#A8DFC9;">
+            <p class="metric-label" style="color:#2E8B6E;">Budget HT</p>
+            <p class="metric-value">4 800 €</p>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <p class="stack-label">Stack Logicielle</p>
+          <div class="stack-tags">
+            <span class="stack-tag" style="color:#2E8B6E; background:#EDFAF4; border-color:#A8DFC9;">Apaleo PMS API-first</span>
+            <span class="stack-tag" style="color:#2E8B6E; background:#EDFAF4; border-color:#A8DFC9;">Stripe PSP</span>
+            <span class="stack-tag" style="color:#2E8B6E; background:#EDFAF4; border-color:#A8DFC9;">Namastay BE</span>
+            <span class="stack-tag" style="color:#2E8B6E; background:#EDFAF4; border-color:#A8DFC9;">D-edge CM</span>
+            <span class="stack-tag" style="color:#2E8B6E; background:#EDFAF4; border-color:#A8DFC9;">Bowo Conciergerie</span>
+            <span class="stack-tag" style="color:#2E8B6E; background:#EDFAF4; border-color:#A8DFC9;">Salto Accès</span>
+            <span class="stack-tag" style="color:#2E8B6E; background:#EDFAF4; border-color:#A8DFC9;">1Check HK</span>
+            <span class="stack-tag" style="color:#2E8B6E; background:#EDFAF4; border-color:#A8DFC9;">Pennylane Compta</span>
+          </div>
+        </div>
+        <a href="https://oceane-habonneau.github.io/EcosT-v2/?test#ecosystem" target="_blank" class="cta-link" style="color:#2E8B6E;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Visualiser l'architecture
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-items">
+      <div class="footer-item">
+        <span class="footer-label">Expertise</span>
+        <span class="footer-value">150 €/h</span>
+      </div>
+      <div class="footer-item">
+        <span class="footer-label">TJM</span>
+        <span class="footer-value">1 050 € HT</span>
+      </div>
+      <div class="footer-item">
+        <span class="footer-label">Inclus</span>
+        <span class="footer-value">Audit · Connectivité · Paramétrage · Recette</span>
+      </div>
+    </div>
+    <p class="footer-note">Document confidentiel</p>
+  </footer>
+
+</div>
+</body>
+</html>
