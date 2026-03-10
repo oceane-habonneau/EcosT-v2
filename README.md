@@ -2,7 +2,7 @@
 Visualisez, Auditez et Optimisez la performance digitale de votre hôtel.
 
 **⚠️ NOTE SUR LA PROPRIÉTÉ INTELLECTUELLE**
-Cet outil est un moteur de diagnostic métier propriétaire développé par Océane Habonneau. Le code est partagé ici à des fins de transparence technologique et de portfolio. Toute exploitation commerciale, modification ou redistribution par un tiers est strictement interdite sans accord écrit préalable. Pour toute demande de licence ou de partenariat, merci de me contacter via oceane.habonneau@gmail.com.
+Cet outil est un moteur de diagnostic métier propriétaire développé par Océane Habonneau. Les sources de cet outil sont hébergées sur un dépôt privé pour garantir la sécurité des algorithmes de scoring. Ce dépôt public contient la version de production destinée à la démonstration de mon expertise en architecture de flux.Toute exploitation commerciale, modification ou redistribution par un tiers est strictement interdite sans accord écrit préalable. Pour toute demande de licence ou de partenariat, merci de me contacter via oceane.habonneau@gmail.com.
 
 **🚀 Pourquoi cet outil ?**
 Dans un marché hôtelier ultra-connecté, la fluidité des flux de données est le premier levier de rentabilité. Pourtant, beaucoup d'établissements souffrent encore de "silos digitaux" qui génèrent des erreurs de facturation, des surréservations et une perte de temps administratif.
