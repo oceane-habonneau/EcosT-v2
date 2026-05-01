@@ -40,65 +40,19 @@
   .card-name { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 500; color: #111; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 7px; }
   .card-tagline { font-size: 12px; color: #ABABAB; line-height: 1.5; font-weight: 400; }
   .metrics { display: flex; gap: 10px; }
-  .metric-box { flex: 1; border-radius: 12px; padding: 14px 14px; border: 1px solid; min-width: 0; }
+  .metric-box { flex: 1; border-radius: 12px; padding: 16px 18px; border: 1px solid; }
   .metric-label { font-size: 9px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
-  .metric-value { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 500; color: #111; letter-spacing: -0.02em; line-height: 1.2; word-break: break-word; }
+  .metric-value { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; color: #111; letter-spacing: -0.02em; line-height: 1; }
   .divider { height: 1px; background: #F0F0F0; }
   .stack-label { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: #CACACA; margin-bottom: 12px; }
-
-  /* STACK — categorized layout */
-  .stack-categories {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .stack-cat-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 7px 10px;
-    border-radius: 8px;
-    background: #FAFAFA;
-    border: 1px solid #F4F4F4;
-    transition: background 0.15s;
-  }
-  .stack-cat-row:hover { background: #F5F5F5; }
-
-  .stack-cat-name {
-    font-size: 8.5px; font-weight: 700; letter-spacing: 1.5px;
-    text-transform: uppercase; color: #CACACA;
-    min-width: 72px; padding-top: 3px; white-space: nowrap; flex-shrink: 0;
-  }
-  .stack-cat-sep { width: 1px; min-height: 20px; background: #EAEAEA; flex-shrink: 0; align-self: stretch; }
-  .stack-cat-tools { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; flex: 1; }
+  .stack-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 
   /* TAGS by level */
-  .stack-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 500; letter-spacing: 0.01em; padding: 4px 9px 4px 7px; border-radius: 5px; border: 1px solid; white-space: nowrap; transition: opacity 0.2s; cursor: default; position: relative; }
+  .stack-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; letter-spacing: 0.01em; padding: 5px 10px 5px 8px; border-radius: 6px; border: 1px solid; white-space: nowrap; transition: opacity 0.2s; cursor: default; }
   .stack-tag:hover { opacity: 0.75 !important; }
   .tag-integree  { opacity: 1; }
-  .tag-modelisee { opacity: 1; }
-  .tag-observee  { opacity: 1; }
-
-  /* TOOLTIP */
-  .stack-tag { position: relative; }
-  .stack-tag[data-tip]::after {
-    content: attr(data-tip);
-    position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%);
-    background: #1A202C; color: #fff;
-    font-size: 10px; font-weight: 500; letter-spacing: 0.01em; white-space: nowrap;
-    padding: 5px 10px; border-radius: 6px;
-    pointer-events: none; opacity: 0; transition: opacity 0.18s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 100;
-  }
-  .stack-tag[data-tip]::before {
-    content: ''; position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%);
-    border: 5px solid transparent; border-top-color: #1A202C;
-    pointer-events: none; opacity: 0; transition: opacity 0.18s ease; z-index: 100;
-  }
-  .stack-tag[data-tip]:hover::after,
-  .stack-tag[data-tip]:hover::before { opacity: 1; }
+  .tag-modelisee { opacity: 0.78; }
+  .tag-observee  { opacity: 0.48; }
 
   /* CTA */
   .cta-link { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.03em; text-decoration: none; margin-top: auto; transition: gap 0.2s ease, opacity 0.2s ease; }
@@ -106,28 +60,16 @@
 
   /* CONNECTIVITY INDEX */
   .connectivity-index { background: #FFFFFF; border: 1px solid #EAEAEA; border-radius: 16px; padding: 24px 28px; margin-bottom: 28px; animation: fadeUp 0.6s ease 0.38s both; }
-  .ci-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-  .ci-header-left { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-  .ci-title { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: #CACACA; white-space: nowrap; }
-  .ci-legend { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-  .ci-legend-sep { width: 1px; height: 16px; background: #EAEAEA; }
-  .ci-legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #666; white-space: nowrap; }
-  .ci-legend-item strong { font-weight: 600; color: #3B7DD8; }
-  /* one row per category */
-  .ci-grid { display: flex; flex-direction: column; gap: 10px; }
-  .ci-cell { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border: 1px solid #F0F0F0; border-radius: 10px; background: #FAFAFA; transition: border-color 0.2s, background 0.2s; }
+  .ci-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .ci-title { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: #CACACA; }
+  .ci-subtitle { font-size: 11px; color: #ABABAB; font-style: italic; }
+  .ci-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .ci-cell { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 10px; border: 1px solid #F0F0F0; border-radius: 12px; background: #FAFAFA; transition: border-color 0.2s, background 0.2s; }
   .ci-cell:hover { border-color: #DCDCDC; background: #FFFFFF; }
-  .ci-cat { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #999; white-space: nowrap; min-width: 90px; }
-  .ci-sep { width: 1px; height: 18px; background: #EAEAEA; flex-shrink: 0; }
-  .ci-tools { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
-  /* base tool chip */
-  .ci-tool { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 500; padding: 3px 9px 3px 7px; border-radius: 5px; white-space: nowrap; border: 1px solid; }
-  /* Intégrée — bleu plein */
-  .ci-tool.lvl-i { background: #EEF5FF; color: #3B7DD8; border-color: #C3DAFB; font-weight: 600; }
-  /* Modélisée — bleu contouré atténué */
-  .ci-tool.lvl-m { background: transparent; color: #3B7DD8; border-color: #C3DAFB; opacity: 0.72; }
-  /* Observée — gris discret */
-  .ci-tool.lvl-o { background: #F4F4F4; color: #888; border-color: #E8E8E8; opacity: 0.65; }
+  .ci-cat { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #999; }
+  .ci-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+  .ci-tool { font-size: 10px; font-weight: 500; color: #777; background: #F0F0F0; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+  .ci-tool.lvl-i { background: #EEF5FF; color: #3B7DD8; font-weight: 600; }
 
   /* FOOTER */
   footer { border-top: 1px solid #EAEAEA; padding-top: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; animation: fadeUp 0.6s ease 0.48s both; }
@@ -150,118 +92,8 @@
     .card, .connectivity-index, .legend { break-inside: avoid; box-shadow: none !important; }
     .card:hover { transform: none; }
     * { animation: none !important; opacity: 1 !important; transform: none !important; }
-    .edit-btn, .tag-delete, .tag-add-btn, .add-row-btn { display: none !important; }
     @page { size: A4 landscape; margin: 0; }
   }
-
-  /* ── BOUTON ÉDITION ── */
-  .edit-btn {
-    display: inline-flex; align-items: center; gap: 7px;
-    font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
-    padding: 8px 16px; border-radius: 8px; border: 1.5px solid #DCDCDC;
-    background: #FFFFFF; color: #666; cursor: pointer;
-    transition: all 0.2s ease; white-space: nowrap; margin-top: 12px;
-  }
-  .edit-btn:hover { border-color: #ABABAB; color: #333; }
-  .edit-btn.active { background: #1A202C; color: #fff; border-color: #1A202C; }
-  .edit-btn svg { flex-shrink: 0; }
-
-  /* ── MODE ÉDITION — badge ── */
-  body.edit-mode .stack-tag { cursor: text; padding-right: 6px; }
-  body.edit-mode .stack-tag:hover { opacity: 1 !important; outline: 1.5px dashed currentColor; outline-offset: 2px; border-radius: 5px; }
-
-  /* Bouton ✕ sur chaque badge */
-  .tag-delete {
-    display: none; align-items: center; justify-content: center;
-    width: 14px; height: 14px; border-radius: 50%;
-    background: rgba(0,0,0,0.12); border: none; cursor: pointer;
-    font-size: 9px; line-height: 1; color: inherit; flex-shrink: 0;
-    margin-left: 3px; padding: 0; transition: background 0.15s;
-  }
-  .tag-delete:hover { background: rgba(0,0,0,0.25); }
-  body.edit-mode .tag-delete { display: inline-flex; }
-
-  /* Input inline pour renommer */
-  .tag-input {
-    background: transparent; border: none; outline: none;
-    font: inherit; color: inherit; width: auto; min-width: 20px;
-    padding: 0; cursor: text;
-  }
-
-  /* Bouton + ajouter un badge */
-  .tag-add-btn {
-    display: none; align-items: center; gap: 4px;
-    font-size: 10px; font-weight: 600; padding: 4px 8px;
-    border-radius: 5px; border: 1.5px dashed #DCDCDC;
-    background: transparent; color: #ABABAB; cursor: pointer;
-    transition: all 0.15s; white-space: nowrap;
-  }
-  .tag-add-btn:hover { border-color: #999; color: #666; }
-  body.edit-mode .tag-add-btn { display: inline-flex; }
-
-  /* Bouton + ajouter une ligne catégorie */
-  .add-row-btn {
-    display: none; align-items: center; gap: 6px;
-    font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-    padding: 6px 10px; border-radius: 8px;
-    border: 1.5px dashed #DCDCDC; background: transparent; color: #ABABAB;
-    cursor: pointer; width: 100%; justify-content: center;
-    transition: all 0.15s; margin-top: 2px;
-  }
-  .add-row-btn:hover { border-color: #999; color: #666; }
-  body.edit-mode .add-row-btn { display: flex; }
-
-  /* Catégorie label éditable */
-  body.edit-mode .stack-cat-name {
-    outline: none; cursor: text; border-radius: 3px;
-    padding: 1px 3px; transition: background 0.15s;
-  }
-  body.edit-mode .stack-cat-name:hover { background: #EBEBEB; }
-  body.edit-mode .stack-cat-name:focus { background: #E4E4E4; }
-
-  /* Ligne supprimable */
-  .row-delete {
-    display: none; align-items: center; justify-content: center;
-    width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
-    background: #F0F0F0; border: none; cursor: pointer;
-    font-size: 10px; color: #ABABAB; margin-left: auto; padding: 0;
-    transition: background 0.15s, color 0.15s;
-  }
-  .row-delete:hover { background: #FFE5E5; color: #E55; }
-  body.edit-mode .row-delete { display: inline-flex; }
-
-  /* Sélecteur de niveau */
-  .level-select {
-    display: none; font-size: 9px; font-weight: 600; letter-spacing: 0.5px;
-    border: 1px solid #DCDCDC; border-radius: 4px; background: #fff;
-    color: #666; padding: 2px 4px; cursor: pointer; margin-left: 2px;
-  }
-  body.edit-mode .level-select { display: inline-block; }
-
-  /* ── DRAG & DROP lignes ── */
-  .drag-handle {
-    display: none; align-items: center; justify-content: center;
-    width: 14px; flex-shrink: 0; cursor: grab; color: #CACACA;
-    padding: 0; margin-right: 2px;
-  }
-  .drag-handle:active { cursor: grabbing; }
-  body.edit-mode .drag-handle { display: flex; }
-
-  .stack-cat-row.dragging { opacity: 0.4; }
-  .stack-cat-row.drag-over {
-    border-color: #ABABAB;
-    background: #F0F0F0;
-  }
-
-  /* ── MÉTRIQUES ÉDITABLES ── */
-  .metric-value { cursor: default; }
-  body.edit-mode .metric-value {
-    cursor: text; outline: none;
-    border-radius: 6px; padding: 2px 5px; margin: -2px -5px;
-    transition: background 0.15s;
-  }
-  body.edit-mode .metric-value:hover { background: rgba(0,0,0,0.05); }
-  body.edit-mode .metric-value:focus { background: rgba(0,0,0,0.07); outline: none; }
 </style>
 </head>
 <body>
@@ -276,16 +108,6 @@
     <div class="header-right">
       <p class="name">Océane Habonneau</p>
       <p class="role">Conseil &amp; Intégration Hôtelière</p>
-      <div style="margin-top:12px; display:inline-flex; align-items:center; gap:8px; background:#1A202C; color:#fff; padding:7px 14px; border-radius:8px;">
-        <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="#C9A96E" stroke-width="1.5"/><circle cx="5" cy="5" r="1.5" fill="#C9A96E"/></svg>
-        <span style="font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:#C9A96E;">Maison André</span>
-        <span style="width:1px; height:12px; background:rgba(255,255,255,0.15); display:inline-block;"></span>
-        <span style="font-size:10px; color:rgba(255,255,255,0.5); letter-spacing:0.05em;">Document exclusif</span>
-      </div>
-      <button class="edit-btn" id="editBtn" onclick="toggleEditMode()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Éditer
-      </button>
     </div>
   </header>
 
@@ -325,92 +147,43 @@
         <div class="metrics">
           <div class="metric-box" style="background:#FBF5EB; border-color:#E8D5B0;">
             <p class="metric-label" style="color:#C9A96E;">Durée</p>
-            <p class="metric-value">38h <span style="font-size:13px;color:#ABABAB;font-weight:400;">/ ≃5j</span></p>
+            <p class="metric-value">47h</p>
           </div>
           <div class="metric-box" style="background:#FBF5EB; border-color:#E8D5B0;">
             <p class="metric-label" style="color:#C9A96E;">Budget HT</p>
-            <p class="metric-value">5 700 €</p>
+            <p class="metric-value">7 050 €</p>
           </div>
         </div>
         <div class="divider"></div>
         <div>
-          <p class="stack-label">Stack Logiciel</p>
-          <div class="stack-categories">
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">PMS · POS</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" data-tip="6h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>Mews PMS/POS</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">PSP</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>Stripe</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">CM · BE</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>D-edge</span>
-                <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>Namastay</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">CRM</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>Bowo</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">F&amp;B</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>Zenchef</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">HK</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" data-tip="4h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>1Check</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">Serrurerie</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" data-tip="4h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>AssaAbloy</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">Compta</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" data-tip="3h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>Pennylane</span>
-              </div>
-            </div>
-
+          <p class="stack-label">Stack Logicielle</p>
+          <div class="stack-tags">
+            <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Intégrée — Expertise totale">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>Mews PMS/POS</span>
+            <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>Stripe PSP</span>
+            <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>D-edge CM</span>
+            <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>Bowo CRM</span>
+            <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>Zenchef Restaurant</span>
+            <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>Lightspeed POS</span>
+            <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>Expérience CRM</span>
+            <span class="stack-tag tag-integree" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#C9A96E"/></svg>The Fork BE</span>
+            <span class="stack-tag tag-modelisee" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Modélisée — Maîtrise technique">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="2.5" fill="none" stroke="#C9A96E" stroke-width="1.5"/></svg>1Check HK</span>
+            <span class="stack-tag tag-modelisee" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Modélisée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="2.5" fill="none" stroke="#C9A96E" stroke-width="1.5"/></svg>RevBell RMS</span>
+            <span class="stack-tag tag-observee" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Observée — Veille technologique">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#C9A96E"/></svg>Namastay BE</span>
+            <span class="stack-tag tag-observee" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#C9A96E"/></svg>AssaAbloy Serrure</span>
+            <span class="stack-tag tag-observee" style="color:#C9A96E;background:#FBF5EB;border-color:#E8D5B0;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#C9A96E"/></svg>Pennylane Compta</span>
           </div>
         </div>
         <a href="https://oceane-habonneau.github.io/EcosT-v2/?test#ecosystem" target="_blank" class="cta-link" style="color:#C9A96E;">
@@ -436,107 +209,53 @@
         <div class="metrics">
           <div class="metric-box" style="background:#EEF5FF; border-color:#C3DAFB;">
             <p class="metric-label" style="color:#3B7DD8;">Durée</p>
-            <p class="metric-value">58h <span style="font-size:13px;color:#ABABAB;font-weight:400;">/ ≃8j</span></p>
+            <p class="metric-value">81h</p>
           </div>
           <div class="metric-box" style="background:#EEF5FF; border-color:#C3DAFB;">
             <p class="metric-label" style="color:#3B7DD8;">Budget HT</p>
-            <p class="metric-value">7 800 €</p>
+            <p class="metric-value">12 150 €</p>
           </div>
         </div>
         <div class="divider"></div>
         <div>
-          <p class="stack-label">Stack Logiciel</p>
-          <div class="stack-categories">
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">PMS</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="4h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Mews PMS</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">PSP</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Stripe</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">CM · BE</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>D-edge</span>
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Namastay</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">CRM</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Bowo</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">F&amp;B</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="4h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Lightspeed</span>
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Zenchef</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">SPA · EMS</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="5h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Pure</span>
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="6h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Backyou</span>
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Ubiliz</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">HK</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="4h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>1Check</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">Serrurerie</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="4h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>AssaAbloy</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">Compta</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" data-tip="3h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Pennylane</span>
-              </div>
-            </div>
-
+          <p class="stack-label">Stack Logicielle</p>
+          <div class="stack-tags">
+            <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Mews PMS</span>
+            <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Stripe PSP</span>
+            <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>D-edge CM</span>
+            <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Lightspeed POS</span>
+            <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Bowo CRM</span>
+            <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Zenchef Restaurant</span>
+            <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>The Fork BE</span>
+            <span class="stack-tag tag-integree" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>Expérience CRM</span>
+            <span class="stack-tag tag-modelisee" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Modélisée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="2.5" fill="none" stroke="#3B7DD8" stroke-width="1.5"/></svg>1Check HK</span>
+            <span class="stack-tag tag-modelisee" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Modélisée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="2.5" fill="none" stroke="#3B7DD8" stroke-width="1.5"/></svg>LabEvent EMS</span>
+            <span class="stack-tag tag-modelisee" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Modélisée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="2.5" fill="none" stroke="#3B7DD8" stroke-width="1.5"/></svg>RevBell RMS</span>
+            <span class="stack-tag tag-observee" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#3B7DD8"/></svg>Namastay BE</span>
+            <span class="stack-tag tag-observee" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#3B7DD8"/></svg>Pure Spa</span>
+            <span class="stack-tag tag-observee" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#3B7DD8"/></svg>SpaBooker</span>
+            <span class="stack-tag tag-observee" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#3B7DD8"/></svg>Backyou EMS</span>
+            <span class="stack-tag tag-observee" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#3B7DD8"/></svg>Ubiliz Boutique</span>
+            <span class="stack-tag tag-observee" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#3B7DD8"/></svg>AssaAbloy Serrure</span>
+            <span class="stack-tag tag-observee" style="color:#3B7DD8;background:#EEF5FF;border-color:#C3DAFB;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#3B7DD8"/></svg>Pennylane Compta</span>
           </div>
         </div>
         <a href="https://oceane-habonneau.github.io/EcosT-v2/?test#ecosystem" target="_blank" class="cta-link" style="color:#3B7DD8;">
@@ -562,83 +281,43 @@
         <div class="metrics">
           <div class="metric-box" style="background:#EDFAF4; border-color:#A8DFC9;">
             <p class="metric-label" style="color:#2E8B6E;">Durée</p>
-            <p class="metric-value">34h <span style="font-size:13px;color:#ABABAB;font-weight:400;">/ ≃5j</span></p>
+            <p class="metric-value">32h</p>
           </div>
           <div class="metric-box" style="background:#EDFAF4; border-color:#A8DFC9;">
             <p class="metric-label" style="color:#2E8B6E;">Budget HT</p>
-            <p class="metric-value">5 100 €</p>
+            <p class="metric-value">4 800 €</p>
           </div>
         </div>
         <div class="divider"></div>
         <div>
-          <p class="stack-label">Stack Logiciel</p>
-          <div class="stack-categories">
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">PMS</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-observee" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" data-tip="5h">
-                  <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#2E8B6E"/></svg>Apaleo PMS API-first</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">PSP</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#2E8B6E"/></svg>Stripe PSP</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">CM · BE</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#2E8B6E"/></svg>D-edge</span>
-                <span class="stack-tag tag-integree" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#2E8B6E"/></svg>Namastay</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">CRM</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" data-tip="2h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#2E8B6E"/></svg>Bowo</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">HK</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" data-tip="4h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#2E8B6E"/></svg>1Check</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">Serrurerie</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" data-tip="4h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#2E8B6E"/></svg>Salto</span>
-              </div>
-            </div>
-
-            <div class="stack-cat-row">
-              <span class="stack-cat-name">Compta</span>
-              <div class="stack-cat-sep"></div>
-              <div class="stack-cat-tools">
-                <span class="stack-tag tag-integree" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" data-tip="3h">
-                  <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#2E8B6E"/></svg>Pennylane</span>
-              </div>
-            </div>
-
+          <p class="stack-label">Stack Logicielle</p>
+          <div class="stack-tags">
+            <span class="stack-tag tag-integree" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#2E8B6E"/></svg>Stripe PSP</span>
+            <span class="stack-tag tag-integree" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#2E8B6E"/></svg>D-edge CM</span>
+            <span class="stack-tag tag-integree" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#2E8B6E"/></svg>Bowo Conciergerie</span>
+            <span class="stack-tag tag-integree" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#2E8B6E"/></svg>Synexis CM/BE</span>
+            <span class="stack-tag tag-integree" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Intégrée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#2E8B6E"/></svg>Roomcloud CM</span>
+            <span class="stack-tag tag-modelisee" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Modélisée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="2.5" fill="none" stroke="#2E8B6E" stroke-width="1.5"/></svg>1Check HK</span>
+            <span class="stack-tag tag-modelisee" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Modélisée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="2.5" fill="none" stroke="#2E8B6E" stroke-width="1.5"/></svg>Octorate PMS</span>
+            <span class="stack-tag tag-modelisee" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Modélisée">
+              <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="2.5" fill="none" stroke="#2E8B6E" stroke-width="1.5"/></svg>RoomRaccoon PMS</span>
+            <span class="stack-tag tag-observee" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#2E8B6E"/></svg>Apaleo PMS API-first</span>
+            <span class="stack-tag tag-observee" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#2E8B6E"/></svg>Namastay BE</span>
+            <span class="stack-tag tag-observee" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#2E8B6E"/></svg>Sésame Serrure</span>
+            <span class="stack-tag tag-observee" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#2E8B6E"/></svg>Salto Accès</span>
+            <span class="stack-tag tag-observee" style="color:#2E8B6E;background:#EDFAF4;border-color:#A8DFC9;" title="Observée">
+              <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#2E8B6E"/></svg>Pennylane Compta</span>
           </div>
         </div>
         <a href="https://oceane-habonneau.github.io/EcosT-v2/?test#ecosystem" target="_blank" class="cta-link" style="color:#2E8B6E;">
@@ -651,125 +330,84 @@
 
   </div><!-- /grid -->
 
-  <!-- PÉRIMÈTRE DE MAÎTRISE -->
+  <!-- INDEX DE CONNECTIVITÉ -->
   <div class="connectivity-index">
     <div class="ci-header">
-      <div class="ci-header-left">
-        <span class="ci-title">Périmètre de maîtrise</span>
-        <div class="ci-legend-sep"></div>
-        <div class="ci-legend">
-          <div class="ci-legend-item">
-            <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#3B7DD8"/></svg>
-            <strong>Intégrée</strong>
-          </div>
-          <div class="ci-legend-item">
-            <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="2.5" fill="none" stroke="#3B7DD8" stroke-width="1.5"/></svg>
-            <strong>Modélisée</strong>
-          </div>
-          <div class="ci-legend-item">
-            <svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="#3B7DD8" opacity="0.4"/></svg>
-            <strong>Observée</strong>
-          </div>
-        </div>
-      </div>
+      <span class="ci-title">Index de Connectivité · Périmètre de maîtrise</span>
+      <span class="ci-subtitle">Solutions intégrées par domaine fonctionnel — <strong style="color:#3B7DD8">Bleu</strong> = niveau Intégrée</span>
     </div>
     <div class="ci-grid">
-
       <div class="ci-cell">
         <span class="ci-cat">PMS</span>
-        <div class="ci-sep"></div>
         <div class="ci-tools">
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Opéra V5</span>
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Opéra Cloud</span>
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Mews</span>
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Thaïs</span>
-          <span class="ci-tool lvl-m"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="2" fill="none" stroke="#3B7DD8" stroke-width="1.5"/></svg>Misterbooking</span>
-          <span class="ci-tool lvl-m"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="2" fill="none" stroke="#3B7DD8" stroke-width="1.5"/></svg>Galaxy</span>
-          <span class="ci-tool lvl-m"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="2" fill="none" stroke="#3B7DD8" stroke-width="1.5"/></svg>Octorate</span>
-          <span class="ci-tool lvl-m"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="2" fill="none" stroke="#3B7DD8" stroke-width="1.5"/></svg>RoomRaccoon</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Protel</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Apaleo</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Cloudbeds</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Fidelio</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>5Estelle</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Amenitiz</span>
+          <span class="ci-tool lvl-i">Opéra V5</span>
+          <span class="ci-tool lvl-i">Opéra Cloud</span>
+          <span class="ci-tool lvl-i">Mews</span>
+          <span class="ci-tool lvl-i">Thaïs</span>
+          <span class="ci-tool">Misterbooking</span>
+          <span class="ci-tool">Octorate</span>
+          <span class="ci-tool">Galaxy</span>
+          <span class="ci-tool">RoomRaccoon</span>
         </div>
       </div>
-
       <div class="ci-cell">
         <span class="ci-cat">POS · F&amp;B</span>
-        <div class="ci-sep"></div>
         <div class="ci-tools">
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Lightspeed</span>
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Zenchef</span>
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>The Fork</span>
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Opentable</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Micros/Simphony</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Koust</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>L'Addition</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Skeat BE</span>
+          <span class="ci-tool lvl-i">Lightspeed</span>
+          <span class="ci-tool lvl-i">Zenchef</span>
+          <span class="ci-tool lvl-i">The Fork</span>
+          <span class="ci-tool lvl-i">Opentable</span>
+          <span class="ci-tool">Micros</span>
+          <span class="ci-tool">L'Addition</span>
+          <span class="ci-tool">Skeat BE</span>
         </div>
       </div>
-
       <div class="ci-cell">
         <span class="ci-cat">CM · BE · RMS</span>
-        <div class="ci-sep"></div>
         <div class="ci-tools">
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>D-edge</span>
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Roomcloud</span>
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Synexis</span>
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>RevBell RMS</span>
-          <span class="ci-tool lvl-m"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="2" fill="none" stroke="#3B7DD8" stroke-width="1.5"/></svg>SiteMinder</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Namastay</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Mirai</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Atomize</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>RevControl</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>IdeaS RMS</span>
+          <span class="ci-tool lvl-i">D-edge</span>
+          <span class="ci-tool lvl-i">Roomcloud</span>
+          <span class="ci-tool lvl-i">Synexis</span>
+          <span class="ci-tool lvl-i">RevBell</span>
+          <span class="ci-tool">SiteMinder</span>
+          <span class="ci-tool">Mirai</span>
+          <span class="ci-tool">Atomize</span>
         </div>
       </div>
-
       <div class="ci-cell">
         <span class="ci-cat">CRM · Com.</span>
-        <div class="ci-sep"></div>
         <div class="ci-tools">
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Bowo</span>
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Expérience CRM</span>
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Hijiffy</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>LoungeUp</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Duve</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Userguest</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>CustomerAlliance</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Myroomservice</span>
+          <span class="ci-tool lvl-i">Bowo</span>
+          <span class="ci-tool lvl-i">Expérience</span>
+          <span class="ci-tool lvl-i">Hijiffy</span>
+          <span class="ci-tool">LoungeUp</span>
+          <span class="ci-tool">Duve</span>
+          <span class="ci-tool">Userguest</span>
+          <span class="ci-tool">CustomerAlliance</span>
         </div>
       </div>
-
       <div class="ci-cell">
         <span class="ci-cat">PSP · Compta</span>
-        <div class="ci-sep"></div>
         <div class="ci-tools">
-          <span class="ci-tool lvl-i"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#3B7DD8"/></svg>Stripe</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Pennylane</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Payzen</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Payline</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Worldline</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>SysPay</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Cegid</span>
+          <span class="ci-tool lvl-i">Stripe</span>
+          <span class="ci-tool">Pennylane</span>
+          <span class="ci-tool">Payzen</span>
+          <span class="ci-tool">Payline</span>
+          <span class="ci-tool">Worldline</span>
+          <span class="ci-tool">SysPay</span>
         </div>
       </div>
-
       <div class="ci-cell">
         <span class="ci-cat">Serrurerie · HK</span>
-        <div class="ci-sep"></div>
         <div class="ci-tools">
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>AssaAbloy</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Sésame</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Onity</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Salto</span>
-          <span class="ci-tool lvl-m"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="2" fill="none" stroke="#3B7DD8" stroke-width="1.5"/></svg>1Check</span>
-          <span class="ci-tool lvl-o"><svg width="7" height="2" viewBox="0 0 7 2"><rect width="7" height="2" rx="1" fill="#999"/></svg>Roomchecking</span>
+          <span class="ci-tool">AssaAbloy</span>
+          <span class="ci-tool">Sésame</span>
+          <span class="ci-tool">Onity</span>
+          <span class="ci-tool">Salto</span>
+          <span class="ci-tool">1Check</span>
+          <span class="ci-tool">Roomchecking</span>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -786,319 +424,12 @@
       </div>
       <div class="footer-item">
         <span class="footer-label">Inclus</span>
-        <span class="footer-value">Paramétrage · Connectivité</span>
-      </div>
-      <div class="footer-item">
-        <span class="footer-label">Pilotage</span>
-        <span class="footer-value">Suivi projet &amp; coordination <span style="color:#ABABAB;font-weight:400;font-size:11px;">(∼1/3 du temps technique)</span></span>
+        <span class="footer-value">Audit · Connectivité · Paramétrage · Recette</span>
       </div>
     </div>
-    <p class="footer-note">Proposition exclusive — Océane Habonneau × Maison André</p>
+    <p class="footer-note">Document confidentiel — Océane Habonneau</p>
   </footer>
 
 </div>
-
-<script>
-// ── CONFIG SVG par niveau ──
-const LEVELS = {
-  integree: {
-    label: 'Intégrée',
-    cls: 'tag-integree',
-    svg: (c) => `<svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="${c}"/></svg>`
-  },
-  modelisee: {
-    label: 'Modélisée',
-    cls: 'tag-modelisee',
-    svg: (c) => `<svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="2.5" fill="none" stroke="${c}" stroke-width="1.5"/></svg>`
-  },
-  observee: {
-    label: 'Observée',
-    cls: 'tag-observee',
-    svg: (c) => `<svg width="8" height="2" viewBox="0 0 8 2"><rect width="8" height="2" rx="1" fill="${c}"/></svg>`
-  }
-};
-
-function getCardColor(tag) {
-  return tag.style.color || '#666';
-}
-
-function getLevelFromTag(tag) {
-  if (tag.classList.contains('tag-integree')) return 'integree';
-  if (tag.classList.contains('tag-modelisee')) return 'modelisee';
-  if (tag.classList.contains('tag-observee')) return 'observee';
-  return 'integree';
-}
-
-// ── Initialise les contrôles édition sur tous les badges existants ──
-function initTag(tag) {
-  if (tag.dataset.editInit) return;
-  tag.dataset.editInit = '1';
-
-  // Rendre le texte éditable via un span
-  const textNodes = [...tag.childNodes].filter(n => n.nodeType === 3 && n.textContent.trim());
-  const text = textNodes.map(n => n.textContent.trim()).join('') || tag.textContent.trim();
-  textNodes.forEach(n => n.remove());
-
-  const labelSpan = document.createElement('span');
-  labelSpan.className = 'tag-input';
-  labelSpan.contentEditable = 'false';
-  labelSpan.textContent = text;
-  labelSpan.addEventListener('blur', () => { labelSpan.contentEditable = 'false'; });
-  labelSpan.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); labelSpan.blur(); } });
-  tag.appendChild(labelSpan);
-
-  // Double-clic pour éditer le nom
-  tag.addEventListener('dblclick', () => {
-    if (!document.body.classList.contains('edit-mode')) return;
-    labelSpan.contentEditable = 'true';
-    labelSpan.focus();
-    const range = document.createRange();
-    range.selectNodeContents(labelSpan);
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-  });
-
-  // Sélecteur de niveau
-  const sel = document.createElement('select');
-  sel.className = 'level-select';
-  const currentLevel = getLevelFromTag(tag);
-  Object.entries(LEVELS).forEach(([k, v]) => {
-    const opt = document.createElement('option');
-    opt.value = k; opt.textContent = v.label;
-    if (k === currentLevel) opt.selected = true;
-    sel.appendChild(opt);
-  });
-  sel.addEventListener('change', () => {
-    const color = getCardColor(tag);
-    const newLevel = sel.value;
-    // Retirer anciennes classes de niveau
-    tag.classList.remove('tag-integree', 'tag-modelisee', 'tag-observee');
-    tag.classList.add(LEVELS[newLevel].cls);
-    // Remplacer le SVG
-    const oldSvg = tag.querySelector('svg');
-    if (oldSvg) oldSvg.remove();
-    const tmp = document.createElement('div');
-    tmp.innerHTML = LEVELS[newLevel].svg(color);
-    tag.insertBefore(tmp.firstChild, tag.firstChild);
-  });
-  tag.appendChild(sel);
-
-  // Bouton ✕
-  const del = document.createElement('button');
-  del.className = 'tag-delete';
-  del.innerHTML = '✕';
-  del.title = 'Supprimer ce badge';
-  del.addEventListener('click', (e) => {
-    e.stopPropagation();
-    tag.remove();
-  });
-  tag.appendChild(del);
-}
-
-// ── Initialise les contrôles édition sur toutes les lignes catégorie ──
-function initRow(row) {
-  if (row.dataset.editInit) return;
-  row.dataset.editInit = '1';
-
-  // Poignée drag & drop
-  const handle = document.createElement('div');
-  handle.className = 'drag-handle';
-  handle.innerHTML = `<svg width="10" height="14" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2.5" r="1.2" fill="currentColor"/><circle cx="7" cy="2.5" r="1.2" fill="currentColor"/><circle cx="3" cy="7" r="1.2" fill="currentColor"/><circle cx="7" cy="7" r="1.2" fill="currentColor"/><circle cx="3" cy="11.5" r="1.2" fill="currentColor"/><circle cx="7" cy="11.5" r="1.2" fill="currentColor"/></svg>`;
-  handle.title = 'Glisser pour réorganiser';
-  row.insertBefore(handle, row.firstChild);
-
-  // Drag & drop natif
-  handle.addEventListener('mousedown', () => { row.draggable = true; });
-  handle.addEventListener('mouseup',   () => { row.draggable = false; });
-
-  row.addEventListener('dragstart', (e) => {
-    row.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-  });
-  row.addEventListener('dragend', () => {
-    row.classList.remove('dragging');
-    row.draggable = false;
-    document.querySelectorAll('.stack-cat-row').forEach(r => r.classList.remove('drag-over'));
-  });
-  row.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    const dragging = document.querySelector('.stack-cat-row.dragging');
-    if (!dragging || dragging === row) return;
-    // Même conteneur seulement
-    if (dragging.parentElement !== row.parentElement) return;
-    row.classList.add('drag-over');
-    const rect = row.getBoundingClientRect();
-    const after = e.clientY > rect.top + rect.height / 2;
-    if (after) row.parentElement.insertBefore(dragging, row.nextSibling);
-    else row.parentElement.insertBefore(dragging, row);
-  });
-  row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
-  row.addEventListener('drop', (e) => { e.preventDefault(); row.classList.remove('drag-over'); });
-
-  // Rendre le nom de catégorie éditable
-  const catName = row.querySelector('.stack-cat-name');
-  if (catName) { catName.contentEditable = 'false'; }
-
-  // Bouton + ajouter un badge
-  const toolsDiv = row.querySelector('.stack-cat-tools');
-  if (toolsDiv) {
-    const addBtn = document.createElement('button');
-    addBtn.className = 'tag-add-btn';
-    addBtn.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Ajouter`;
-    addBtn.addEventListener('click', () => addBadge(toolsDiv, addBtn, row));
-    toolsDiv.appendChild(addBtn);
-  }
-
-  // Bouton supprimer la ligne
-  const delRow = document.createElement('button');
-  delRow.className = 'row-delete';
-  delRow.innerHTML = '✕';
-  delRow.title = 'Supprimer cette catégorie';
-  delRow.addEventListener('click', () => row.remove());
-  row.appendChild(delRow);
-}
-
-function addBadge(toolsDiv, addBtn, row) {
-  // Détecter la couleur de la carte parente
-  const card = row.closest('.card');
-  const stripe = card ? card.querySelector('.card-stripe') : null;
-  const color = stripe ? stripe.style.background : '#666';
-  const bg = color === '#C9A96E' ? '#FBF5EB' : color === '#3B7DD8' ? '#EEF5FF' : '#EDFAF4';
-  const border = color === '#C9A96E' ? '#E8D5B0' : color === '#3B7DD8' ? '#C3DAFB' : '#A8DFC9';
-
-  const tag = document.createElement('span');
-  tag.className = 'stack-tag tag-integree';
-  tag.style.cssText = `color:${color};background:${bg};border-color:${border};`;
-  tag.innerHTML = LEVELS.integree.svg(color);
-
-  const labelSpan = document.createElement('span');
-  labelSpan.className = 'tag-input';
-  labelSpan.contentEditable = 'true';
-  labelSpan.textContent = 'Nouveau';
-  labelSpan.addEventListener('blur', () => { labelSpan.contentEditable = 'false'; });
-  labelSpan.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); labelSpan.blur(); } });
-  tag.appendChild(labelSpan);
-  tag.dataset.editInit = '1';
-
-  // Sélecteur de niveau
-  const sel = document.createElement('select');
-  sel.className = 'level-select';
-  Object.entries(LEVELS).forEach(([k, v]) => {
-    const opt = document.createElement('option');
-    opt.value = k; opt.textContent = v.label;
-    if (k === 'integree') opt.selected = true;
-    sel.appendChild(opt);
-  });
-  sel.addEventListener('change', () => {
-    const newLevel = sel.value;
-    tag.classList.remove('tag-integree', 'tag-modelisee', 'tag-observee');
-    tag.classList.add(LEVELS[newLevel].cls);
-    const oldSvg = tag.querySelector('svg');
-    if (oldSvg) oldSvg.remove();
-    const tmp = document.createElement('div');
-    tmp.innerHTML = LEVELS[newLevel].svg(color);
-    tag.insertBefore(tmp.firstChild, tag.firstChild);
-  });
-  tag.appendChild(sel);
-
-  const del = document.createElement('button');
-  del.className = 'tag-delete';
-  del.innerHTML = '✕';
-  del.addEventListener('click', (e) => { e.stopPropagation(); tag.remove(); });
-  tag.appendChild(del);
-
-  toolsDiv.insertBefore(tag, addBtn);
-  labelSpan.focus();
-  const range = document.createRange();
-  range.selectNodeContents(labelSpan);
-  const s = window.getSelection(); s.removeAllRanges(); s.addRange(range);
-}
-
-function addRow(stackCategories, addRowBtn) {
-  const card = stackCategories.closest('.card');
-  const stripe = card ? card.querySelector('.card-stripe') : null;
-  const color = stripe ? stripe.style.background : '#666';
-  const bg = color === '#C9A96E' ? '#FBF5EB' : color === '#3B7DD8' ? '#EEF5FF' : '#EDFAF4';
-  const border = color === '#C9A96E' ? '#E8D5B0' : color === '#3B7DD8' ? '#C3DAFB' : '#A8DFC9';
-
-  const row = document.createElement('div');
-  row.className = 'stack-cat-row';
-  row.dataset.editInit = '1';
-  row.innerHTML = `
-    <span class="stack-cat-name" contenteditable="false" style="outline:none">Catégorie</span>
-    <div class="stack-cat-sep"></div>
-    <div class="stack-cat-tools">
-      <button class="tag-add-btn" style="display:inline-flex;">
-        <svg width="10" height="10" viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Ajouter
-      </button>
-    </div>
-    <button class="row-delete" style="display:inline-flex;">✕</button>
-  `;
-
-  const toolsDiv = row.querySelector('.stack-cat-tools');
-  const addBtn = row.querySelector('.tag-add-btn');
-  addBtn.addEventListener('click', () => addBadge(toolsDiv, addBtn, row));
-  row.querySelector('.row-delete').addEventListener('click', () => row.remove());
-
-  const catName = row.querySelector('.stack-cat-name');
-  catName.contentEditable = 'true';
-  catName.addEventListener('blur', () => { catName.contentEditable = 'false'; });
-  catName.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); catName.blur(); } });
-
-  stackCategories.insertBefore(row, addRowBtn);
-  catName.focus();
-  const range = document.createRange();
-  range.selectNodeContents(catName);
-  const s = window.getSelection(); s.removeAllRanges(); s.addRange(range);
-}
-
-// ── Toggle mode édition ──
-function toggleEditMode() {
-  const body = document.body;
-  const btn = document.getElementById('editBtn');
-  const isEditing = body.classList.toggle('edit-mode');
-
-  if (isEditing) {
-    btn.classList.add('active');
-    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Terminer`;
-
-    // Init tous les badges et lignes existants
-    document.querySelectorAll('.stack-tag').forEach(initTag);
-    document.querySelectorAll('.stack-cat-row').forEach(initRow);
-
-    // Activer édition des noms de catégorie
-    document.querySelectorAll('.stack-cat-name').forEach(n => { n.contentEditable = 'true'; });
-
-    // Activer édition des métriques (durée, budget)
-    document.querySelectorAll('.metric-value').forEach(el => {
-      el.contentEditable = 'true';
-      el.title = 'Cliquer pour modifier';
-      el.addEventListener('keydown', function handler(e) {
-        if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
-        el._handler = handler;
-      });
-    });
-
-    // Ajouter boutons "+ Catégorie" sur chaque stack
-    document.querySelectorAll('.stack-categories').forEach(sc => {
-      if (sc.querySelector('.add-row-btn')) return;
-      const btn = document.createElement('button');
-      btn.className = 'add-row-btn';
-      btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Ajouter une catégorie`;
-      btn.style.display = 'flex';
-      btn.addEventListener('click', () => addRow(sc, btn));
-      sc.appendChild(btn);
-    });
-
-  } else {
-    btn.classList.remove('active');
-    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Éditer`;
-
-    // Désactiver les contentEditable
-    document.querySelectorAll('[contenteditable]').forEach(el => { el.contentEditable = 'false'; el.title = ''; });
-  }
-}
-</script>
 </body>
 </html>
